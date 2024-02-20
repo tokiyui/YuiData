@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
@@ -14,12 +14,58 @@
     <label for="month">月:</label>
     <select id="month">
         <option value="">-- 選択してください --</option>
+        <option value="1">1</option>
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">9</option>
+        <option value="10">10</option>
+        <option value="11">11</option>
+        <option value="12">12</option>
     </select>
     <label for="day">日:</label>
     <select id="day">
         <option value="">-- 選択してください --</option>
+        <!-- 日の選択肢は後で動的に生成 -->
     </select>
-    <!-- 他の項目に対する選択肢も同様に作成 -->
+    <label for="time">時刻:</label>
+    <select id="time">
+        <option value="">-- 選択してください --</option>
+        <!-- 時刻の選択肢は後で動的に生成 -->
+    </select>
+    <br>
+    <label for="category">大分類:</label>
+    <select id="category">
+        <option value="">-- 選択してください --</option>
+    </select>
+    <label for="subcategory">小分類:</label>
+    <select id="subcategory">
+        <option value="">-- 選択してください --</option>
+    </select>
+    <label for="title">作品タイトル:</label>
+    <select id="title">
+        <option value="">-- 選択してください --</option>
+    </select>
+    <label for="prefecture">都道府県:</label>
+    <select id="prefecture">
+        <option value="">-- 選択してください --</option>
+    </select>
+    <label for="venue">会場:</label>
+    <select id="venue">
+        <option value="">-- 選択してください --</option>
+    </select>
+    <label for="method">応募方法:</label>
+    <select id="method">
+        <option value="">-- 選択してください --</option>
+    </select>
+    <label for="note">備考:</label>
+    <select id="note">
+        <option value="">-- 選択してください --</option>
+    </select>
 
     <button onclick="searchData()">検索</button>
 
@@ -40,65 +86,87 @@
             var year = document.getElementById("year").value;
             var month = document.getElementById("month").value;
             var day = document.getElementById("day").value;
-            // 他の選択肢に対する値も同様に取得
+            var time = document.getElementById("time").value;
+            var category = document.getElementById("category").value;
+            var subcategory = document.getElementById("subcategory").value;
+            var title = document.getElementById("title").value;
+            var prefecture = document.getElementById("prefecture").value;
+            var venue = document.getElementById("venue").value;
+            var method = document.getElementById("method").value;
+            var note = document.getElementById("note").value;
 
-            var searchResults = document.getElementById("searchResults");
-            searchResults.innerHTML = "";
-
-            fetch("test.txt")
-                .then(response => response.text())
-                .then(data => {
-                    var lines = data.split("\n");
-                    lines.shift(); // ヘッダー行を削除
-                    lines.forEach(line => {
-                        var columns = line.split(",");
-                        var dataYear = columns[0];
-                        var dataMonth = columns[1];
-                        var dataDay = columns[2];
-                        // 他の条件に合うかどうかを確認
-                        if ((year === "" || dataYear === year) &&
-                            (month === "" || dataMonth === month) &&
-                            (day === "" || dataDay === day)) {
-                            var resultRow = document.createElement("p");
-                            resultRow.textContent = line;
-                            searchResults.appendChild(resultRow);
-                        }
-                    });
-                })
-                .catch(error => console.error("Error:", error));
+            // ここで選択された条件に基づいてデータを検索し、結果を表示する処理を実装
+            console.log("選択された条件:");
+            console.log("年:", year, "月:", month, "日:", day, "時刻:", time);
+            console.log("大分類:", category, "小分類:", subcategory, "作品タイトル:", title);
+            console.log("都道府県:", prefecture, "会場:", venue, "応募方法:", method, "備考:", note);
         }
 
-        // 年、月、日の選択肢を動的に生成
-        var years = [];
-        var months = [];
-        var days = [];
+        // 年の選択肢を動的に生成
+        var currentYear = new Date().getFullYear();
+        var years = Array.from({length: currentYear - 2012 + 1}, (_, index) => (2012 + index).toString());
+        populateSelectOptions("year", years);
 
-        fetch("test.txt")
+        // 日の選択肢を動的に生成
+        var days = Array.from({length: 31}, (_, index) => (index + 1).toString());
+        populateSelectOptions("day", days);
+
+        // 時刻の選択肢を動的に生成
+        var hours = Array.from({length: 24}, (_, index) => {
+            var hour = index < 10 ? "0" + index : index.toString();
+            return hour + ":00";
+        });
+        populateSelectOptions("time", hours);
+
+        // 大分類、小分類、作品タイトル、都道府県、会場、応募方法、備考の選択肢を動的に生成
+        fetch("category.txt")
             .then(response => response.text())
             .then(data => {
-                var lines = data.split("\n");
-                lines.shift(); // ヘッダー行を削除
-                lines.forEach(line => {
-                    var columns = line.split(",");
-                    var dataYear = columns[0];
-                    var dataMonth = columns[1];
-                    var dataDay = columns[2];
-                    if (!years.includes(dataYear)) {
-                        years.push(dataYear);
-                    }
-                    if (!months.includes(dataMonth)) {
-                        months.push(dataMonth);
-                    }
-                    if (!days.includes(dataDay)) {
-                        days.push(dataDay);
-                    }
-                });
+                var categories = data.split("\n");
+                populateSelectOptions("category", categories);
+            });
 
-                populateSelectOptions("year", years);
-                populateSelectOptions("month", months);
-                populateSelectOptions("day", days);
-            })
-            .catch(error => console.error("Error:", error));
+        fetch("subcategory.txt")
+            .then(response => response.text())
+            .then(data => {
+                var subcategories = data.split("\n");
+                populateSelectOptions("subcategory", subcategories);
+            });
+
+        fetch("title.txt")
+            .then(response => response.text())
+            .then(data => {
+                var titles = data.split("\n");
+                populateSelectOptions("title", titles);
+            });
+
+        fetch("prefecture.txt")
+            .then(response => response.text())
+            .then(data => {
+                var prefectures = data.split("\n");
+                populateSelectOptions("prefecture", prefectures);
+            });
+
+        fetch("venue.txt")
+            .then(response => response.text())
+            .then(data => {
+                var venues = data.split("\n");
+                populateSelectOptions("venue", venues);
+            });
+
+        fetch("method.txt")
+            .then(response => response.text())
+            .then(data => {
+                var methods = data.split("\n");
+                populateSelectOptions("method", methods);
+            });
+
+        fetch("note.txt")
+            .then(response => response.text())
+            .then(data => {
+                var notes = data.split("\n");
+                populateSelectOptions("note", notes);
+            });
     </script>
 </body>
 </html>
