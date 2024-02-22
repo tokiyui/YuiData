@@ -90,23 +90,6 @@ generateCheckboxes('title', 'イベント名', ['小倉唯BIRTHDAY SPECIALミニ
                                           'Xmasイブ×3♪', 'Step Apple', '「小倉唯のyui*room」公開録音', '「Step Apple」Blu-ray＆DVD発売記念イベント', 'New Year Party♪2020', '#LOVEcall', '#Re?LOVEcall', 'Twinkle Holy Day♪',
                                           'Birthday Party?2022', 'ゆいらんらん', '10th Anniversary Assemble!!', 'To the 11\'Eleven', '#ゆいしょ!公開録音']);
 
-fetch('data.txt')
-    .then(response => response.text())
-    .then(data => {
-        const events = data.trim().split('\n').map(line => line.split(','));
-        const headers = events.shift(); // Remove header row
-        const titleIndex = headers.indexOf('title');
-
-        const titleValues = new Set();
-
-        events.forEach(event => {
-            titleValues.add(event[titleIndex]);
-        });
-
-        generateCheckboxes('title', 'title', Array.from(titleValues));
-    })
-    .catch(error => console.error('Error fetching data:', error));
-
 function searchEvents() {
     const years = Array.from(document.querySelectorAll('input[name="years"]:checked')).map(input => input.value);
     const months = Array.from(document.querySelectorAll('input[name="months"]:checked')).map(input => input.value);
