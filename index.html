@@ -57,7 +57,7 @@ function generateCheckboxes(id, options) {
         label.textContent = option;
         const checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('name', id + '-' + option);
+        checkbox.setAttribute('name', id);
         checkbox.setAttribute('value', option);
         container.appendChild(checkbox);
         container.appendChild(label);
