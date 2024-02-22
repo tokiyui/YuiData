@@ -85,27 +85,23 @@ fetch('data.txt')
     .then(data => {
         const events = data.trim().split('\n').map(line => line.split(','));
         const headers = events.shift(); // Remove header row
-        const type2Index = headers.indexOf('type2');
         const type3Index = headers.indexOf('type3');
         const titleIndex = headers.indexOf('title');
         const eventTitleIndex = headers.indexOf('eventtitle');
         const prefectureIndex = headers.indexOf('prefecture');
 
-        const type2Values = new Set();
         const type3Values = new Set();
         const titleValues = new Set();
         const eventTitleValues = new Set();
         const prefectureValues = new Set();
 
         events.forEach(event => {
-            type2Values.add(event[type2Index]);
             type3Values.add(event[type3Index]);
             titleValues.add(event[titleIndex]);
             eventTitleValues.add(event[eventTitleIndex]);
             prefectureValues.add(event[prefectureIndex]);
         });
 
-        generateCheckboxes('type2', 'type', Array.from(type2Values));
         generateCheckboxes('type3', 'type', Array.from(type3Values));
         generateCheckboxes('title', 'title', Array.from(titleValues));
         generateCheckboxes('eventtitle', 'a', Array.from(eventTitleValues));
