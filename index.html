@@ -50,7 +50,6 @@
 
 <script>
 function generateCheckboxes(id, options) {
-    console.log("Generating checkboxes for " + id + " with options:", options);
     // 以下のコードを追加
     const container = document.getElementById('checkboxes'); // コンテナを checkboxes ディビに変更
     const groupDiv = document.createElement('div'); // 新しいディビを作成
@@ -114,24 +113,23 @@ fetch('data.txt')
 
 function searchEvents() {
     const years = Array.from(document.querySelectorAll('input[name="years"]:checked')).map(input => input.value); // グループごとに値を取得
+    console.log("Years:", years); // 追加
     const months = Array.from(document.querySelectorAll('input[name="months"]:checked')).map(input => input.value);
+    console.log("Months:", months); // 追加
     const daysOfWeek = Array.from(document.querySelectorAll('input[name="daysOfWeek"]:checked')).map(input => input.value);
+    console.log("Days of the week:", daysOfWeek); // 追加
     const type1Values = Array.from(document.querySelectorAll('input[name="type1"]:checked')).map(input => input.value);
+    console.log("Type 1 values:", type1Values); // 追加
     const type2Values = Array.from(document.querySelectorAll('input[name="type2"]:checked')).map(input => input.value);
+    console.log("Type 2 values:", type2Values); // 追加
     const type3Values = Array.from(document.querySelectorAll('input[name="type3"]:checked')).map(input => input.value);
+    console.log("Type 3 values:", type3Values); // 追加
     const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
+    console.log("Title values:", titleValues); // 追加
     const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
+    console.log("Event title values:", eventTitleValues); // 追加
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
-
-    console.log("Years:", years);
-    console.log("Months:", months);
-    console.log("Days of the week:", daysOfWeek);
-    console.log("Type 1 values:", type1Values);
-    console.log("Type 2 values:", type2Values);
-    console.log("Type 3 values:", type3Values);
-    console.log("Title values:", titleValues);
-    console.log("Event title values:", eventTitleValues);
-    console.log("Prefecture values:", prefectureValues);
+    console.log("Prefecture values:", prefectureValues); // 追加
 
     fetch('data.txt')
     .then(response => response.text())
