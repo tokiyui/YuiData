@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Event Search</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+</style>
+</head>
+<body>
+<h2>Event Search</h2>
+<div>
+    <label for="year">Year:</label><br>
+    <input type="checkbox" name="year" value="2012">2012
+    <input type="checkbox" name="year" value="2013">2013
+    <input type="checkbox" name="year" value="2014">2014
+    <!-- Add other years up to 2024 -->
+</div>
+<div>
+    <label for="month">Month:</label><br>
+    <input type="checkbox" name="month" value="1">January
+    <input type="checkbox" name="month" value="2">February
+    <!-- Add other months up to December -->
+</div>
+<div>
+    <label for="dayoftheweek">Day of the week:</label><br>
+    <input type="checkbox" name="dayoftheweek" value="0">Sunday
+    <input type="checkbox" name="dayoftheweek" value="1">Monday
+    <!-- Add other days of the week -->
+</div>
+<div>
+    <label for="type1">Type 1:</label><br>
+    <input type="checkbox" name="type1" value="type1_value1">Type 1 Value 1
+    <input type="checkbox" name="type1" value="type1_value2">Type 1 Value 2
+    <!-- Add other values for Type 1 -->
+</div>
+<div>
+    <label for="type2">Type 2:</label><br>
+    <input type="checkbox" name="type2" value="type2_value1">Type 2 Value 1
+    <input type="checkbox" name="type2" value="type2_value2">Type 2 Value 2
+    <!-- Add other values for Type 2 -->
+</div>
+<div>
+    <label for="type3">Type 3:</label><br>
+    <input type="checkbox" name="type3" value="type3_value1">Type 3 Value 1
+    <input type="checkbox" name="type3" value="type3_value2">Type 3 Value 2
+    <!-- Add other values for Type 3 -->
+</div>
+<div>
+    <label for="title">Title:</label><br>
+    <input type="checkbox" name="title" value="title_value1">Title Value 1
+    <input type="checkbox" name="title" value="title_value2">Title Value 2
+    <!-- Add other values for Title -->
+</div>
+<div>
+    <label for="prefecture">Prefecture:</label><br>
+    <input type="checkbox" name="prefecture" value="prefecture_value1">Prefecture Value 1
+    <input type="checkbox" name="prefecture" value="prefecture_value2">Prefecture Value 2
+    <!-- Add other values for Prefecture -->
+</div>
+
+<button onclick="searchEvents()">Search</button>
+
+<table id="eventsTable">
+    <thead>
+        <tr>
+            <th>Year</th>
+            <th>Month</th>
+            <th>Day of the week</th>
+            <th>Type 1</th>
+            <th>Type 2</th>
+            <th>Type 3</th>
+            <th>Title</th>
+            <th>Prefecture</th>
+            <th>Place</th>
+            <th>With</th>
+            <th>Info</th>
+        </tr>
+    </thead>
+    <tbody id="eventsTableBody">
+    </tbody>
+</table>
+
+<script>
+function searchEvents() {
+    const years = Array.from(document.querySelectorAll('input[name="year"]:checked')).map(input => input.value);
+    const months = Array.from(document.querySelectorAll('input[name="month"]:checked')).map(input => input.value);
+    const daysOfWeek = Array.from(document.querySelectorAll('input[name="dayoftheweek"]:checked')).map(input => input.value);
+    const type1Values = Array.from(document.querySelectorAll('input[name="type1"]:checked')).map(input => input.value);
+    const type2Values = Array.from(document.querySelectorAll('input[name="type2"]:checked')).map(input => input.value);
+    const type3Values = Array.from(document.querySelectorAll('input[name="type3"]:checked')).map(input => input.value);
+    const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
+    const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
+
+    fetch('data.txt')
+    .then(response => response.text())
+    .then(data => {
+        const events = data.trim().split('\n').map(line => line.split(','));
+        const filteredEvents = events.filter(event => {
+            const year = event[0];
+            const month = event[1];
+            const dayOfWeek = event[3];
+            const type1 = event[5];
+            const type2 = event[6];
+            const type3 = event[7];
+            const title = event[8];
+            const prefecture = event[10];
+            return (
+                years.includes(year) && 
+                months.includes(month) && 
+                daysOfWeek.includes(dayOfWeek) &&
+                (type1Values.includes(type1) || type2Values.includes(type2) || type3Values.includes(type3)) &&
+                titleValues.includes(title) &&
+                prefectureValues.includes(prefecture)
+            );
+        });
+
+        displayEvents(filteredEvents);
+    })
+    .catch(error => console.error('Error fetching data:', error));
+}
+
+function displayEvents(events) {
+    const tableBody = document.getElementById('eventsTableBody');
+    tableBody.innerHTML = '';
+    
+    events.forEach(event => {
+        const row = document.createElement('tr');
+        event.forEach(value => {
+            const cell = document.createElement('td');
+            cell.textContent = value;
+            row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+    });
+}
+</script>
+</body>
+</html>
