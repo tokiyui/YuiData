@@ -39,6 +39,7 @@
             <th>Type 2</th>
             <th>Type 3</th>
             <th>Title</th>
+            <th>Event Title</th>
             <th>Prefecture</th>
             <th>Place</th>
             <th>With</th>
@@ -73,7 +74,7 @@ generateCheckboxes('checkboxes', ['2012', '2013', '2014', '2015', '2016', '2017'
 
 generateCheckboxes('checkboxes', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
 
-generateCheckboxes('checkboxes', ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']);
+generateCheckboxes('checkboxes', ['日', '月', '火', '水', '木', '金', '土']);
 
 // Add checkboxes for type1, type2, type3, title, prefecture dynamically
 fetch('data.txt')
@@ -85,12 +86,14 @@ fetch('data.txt')
         const type2Index = headers.indexOf('type2');
         const type3Index = headers.indexOf('type3');
         const titleIndex = headers.indexOf('title');
+        const eventTitleIndex = headers.indexOf('eventtitle');
         const prefectureIndex = headers.indexOf('prefecture');
 
         const type1Values = new Set();
         const type2Values = new Set();
         const type3Values = new Set();
         const titleValues = new Set();
+        const eventTitleValues = new Set();
         const prefectureValues = new Set();
 
         events.forEach(event => {
@@ -98,6 +101,7 @@ fetch('data.txt')
             type2Values.add(event[type2Index]);
             type3Values.add(event[type3Index]);
             titleValues.add(event[titleIndex]);
+            eventTitleValues.add(event[eventTitleIndex]);
             prefectureValues.add(event[prefectureIndex]);
         });
 
@@ -105,6 +109,7 @@ fetch('data.txt')
         generateCheckboxes('checkboxes', Array.from(type2Values));
         generateCheckboxes('checkboxes', Array.from(type3Values));
         generateCheckboxes('checkboxes', Array.from(titleValues));
+        generateCheckboxes('checkboxes', Array.from(eventTitleValues));
         generateCheckboxes('checkboxes', Array.from(prefectureValues));
     })
     .catch(error => console.error('Error fetching data:', error));
@@ -117,6 +122,7 @@ function searchEvents() {
     const type2Values = Array.from(document.querySelectorAll('input[name="type2"]:checked')).map(input => input.value);
     const type3Values = Array.from(document.querySelectorAll('input[name="type3"]:checked')).map(input => input.value);
     const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
+    const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
 
     fetch('data.txt')
@@ -131,6 +137,7 @@ function searchEvents() {
             const type2 = event[6];
             const type3 = event[7];
             const title = event[8];
+            const eventTitle = event[9];
             const prefecture = event[10];
             return (
                 (years.length === 0 || years.includes(year)) && 
@@ -140,6 +147,7 @@ function searchEvents() {
                 (type2Values.length === 0 || type2Values.includes(type2)) &&
                 (type3Values.length === 0 || type3Values.includes(type3)) &&
                 (titleValues.length === 0 || titleValues.includes(title)) &&
+                (eventTitleValues.length === 0 || eventTitleValues.includes(eventTitle)) &&
                 (prefectureValues.length === 0 || prefectureValues.includes(prefecture))
             );
         });
