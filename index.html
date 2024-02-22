@@ -69,6 +69,7 @@ function generateCheckboxes(id, options) {
 generateCheckboxes('years', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
 generateCheckboxes('months', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
 generateCheckboxes('daysOfWeek', ['日', '月', '火', '水', '木', '金', '土']);
+generateCheckboxes('type1', ['ライブ', 'リリース', 'イベント', '特典会', '配信', '歩み']);
 
 // Add checkboxes for type1, type2, type3, title, prefecture dynamically
 fetch('data.txt')
@@ -99,7 +100,6 @@ fetch('data.txt')
             prefectureValues.add(event[prefectureIndex]);
         });
 
-        generateCheckboxes('type1', Array.from(type1Values));
         generateCheckboxes('type2', Array.from(type2Values));
         generateCheckboxes('type3', Array.from(type3Values));
         generateCheckboxes('title', Array.from(titleValues));
