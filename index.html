@@ -91,21 +91,17 @@ fetch('data.txt')
         const headers = events.shift(); // Remove header row
         const type3Index = headers.indexOf('type3');
         const titleIndex = headers.indexOf('title');
-        const prefectureIndex = headers.indexOf('prefecture');
 
         const type3Values = new Set();
         const titleValues = new Set();
-        const prefectureValues = new Set();
 
         events.forEach(event => {
             type3Values.add(event[type3Index]);
             titleValues.add(event[titleIndex]);
-            prefectureValues.add(event[prefectureIndex]);
         });
 
         generateCheckboxes('type3', 'type', Array.from(type3Values));
         generateCheckboxes('title', 'title', Array.from(titleValues));
-        generateCheckboxes('prefecture', 'b', Array.from(prefectureValues));
     })
     .catch(error => console.error('Error fetching data:', error));
 
