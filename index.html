@@ -90,11 +90,6 @@ generateCheckboxes('title', '作品名', ['Raise', 'Baby Sweet Berry Love', 'Cha
 generateCheckboxes('title', 'イベント名', ['小倉唯BIRTHDAY SPECIALミニライブ～SEVENTEEN!', 'HAPPY JAM', 'High-Touch☆Summer', '2ndアルバム発売記念＆バースデーイベント', 'Smiley Cherry', 'Platinum Airline☆', '唯涼祭',
                                           'Xmasイブ×3♪', 'Step Apple', '「小倉唯のyui*room」公開録音', '「Step Apple」Blu-ray＆DVD発売記念イベント', 'New Year Party♪2020', '#LOVEcall', '#Re♥LOVEcall', 'Twinkle Holy Day♪',
                                           'Birthday Party&#9825;2022', 'ゆいらんらん', '10th Anniversary Assemble!!', 'To the 11\'Eleven', '#ゆいしょ!公開録音']);
-
-function convertTextToHtmlEntities(text) {
-    const convertedText = text
-    return convertedText;
-}
     
 function searchEvents() {
     const years = Array.from(document.querySelectorAll('input[name="years"]:checked')).map(input => input.value);
@@ -110,8 +105,7 @@ function searchEvents() {
     fetch('data.txt')
         .then(response => response.text())
         .then(data => {
-            const convertedData = convertTextToHtmlEntities(data); // テキストをHTMLエンティティに変換
-            const events = convertedData.trim().split('\n').map(line => line.split(','));
+            const events = data.trim().split('\n').map(line => line.split(','));
             const filteredEvents = events.filter(event => {
                 const year = event[0];
                 const month = event[1];
