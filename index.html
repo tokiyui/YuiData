@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Event Search</title>
+<title>小倉唯データベース</title>
 <style>
     table {
         width: 100%;
@@ -21,7 +21,7 @@
 </style>
 </head>
 <body>
-<h2>Event Search</h2>
+<h2>小倉唯データベース</h2>
 <div id="checkboxes">
 </div>
 
@@ -77,14 +77,12 @@ fetch('data.txt')
     .then(data => {
         const events = data.trim().split('\n').map(line => line.split(','));
         const headers = events.shift(); // Remove header row
-        const type1Index = headers.indexOf('type1');
         const type2Index = headers.indexOf('type2');
         const type3Index = headers.indexOf('type3');
         const titleIndex = headers.indexOf('title');
         const eventTitleIndex = headers.indexOf('eventtitle');
         const prefectureIndex = headers.indexOf('prefecture');
 
-        const type1Values = new Set();
         const type2Values = new Set();
         const type3Values = new Set();
         const titleValues = new Set();
@@ -92,7 +90,6 @@ fetch('data.txt')
         const prefectureValues = new Set();
 
         events.forEach(event => {
-            type1Values.add(event[type1Index]);
             type2Values.add(event[type2Index]);
             type3Values.add(event[type3Index]);
             titleValues.add(event[titleIndex]);
