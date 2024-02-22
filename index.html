@@ -57,6 +57,7 @@ function generateCheckboxes(id, label, options) {
     // タイトルの追加
     const title = document.createElement('span'); 
     title.textContent = label + '：';
+    title.style.fontWeight = 'bold';
     container.appendChild(title);
 
     options.forEach(option => {
