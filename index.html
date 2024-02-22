@@ -14,11 +14,9 @@
         padding: 8px;
         text-align: left;
     }
-    .checkbox-group {
-        display: inline-block;
-    }
     .checkbox-group label {
-        display: block;
+        display: inline-block;
+        margin-right: 10px;
     }
 </style>
 </head>
@@ -53,8 +51,6 @@
 <script>
 function generateCheckboxes(id, options) {
     const container = document.getElementById(id);
-    const checkboxGroup = document.createElement('div');
-    checkboxGroup.classList.add('checkbox-group');
     options.forEach(option => {
         const label = document.createElement('label');
         label.setAttribute('for', option);
@@ -63,11 +59,9 @@ function generateCheckboxes(id, options) {
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('name', id);
         checkbox.setAttribute('value', option);
-        checkboxGroup.appendChild(checkbox);
-        checkboxGroup.appendChild(label);
-        checkboxGroup.appendChild(document.createElement('br'));
+        container.appendChild(checkbox);
+        container.appendChild(label);
     });
-    container.appendChild(checkboxGroup);
 }
 
 generateCheckboxes('checkboxes', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
@@ -105,12 +99,12 @@ fetch('data.txt')
             prefectureValues.add(event[prefectureIndex]);
         });
 
-        generateCheckboxes('checkboxes', Array.from(type1Values));
-        generateCheckboxes('checkboxes', Array.from(type2Values));
-        generateCheckboxes('checkboxes', Array.from(type3Values));
-        generateCheckboxes('checkboxes', Array.from(titleValues));
-        generateCheckboxes('checkboxes', Array.from(eventTitleValues));
-        generateCheckboxes('checkboxes', Array.from(prefectureValues));
+        #generateCheckboxes('checkboxes', Array.from(type1Values));
+        #generateCheckboxes('checkboxes', Array.from(type2Values));
+        #generateCheckboxes('checkboxes', Array.from(type3Values));
+        #generateCheckboxes('checkboxes', Array.from(titleValues));
+        #generateCheckboxes('checkboxes', Array.from(eventTitleValues));
+        #generateCheckboxes('checkboxes', Array.from(prefectureValues));
     })
     .catch(error => console.error('Error fetching data:', error));
 
