@@ -121,6 +121,16 @@ function searchEvents() {
     const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
 
+    console.log("Years:", years);
+    console.log("Months:", months);
+    console.log("Days of the week:", daysOfWeek);
+    console.log("Type 1 values:", type1Values);
+    console.log("Type 2 values:", type2Values);
+    console.log("Type 3 values:", type3Values);
+    console.log("Title values:", titleValues);
+    console.log("Event title values:", eventTitleValues);
+    console.log("Prefecture values:", prefectureValues);
+
     fetch('data.txt')
     .then(response => response.text())
     .then(data => {
