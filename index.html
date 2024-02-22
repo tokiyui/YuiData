@@ -108,13 +108,13 @@ function searchEvents() {
             const filteredEvents = events.filter(event => {
                 const year = event[0];
                 const month = event[1];
-                const dayOfWeek = event[3]; // 修正：正しい列のインデックスを使用する
-                const type1 = event[5]; // 修正：正しい列のインデックスを使用する
-                const type2 = event[6]; // 修正：正しい列のインデックスを使用する
-                const type3 = event[7]; // 修正：正しい列のインデックスを使用する
-                const title = event[8]; // 修正：正しい列のインデックスを使用する
-                const eventTitle = event[9]; // 修正：正しい列のインデックスを使用する
-                const prefecture = event[10]; // 修正：正しい列のインデックスを使用する
+                const dayOfWeek = event[3];
+                const type1 = event[5];
+                const type2 = event[6];
+                const type3 = event[7];
+                const title = event[8];
+                const eventTitle = event[9];
+                const prefecture = event[10];
                 return (
                     (years.length === 0 || years.includes(year)) &&
                     (months.length === 0 || months.includes(month)) &&
