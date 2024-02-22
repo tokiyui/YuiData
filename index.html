@@ -50,24 +50,26 @@
 
 <script>
 function generateCheckboxes(id, options) {
-    const container = document.getElementById(id);
+    const container = document.getElementById('checkboxes'); // コンテナを checkboxes ディビに変更
+    const groupDiv = document.createElement('div'); // 新しいディビを作成
+    groupDiv.className = 'checkbox-group'; // クラスを追加
+    container.appendChild(groupDiv); // グループディビをコンテナに追加
+
     options.forEach(option => {
         const label = document.createElement('label');
         label.setAttribute('for', option);
         label.textContent = option;
         const checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('name', id + '-' + option); // グループごとに名前を変更
+        checkbox.setAttribute('name', id + '-' + option);
         checkbox.setAttribute('value', option);
-        container.appendChild(checkbox);
-        container.appendChild(label);
+        groupDiv.appendChild(checkbox); // グループディビにチェックボックスを追加
+        groupDiv.appendChild(label);
     });
 }
 
 generateCheckboxes('years', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
-
 generateCheckboxes('months', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
-
 generateCheckboxes('daysOfWeek', ['日', '月', '火', '水', '木', '金', '土']);
 
 // Add checkboxes for type1, type2, type3, title, prefecture dynamically
