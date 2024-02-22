@@ -108,6 +108,7 @@ fetch('data.txt')
     })
     .catch(error => console.error('Error fetching data:', error));
 
+<!--
 function searchEvents() {
     const years = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
     const months = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
@@ -118,6 +119,60 @@ function searchEvents() {
     const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
     const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
+
+    fetch('data.txt')
+    .then(response => response.text())
+    .then(data => {
+        const events = data.trim().split('\n').map(line => line.split(','));
+        const filteredEvents = events.filter(event => {
+            const year = event[0];
+            const month = event[1];
+            const dayOfWeek = event[3];
+            const type1 = event[5];
+            const type2 = event[6];
+            const type3 = event[7];
+            const title = event[8];
+            const eventTitle = event[9];
+            const prefecture = event[10];
+            return (
+                (years.length === 0 || years.includes(year)) && 
+                (months.length === 0 || months.includes(month)) && 
+                (daysOfWeek.length === 0 || daysOfWeek.includes(dayOfWeek)) &&
+                (type1Values.length === 0 || type1Values.includes(type1)) &&
+                (type2Values.length === 0 || type2Values.includes(type2)) &&
+                (type3Values.length === 0 || type3Values.includes(type3)) &&
+                (titleValues.length === 0 || titleValues.includes(title)) &&
+                (eventTitleValues.length === 0 || eventTitleValues.includes(eventTitle)) &&
+                (prefectureValues.length === 0 || prefectureValues.includes(prefecture))
+            );
+        });
+
+        displayEvents(filteredEvents);
+    })
+    .catch(error => console.error('Error fetching data:', error));
+}
+    -->
+
+function searchEvents() {
+    const years = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
+    const months = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
+    const daysOfWeek = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
+    const type1Values = Array.from(document.querySelectorAll('input[name="type1"]:checked')).map(input => input.value);
+    const type2Values = Array.from(document.querySelectorAll('input[name="type2"]:checked')).map(input => input.value);
+    const type3Values = Array.from(document.querySelectorAll('input[name="type3"]:checked')).map(input => input.value);
+    const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
+    const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
+    const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
+
+    console.log("Years:", years);
+    console.log("Months:", months);
+    console.log("Days of the week:", daysOfWeek);
+    console.log("Type 1 values:", type1Values);
+    console.log("Type 2 values:", type2Values);
+    console.log("Type 3 values:", type3Values);
+    console.log("Title values:", titleValues);
+    console.log("Event title values:", eventTitleValues);
+    console.log("Prefecture values:", prefectureValues);
 
     fetch('data.txt')
     .then(response => response.text())
