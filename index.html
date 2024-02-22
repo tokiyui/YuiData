@@ -55,7 +55,7 @@ function generateCheckboxes(id, label, options) {
     const container = document.getElementById('checkboxes');
     
     // タイトルの追加
-    const title = document.createElement('span'); // p要素からspan要素に変更
+    const title = document.createElement('span'); 
     title.textContent = label + '：';
     container.appendChild(title);
 
@@ -67,8 +67,8 @@ function generateCheckboxes(id, label, options) {
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('name', id); 
         checkbox.setAttribute('value', option);
+        container.appendChild(checkbox);
         container.appendChild(label);        
-        container.appendChild(checkbox); // チェックボックスをラベルの後に追加
     });
     container.appendChild(document.createElement('br'));
 }
