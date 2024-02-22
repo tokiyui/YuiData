@@ -99,12 +99,12 @@ fetch('data.txt')
             prefectureValues.add(event[prefectureIndex]);
         });
 
-        #generateCheckboxes('checkboxes', Array.from(type1Values));
-        #generateCheckboxes('checkboxes', Array.from(type2Values));
-        #generateCheckboxes('checkboxes', Array.from(type3Values));
-        #generateCheckboxes('checkboxes', Array.from(titleValues));
-        #generateCheckboxes('checkboxes', Array.from(eventTitleValues));
-        #generateCheckboxes('checkboxes', Array.from(prefectureValues));
+        generateCheckboxes('checkboxes', Array.from(type1Values));
+        generateCheckboxes('checkboxes', Array.from(type2Values));
+        generateCheckboxes('checkboxes', Array.from(type3Values));
+        generateCheckboxes('checkboxes', Array.from(titleValues));
+        generateCheckboxes('checkboxes', Array.from(eventTitleValues));
+        generateCheckboxes('checkboxes', Array.from(prefectureValues));
     })
     .catch(error => console.error('Error fetching data:', error));
 
