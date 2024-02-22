@@ -78,7 +78,8 @@ generateCheckboxes('months', '月', ['1', '2', '3', '4', '5', '6', '7', '8', '9'
 generateCheckboxes('daysOfWeek', '曜日', ['日', '月', '火', '水', '木', '金', '土']);
 generateCheckboxes('type1', '大分類', ['ライブ', 'リリース', 'イベント', '特典会', '配信', '歩み']);
 generateCheckboxes('type2', '中分類', ['ワンマン', 'フェス', 'イベント', '社員総会', '特典会', '公開録音', '学園祭', '有料配信', 'CD', 'DVD', '書籍', 'アーティスト活動', '出身地', 'FC', '事務所移籍', 'その他']);
-
+generateCheckboxes('eventtitle', '詳細タイトル', ['昼公演', '夜公演']);
+    
 // Add checkboxes for type1, type2, type3, title, prefecture dynamically
 fetch('data.txt')
     .then(response => response.text())
@@ -87,24 +88,20 @@ fetch('data.txt')
         const headers = events.shift(); // Remove header row
         const type3Index = headers.indexOf('type3');
         const titleIndex = headers.indexOf('title');
-        const eventTitleIndex = headers.indexOf('eventtitle');
         const prefectureIndex = headers.indexOf('prefecture');
 
         const type3Values = new Set();
         const titleValues = new Set();
-        const eventTitleValues = new Set();
         const prefectureValues = new Set();
 
         events.forEach(event => {
             type3Values.add(event[type3Index]);
             titleValues.add(event[titleIndex]);
-            eventTitleValues.add(event[eventTitleIndex]);
             prefectureValues.add(event[prefectureIndex]);
         });
 
         generateCheckboxes('type3', 'type', Array.from(type3Values));
         generateCheckboxes('title', 'title', Array.from(titleValues));
-        generateCheckboxes('eventtitle', 'a', Array.from(eventTitleValues));
         generateCheckboxes('prefecture', 'b', Array.from(prefectureValues));
     })
     .catch(error => console.error('Error fetching data:', error));
