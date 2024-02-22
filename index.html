@@ -50,6 +50,8 @@
 
 <script>
 function generateCheckboxes(id, options) {
+    console.log("Generating checkboxes for " + id + " with options:", options);
+    // 以下のコードを追加
     const container = document.getElementById('checkboxes'); // コンテナを checkboxes ディビに変更
     const groupDiv = document.createElement('div'); // 新しいディビを作成
     groupDiv.className = 'checkbox-group'; // クラスを追加
