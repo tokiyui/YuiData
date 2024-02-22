@@ -51,20 +51,30 @@
 </table>
 
 <script>
-function generateCheckboxes(id, options) {
+function generateCheckboxes(id, label, options) {
     const container = document.getElementById('checkboxes');
+    
+    // タイトルの追加
+    const title = document.createElement('p');
+    title.textContent = label + '：';
+    container.appendChild(title);
+
     options.forEach(option => {
         const label = document.createElement('label');
-        label.setAttribute('for', option);
+        label.setAttribute('for', id + '-' + option);
         label.textContent = option;
         const checkbox = document.createElement('input');
         checkbox.setAttribute('type', 'checkbox');
-        checkbox.setAttribute('name', id);
+        checkbox.setAttribute('name', id); 
         checkbox.setAttribute('value', option);
         container.appendChild(checkbox);
         container.appendChild(label);
+        container.appendChild(document.createElement('br')); // 改行の追加
     });
 }
+
+generateCheckboxes('years', '年', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
+generateCheckboxes('months', '月', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
 
 generateCheckboxes('years', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
 generateCheckboxes('months', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
