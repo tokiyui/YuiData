@@ -14,6 +14,12 @@
         padding: 8px;
         text-align: left;
     }
+    .checkbox-group {
+        display: inline-block;
+    }
+    .checkbox-group label {
+        display: block;
+    }
 </style>
 </head>
 <body>
@@ -46,6 +52,8 @@
 <script>
 function generateCheckboxes(id, options) {
     const container = document.getElementById(id);
+    const checkboxGroup = document.createElement('div');
+    checkboxGroup.classList.add('checkbox-group');
     options.forEach(option => {
         const label = document.createElement('label');
         label.setAttribute('for', option);
@@ -54,10 +62,11 @@ function generateCheckboxes(id, options) {
         checkbox.setAttribute('type', 'checkbox');
         checkbox.setAttribute('name', id);
         checkbox.setAttribute('value', option);
-        container.appendChild(checkbox);
-        container.appendChild(label);
-        container.appendChild(document.createElement('br'));
+        checkboxGroup.appendChild(checkbox);
+        checkboxGroup.appendChild(label);
+        checkboxGroup.appendChild(document.createElement('br'));
     });
+    container.appendChild(checkboxGroup);
 }
 
 generateCheckboxes('checkboxes', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
@@ -101,9 +110,9 @@ fetch('data.txt')
     .catch(error => console.error('Error fetching data:', error));
 
 function searchEvents() {
-    const years = Array.from(document.querySelectorAll('input[name="Year"]:checked')).map(input => input.value);
-    const months = Array.from(document.querySelectorAll('input[name="Month"]:checked')).map(input => input.value);
-    const daysOfWeek = Array.from(document.querySelectorAll('input[name="Day of the week"]:checked')).map(input => input.value);
+    const years = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
+    const months = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
+    const daysOfWeek = Array.from(document.querySelectorAll('input[name="checkboxes"]:checked')).map(input => input.value);
     const type1Values = Array.from(document.querySelectorAll('input[name="type1"]:checked')).map(input => input.value);
     const type2Values = Array.from(document.querySelectorAll('input[name="type2"]:checked')).map(input => input.value);
     const type3Values = Array.from(document.querySelectorAll('input[name="type3"]:checked')).map(input => input.value);
@@ -124,12 +133,14 @@ function searchEvents() {
             const title = event[8];
             const prefecture = event[10];
             return (
-                years.includes(year) && 
-                months.includes(month) && 
-                daysOfWeek.includes(dayOfWeek) &&
-                (type1Values.includes(type1) || type2Values.includes(type2) || type3Values.includes(type3)) &&
-                titleValues.includes(title) &&
-                prefectureValues.includes(prefecture)
+                (years.length === 0 || years.includes(year)) && 
+                (months.length === 0 || months.includes(month)) && 
+                (daysOfWeek.length === 0 || daysOfWeek.includes(dayOfWeek)) &&
+                (type1Values.length === 0 || type1Values.includes(type1)) &&
+                (type2Values.length === 0 || type2Values.includes(type2)) &&
+                (type3Values.length === 0 || type3Values.includes(type3)) &&
+                (titleValues.length === 0 || titleValues.includes(title)) &&
+                (prefectureValues.length === 0 || prefectureValues.includes(prefecture))
             );
         });
 
