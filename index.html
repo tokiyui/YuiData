@@ -105,10 +105,9 @@ function searchEvents() {
     const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
 
-    fetch('data.csv')
+    fetch('data.txt')
         .then(response => response.text())
         .then(data => {
-            data = data.replace(/""/g, '"').replace(/(^"|"$)/g, '');
             const events = data.trim().split('\n').map(line => line.split(','));
             const filteredEvents = events.filter(event => {
                 const year = event[0];
