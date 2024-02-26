@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Song Information</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+
+<table id="songTable">
+  <thead>
+    <tr>
+      <th>楽曲名</th>
+      <th>作詞</th>
+      <th>作曲</th>
+      <th>編曲</th>
+      <th>収録作品名</th>
+      <th>リリース日</th>
+    </tr>
+  </thead>
+  <tbody id="songTableBody">
+  </tbody>
+</table>
+
+<script>
+  // song.txtを読み込む関数
+  function loadTextFile() {
+    // XMLHttpRequestオブジェクトを作成
+    const xhr = new XMLHttpRequest();
+
+    // 読み込み完了時の処理
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // レスポンステキストを取得して処理
+        const text = xhr.responseText;
+        const lines = text.trim().split('\n');
+        const tbody = document.getElementById('songTableBody');
+
+        // 各行のデータを処理して表に追加
+        lines.forEach(line => {
+          const fields = line.split(',');
+          const row = document.createElement('tr');
+
+          fields.forEach(field => {
+            const cell = document.createElement('td');
+            cell.textContent = field;
+            row.appendChild(cell);
+          });
+
+          tbody.appendChild(row);
+        });
+      } else {
+        console.error('Failed to load the file.');
+      }
+    };
+
+    // song.txtを非同期で取得
+    xhr.open('GET', 'song.txt', true);
+    xhr.send();
+  }
+
+  // ページ読み込み完了後にsong.txtを読み込む
+  window.addEventListener('load', loadTextFile);
+</script>
+
+</body>
+</html>
