@@ -2,3 +2,4 @@
 <MEDLEY>
 ハイタッチ☆メモリー
 Honey♥Come!!
+<MEDLEY END>
