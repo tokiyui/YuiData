@@ -108,7 +108,7 @@ function searchEvents() {
     fetch('data.csv')
         .then(response => response.text())
         .then(data => {
-            data = data.replace(/""/g, '"');
+            data = data.replace(/""/g, '"').replace(/(^"|"$)/g, '');
             const events = data.trim().split('\n').map(line => line.split(','));
             const filteredEvents = events.filter(event => {
                 const year = event[0];
