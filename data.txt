@@ -1,4 +1,3 @@
-year,month,day,dayoftheweek,time,type1,type2,type3,title,eventtitle,prefecture,place,with,info,setlist
 2012,7,14,土,10:30,特典会,CD,シングル,Raise,「小倉唯、会いに行くよ。~Road to 小倉~」,東京,ゲーマーズ池袋店,ゲーマーズ,,
 2012,7,14,土,14:00,特典会,CD,シングル,Raise,「小倉唯、会いに行くよ。~Road to 小倉~」,東京,アニメイト新宿店,アニメイト,,
 2012,7,14,土,17:00,特典会,CD,シングル,Raise,「小倉唯、会いに行くよ。~Road to 小倉~」,東京,AKIHABARAゲーマーズ本店 8F,ゲーマーズ,,
