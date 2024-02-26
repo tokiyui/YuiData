@@ -54,7 +54,7 @@
 
         // 各行のデータを処理して表に追加
         lines.forEach(line => {
-          const fields = line.split(',');
+          const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
           const row = document.createElement('tr');
 
           fields.forEach(field => {
