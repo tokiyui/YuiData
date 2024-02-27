@@ -35,6 +35,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Process setlist
             let isEncore = false;
             let isMedley = false;
+            let songCount = 0;
             let encoreCount = 0; // Track the number of encore songs
             let medleyCount = 0; // Track the number of medleys
             for (let i = 4; i < lines.length; i++) {
@@ -58,10 +59,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         if (isMedley) {
                             // Display medley song only if it's not empty
                             document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
-                        } else {
-                            let prefix = isEncore ? 'EC' : '';
+                        } else if (isEncore) {
+                            let prefix = 'EC'
                             encoreCount++; // Increment encore song count
                             document.body.innerHTML += `<p>${prefix}${encoreCount}. ${line}</p>`;
+                        }
+                          else {
+                            songCount++; // Increment encore song count
+                            document.body.innerHTML += `<p>${songCount + medleyCount}. ${line}</p>`;
                         }
                     }
                 }
