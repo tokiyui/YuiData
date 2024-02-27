@@ -145,7 +145,7 @@ function displayEvents(events) {
         const row = document.createElement('tr');
         event.forEach((value, index) => {
             const cell = document.createElement('td');
-            if (index === 14) { // 15番目の要素の場合
+            if (index === 14 && value.trim() !== '') { // 15番目の要素が空でない場合のみリンクを生成
                 const link = document.createElement('a');
                 link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(value);
                 link.textContent = 'セットリスト'; // セットリストのテキストを設定
