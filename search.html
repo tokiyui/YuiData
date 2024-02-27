@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setlist Search Debug</title>
+    <title>セットリスト検索</title>
 </head>
 <body>
-    <h1 id="title">Setlist Search Debug</h1>
+    <h1 id="title">セットリスト検索</h1>
     <div id="results"></div>
 
     <script>
@@ -71,7 +71,7 @@
             resultsDiv.innerHTML = '';
 
             const title = document.getElementById('title');
-            title.innerText = `Setlist Search Debug - Results for "${query}" (${results.length})`;
+            title.innerText = `${query}の披露実績 (計${results.length}回)`;
 
             if (results.length === 0) {
                 resultsDiv.innerHTML = '<p>No results found.</p>';
