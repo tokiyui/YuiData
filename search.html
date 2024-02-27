@@ -26,7 +26,31 @@
 
         // setlistディレクトリ内のファイルを検索して、指定された文字列を含むファイルの内容を表示する関数
         function searchFilesAndDisplayContent(searchString) {
-            // ここにファイルの検索と表示のロジックを追加
+            fetch('setlist')
+            .then(response => response.text())
+            .then(text => {
+                const files = text.split('\n');
+                files.forEach(file => {
+                    fetch(`setlist/${file}`)
+                    .then(response => response.text())
+                    .then(fileContent => {
+                        if (fileContent.includes(searchString)) {
+                            const lines = fileContent.split('\n').slice(0, 2); // 最初の2行を取得
+                            const content = lines.join('<br>'); // HTMLで改行するために<br>タグを追加
+                            displayFileContent(file, content);
+                        }
+                    })
+                    .catch(error => console.error('Error reading file:', error));
+                });
+            })
+            .catch(error => console.error('Error reading directory:', error));
+        }
+
+        // ファイルの内容をHTMLに表示する関数
+        function displayFileContent(fileName, content) {
+            const outputDiv = document.getElementById('output');
+            const fileHeader = `<h3>${fileName}</h3>`;
+            outputDiv.innerHTML += fileHeader + content + '<hr>';
         }
 
         // ディレクトリ内のファイルを検索して表示
