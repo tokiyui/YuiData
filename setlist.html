@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setlist</title>
+</head>
+<body>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the 10-digit number from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const concertID = urlParams.get('id');
+
+    // Fetch the setlist file
+    fetch(`setlist/${concertID}.txt`)
+        .then(response => response.text())
+        .then(data => {
+            const lines = data.split('\n');
+            const date = lines[0].trim(); // Date line
+            const title = lines[1].trim(); // Title line
+            const venue = lines[2].trim(); // Venue line
+
+            // Display date in the specified format
+            const formattedDate = new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+            document.body.innerHTML += `<p>${formattedDate}</p>`;
+
+            // Display title in bold
+            document.body.innerHTML += `<p><strong>${title}</strong></p>`;
+
+            // Display venue
+            document.body.innerHTML += `<p>@${venue}</p>`;
+
+            // Process setlist
+            let isEncore = false;
+            let isMedley = false;
+            for (let i = 3; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (line === '<MEDLEY>') {
+                    isMedley = true;
+                    document.body.innerHTML += '<p>Medley:</p>';
+                } else if (line === '<MEDLEY END>') {
+                    isMedley = false;
+                } else if (line === '<ENCORE>') {
+                    isEncore = true;
+                    document.body.innerHTML += '<p>Encore:</p>';
+                } else if (line === '<W ENCORE>') {
+                    document.body.innerHTML += '<p>Double Encore:</p>';
+                } else if (line === '<FANCLUB>') {
+                    document.body.innerHTML += '<p>Fanclub Exclusive:</p>';
+                } else {
+                    if (isMedley) {
+                        document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
+                    } else {
+                        let prefix = isEncore ? 'EC' : '';
+                        document.body.innerHTML += `<p>${prefix}${i - 2}. ${line}</p>`;
+                    }
+                }
+            }
+        })
+        .catch(error => {
+            console.error('Error fetching setlist:', error);
+            document.body.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
+        });
+});
+</script>
+
+</body>
+</html>
