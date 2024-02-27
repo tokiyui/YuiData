@@ -43,17 +43,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (line === '<MEDLEY>') {
                     isMedley = true;
                     medleyCount++; // Increment medley count
-                    document.body.innerHTML += `<p>${songCount + medleyCount}. メドレーコーナー</p>`;
+                    document.body.innerHTML += `<p>${songCount + medleyCount}. 【メドレーコーナー】</p>`;
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
                 } else if (line === '<ENCORE>') {
                     isEncore = true;
                     encoreCount = 0; // Reset encore song count when new encore starts
-                    document.body.innerHTML += '<p>アンコール</p>';
+                    document.body.innerHTML += '<p>【アンコール】</p>';
                 } else if (line === '<W ENCORE>') {
-                    document.body.innerHTML += '<p>ダブルアンコール</p>';
+                    document.body.innerHTML += '<p>【ダブルアンコール】</p>';
                 } else if (line === '<FANCLUB>') {
-                    document.body.innerHTML += '<p>ファンクラブ限定</p>';
+                    document.body.innerHTML += '<p>【ファンクラブ限定】</p>';
                 } else {
                     if (line !== '') { // Check if line is not empty
                         if (isMedley) {
