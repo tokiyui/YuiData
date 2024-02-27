@@ -143,14 +143,22 @@ function displayEvents(events) {
     
     events.forEach(event => {
         const row = document.createElement('tr');
-        event.forEach(value => {
+        event.forEach((value, index) => {
             const cell = document.createElement('td');
-            cell.textContent = value;
+            if (index === 14) { // 15番目の要素の場合
+                const link = document.createElement('a');
+                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(value);
+                link.textContent = 'セットリスト'; // セットリストのテキストを設定
+                cell.appendChild(link);
+            } else {
+                cell.textContent = value;
+            }
             row.appendChild(cell);
         });
         tableBody.appendChild(row);
     });
 }
+
 </script>
 </body>
 </html>
