@@ -3,38 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Content Display</title>
+    <title>Search Text in Files</title>
 </head>
 <body>
-    <div id="output">
-        <?php
-            // URLからnameパラメーターの値を取得
-            $searchString = $_GET['name'];
-            echo "<h2>Search String: $searchString</h2>";
+    <input type="text" id="searchInput" placeholder="Search...">
+    <button onclick="searchText()">Search</button>
+    <div id="output"></div>
 
-            // setlistディレクトリ内のファイルを検索して、指定された文字列を含むファイルの内容を表示する関数
-            function searchFilesAndDisplayContent($searchString) {
-                $directory = 'setlist/';
-                $files = scandir($directory);
-                foreach ($files as $file) {
-                    if ($file === '.' || $file === '..') {
-                        continue;
-                    }
-                    $filePath = $directory . $file;
-                    $fileContent = file_get_contents($filePath);
-                    if (strpos($fileContent, $searchString) !== false) {
-                        // ファイルの内容から最初の2行を取得
-                        $lines = explode("\n", $fileContent);
-                        $content = implode('<br>', array_slice($lines, 0, 2));
-                        echo "<h3>$file</h3>";
-                        echo $content . '<hr>';
-                    }
-                }
-            }
+    <script>
+        // テキストファイルを検索する関数
+        function searchText() {
+            const searchString = document.getElementById('searchInput').value;
+            const outputDiv = document.getElementById('output');
+            outputDiv.innerHTML = ''; // 検索結果をリセット
 
-            // ディレクトリ内のファイルを検索して表示
-            searchFilesAndDisplayContent($searchString);
-        ?>
-    </div>
+            fetch('setlist')
+                .then(response => response.text())
+                .then(text => {
+                    const files = text.split('\n');
+                    files.forEach(file => {
+                        if (file.endsWith('.txt')) {
+                            fetch(`setlist/${file}`)
+                                .then(response => response.text())
+                                .then(fileContent => {
+                                    if (fileContent.includes(searchString)) {
+                                        outputDiv.innerHTML += `<p>Found "${searchString}" in file: ${file}</p>`;
+                                    }
+                                })
+                                .catch(error => console.error('Error reading file:', error));
+                        }
+                    });
+                })
+                .catch(error => console.error('Error reading directory:', error));
+        }
+    </script>
 </body>
 </html>
