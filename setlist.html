@@ -44,10 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     isMedley = true;
                     medleyCount++; // Increment medley count
                     document.body.innerHTML += `<p>Medley ${medleyCount}:</p>`;
-                    prevSongWasMedley = false; // Reset flag when medley starts
+                    prevSongWasMedley = true; // Set flag indicating previous song was part of a medley
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
-                    prevSongWasMedley = false; // Reset flag when medley ends
                 } else if (line === '<ENCORE>') {
                     isEncore = true;
                     encoreCount = 0; // Reset encore song count when new encore starts
