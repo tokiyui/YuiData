@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>File Content Display</title>
+</head>
+<body>
+    <div id="output"></div>
+
+    <script>
+        // 引数の値を取得する関数
+        function getParameterByName(name, url) {
+            if (!url) url = window.location.href;
+            name = name.replace(/[\[\]]/g, '\\$&');
+            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
+                results = regex.exec(url);
+            if (!results) return null;
+            if (!results[2]) return '';
+            return decodeURIComponent(results[2].replace(/\+/g, ' '));
+        }
+
+        // URLからnameパラメーターの値を取得
+        var searchString = getParameterByName('name');
+        document.getElementById('output').innerHTML += "<h2>Search String: " + searchString + "</h2>";
+
+        // setlistディレクトリ内のファイルを検索して、指定された文字列を含むファイルの内容を表示する関数
+        function searchFilesAndDisplayContent(searchString) {
+            // ここにファイルの検索と表示のロジックを追加
+        }
+
+        // ディレクトリ内のファイルを検索して表示
+        searchFilesAndDisplayContent(searchString);
+    </script>
+</body>
+</html>
