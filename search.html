@@ -76,7 +76,7 @@
             } else {
                 results.forEach(result => {
                     const resultDiv = document.createElement('div');
-                    resultDiv.innerHTML = `<p><strong>${result.filename}</strong><br>Line 1: ${result.line1}<br>Line 2: ${result.line2}</p>`;
+                    resultDiv.innerHTML = `<p>${result.line1} ${result.line2}</p>`;
                     resultsDiv.appendChild(resultDiv);
                 });
             }
