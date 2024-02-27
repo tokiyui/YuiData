@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (line === '<MEDLEY>') {
                     isMedley = true;
                     medleyCount++; // Increment medley count
-                    document.body.innerHTML += `<p>${songCount + medleyCount}. Medley:</p>`;
+                    document.body.innerHTML += `<p>${songCount + medleyCount}. メドレーコーナー</p>`;
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
                 } else if (line === '<ENCORE>') {
