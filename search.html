@@ -43,7 +43,6 @@
                 .then(response => response.json())
                 .then(data => {
                     const files = data.filter(item => item.type === 'file').map(item => item.name);
-                    console.log('Fetched files:', files);
                     return files;
                 });
         }
@@ -58,6 +57,7 @@
                         const lines = text.split('\n');
                         const match = lines.find(line => line.toLowerCase().includes(query)); 
                         //const match = lines.find(line => line === query); // 大文字と小文字を区別して比較
+                        console.log(match);
                         if (match) {
                             return { filename: file, line1: lines[0], line2: lines[1] };
                         }
