@@ -3,38 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Text in Files</title>
+    <title>Setlist Search</title>
 </head>
 <body>
-    <input type="text" id="searchInput" placeholder="Search...">
-    <button onclick="searchText()">Search</button>
-    <div id="output"></div>
+    <h1>Setlist Search</h1>
+    <label for="searchInput">Search:</label>
+    <input type="text" id="searchInput">
+    <button onclick="search()">Search</button>
+    <div id="results"></div>
 
     <script>
-        function searchText() {
-            const searchString = document.getElementById('searchInput').value;
-            const outputDiv = document.getElementById('output');
-            outputDiv.innerHTML = ''; // 検索結果をリセット
+        function search() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
 
-            fetch('setlist')
-                .then(response => response.text())
-                .then(text => {
-                    const files = text.split('\n');
-                    files.forEach(file => {
-                        if (file.endsWith('.txt')) {
-                            fetch(`setlist/${file}`)
-                                .then(response => response.text())
-                                .then(fileContent => {
-                                    if (fileContent.includes(searchString)) {
-                                        outputDiv.innerHTML += `<p>Found "${searchString}" in file: ${file}</p>`;
-                                    }
-                                })
-                                .catch(error => console.error('Error reading file:', error));
+            fetchSetlistFiles(setlistDirectory)
+                .then(files => searchFiles(files, query))
+                .then(results => displayResults(results))
+                .catch(error => console.error('Error:', error));
+        }
+
+        function fetchSetlistFiles(directory) {
+            const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+            return fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const files = data.filter(item => item.type === 'file').map(item => item.name);
+                    return files;
+                });
+        }
+
+        function searchFiles(files, query) {
+            const promises = files.map(file => {
+                const url = `setlist/${file}`;
+                return fetch(url)
+                    .then(response => response.text())
+                    .then(text => {
+                        const lines = text.split('\n');
+                        const match = lines.find(line => line.toLowerCase().includes(query));
+                        if (match) {
+                            return { filename: file, line1: lines[0], line2: lines[1] };
                         }
                     });
-                })
-                .catch(error => console.error('Error reading directory:', error));
+            });
+            return Promise.all(promises).then(results => results.filter(Boolean));
+        }
+
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<p>No results found.</p>';
+            } else {
+                results.forEach(result => {
+                    const resultDiv = document.createElement('div');
+                    resultDiv.innerHTML = `<p><strong>${result.filename}</strong><br>Line 1: ${result.line1}<br>Line 2: ${result.line2}</p>`;
+                    resultsDiv.appendChild(resultDiv);
+                });
+            }
         }
     </script>
 </body>
 </html>
+
