@@ -56,17 +56,13 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.body.innerHTML += '<p>Fanclub Exclusive:</p>';
                 } else {
                     if (line !== '') { // Check if line is not empty
+                        songCount++;
                         if (isMedley) {
                             // Display medley song only if it's not empty
                             document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
                         } else {
                             let prefix = isEncore ? 'EC' : '';
-                            if (songCount === 0) {
-                                document.body.innerHTML += `<p>${prefix}${songCount + 1}. ${line}</p>`;
-                            } else {
-                                songCount++; // Increment song count
-                                document.body.innerHTML += `<p>${prefix}${songCount}. ${line}</p>`;
-                            }
+                            document.body.innerHTML += `<p>${prefix}${songCount}. ${line}</p>`;
                         }
                     }
                 }
