@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Setlist Search</title>
+    <title>Setlist Search Debug</title>
 </head>
 <body>
-    <h1>Setlist Search</h1>
+    <h1>Setlist Search Debug</h1>
     <div id="results"></div>
 
     <script>
@@ -17,24 +17,34 @@
 
         // 検索文字列を取得
         const query = getQueryStringValue('name');
+        console.log('Search query:', query);
 
         // 検索関数
         function search(query) {
+            console.log('Searching for:', query);
             const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
 
             fetchSetlistFiles(setlistDirectory)
-                .then(files => searchFiles(files, query))
-                .then(results => displayResults(results))
+                .then(files => {
+                    console.log('Files:', files);
+                    return searchFiles(files, query);
+                })
+                .then(results => {
+                    console.log('Search results:', results);
+                    displayResults(results);
+                })
                 .catch(error => console.error('Error:', error));
         }
 
         // ディレクトリ内のファイルを取得する関数
         function fetchSetlistFiles(directory) {
             const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+            console.log('Fetching files from:', url);
             return fetch(url)
                 .then(response => response.json())
                 .then(data => {
                     const files = data.filter(item => item.type === 'file').map(item => item.name);
+                    console.log('Fetched files:', files);
                     return files;
                 });
         }
@@ -43,9 +53,11 @@
         function searchFiles(files, query) {
             const promises = files.map(file => {
                 const url = `setlist/${file}`;
+                console.log('Searching in file:', url);
                 return fetch(url)
                     .then(response => response.text())
                     .then(text => {
+                        console.log('File content:', text);
                         const lines = text.split('\n');
                         const match = lines.find(line => line.toLowerCase().includes(query));
                         if (match) {
