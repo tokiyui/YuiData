@@ -36,11 +36,13 @@ document.addEventListener('DOMContentLoaded', function() {
             let isEncore = false;
             let isMedley = false;
             let encoreCount = 0; // Track the number of encore songs
+            let medleyCount = 0; // Track the number of medleys
             for (let i = 4; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line === '<MEDLEY>') {
                     isMedley = true;
-                    document.body.innerHTML += '<p>Medley:</p>';
+                    medleyCount++; // Increment medley count
+                    document.body.innerHTML += `<p>Medley ${medleyCount}:</p>`;
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
                 } else if (line === '<ENCORE>') {
@@ -52,12 +54,15 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else if (line === '<FANCLUB>') {
                     document.body.innerHTML += '<p>Fanclub Exclusive:</p>';
                 } else {
-                    if (isMedley) {
-                        document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
-                    } else {
-                        let prefix = isEncore ? 'EC' : '';
-                        encoreCount++; // Increment encore song count
-                        document.body.innerHTML += `<p>${prefix}${encoreCount}. ${line}</p>`;
+                    if (line !== '') { // Check if line is not empty
+                        if (isMedley) {
+                            // Display medley song only if it's not empty
+                            document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
+                        } else {
+                            let prefix = isEncore ? 'EC' : '';
+                            encoreCount++; // Increment encore song count
+                            document.body.innerHTML += `<p>${prefix}${encoreCount}. ${line}</p>`;
+                        }
                     }
                 }
             }
