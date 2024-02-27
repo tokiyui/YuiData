@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     isMedley = true;
                     medleyCount++; // Increment medley count
                     document.body.innerHTML += `<p>Medley ${medleyCount}:</p>`;
-                    prevSongWasMedley = true; // Set flag indicating previous song was part of a medley
+                    prevSongWasMedley = false; // Reset flag when medley starts
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
                     prevSongWasMedley = false; // Reset flag when medley ends
@@ -74,7 +74,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 encoreCount = 1;
                             }
                             document.body.innerHTML += `<p>${prefix}${encoreCount}. ${line}</p>`;
-                            prevSongWasMedley = false; // Reset flag for non-medley songs
+                            prevSongWasMedley = isMedley; // Update flag based on current song
                         }
                     }
                 }
