@@ -57,9 +57,17 @@
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
 
-          fields.forEach(field => {
+          fields.forEach((field, index) => {
             const cell = document.createElement('td');
-            cell.textContent = field;
+            if (index === 0) { // 最初の要素の場合
+              const lowercaseField = field.toLowerCase();
+              const link = document.createElement('a');
+              link.href = `search.html?name=${lowercaseField}`;
+              link.textContent = field;
+              cell.appendChild(link);
+            } else {
+              cell.textContent = field;
+            }
             row.appendChild(cell);
           });
 
