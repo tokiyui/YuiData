@@ -37,22 +37,28 @@ document.addEventListener('DOMContentLoaded', function() {
             let isMedley = false;
             let encoreCount = 0; // Track the number of encore songs
             let medleyCount = 0; // Track the number of medleys
+            let prevSongWasMedley = false; // Track if previous song was part of a medley
             for (let i = 4; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line === '<MEDLEY>') {
                     isMedley = true;
                     medleyCount++; // Increment medley count
                     document.body.innerHTML += `<p>Medley ${medleyCount}:</p>`;
+                    prevSongWasMedley = true; // Set flag indicating previous song was part of a medley
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
+                    prevSongWasMedley = false; // Reset flag when medley ends
                 } else if (line === '<ENCORE>') {
                     isEncore = true;
                     encoreCount = 0; // Reset encore song count when new encore starts
                     document.body.innerHTML += '<p>Encore:</p>';
+                    prevSongWasMedley = false; // Reset flag when new encore starts
                 } else if (line === '<W ENCORE>') {
                     document.body.innerHTML += '<p>Double Encore:</p>';
+                    prevSongWasMedley = false; // Reset flag when new encore starts
                 } else if (line === '<FANCLUB>') {
                     document.body.innerHTML += '<p>Fanclub Exclusive:</p>';
+                    prevSongWasMedley = false; // Reset flag when new fanclub exclusive starts
                 } else {
                     if (line !== '') { // Check if line is not empty
                         if (isMedley) {
@@ -60,8 +66,15 @@ document.addEventListener('DOMContentLoaded', function() {
                             document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
                         } else {
                             let prefix = isEncore ? 'EC' : '';
-                            encoreCount++; // Increment encore song count
+                            if (prevSongWasMedley) {
+                                // If previous song was part of a medley, continue numbering sequentially
+                                encoreCount++;
+                            } else {
+                                // Otherwise, start new sequence
+                                encoreCount = 1;
+                            }
                             document.body.innerHTML += `<p>${prefix}${encoreCount}. ${line}</p>`;
+                            prevSongWasMedley = false; // Reset flag for non-medley songs
                         }
                     }
                 }
