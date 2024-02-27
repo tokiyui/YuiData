@@ -56,7 +56,8 @@
                     .then(response => response.text())
                     .then(text => {
                         const lines = text.split('\n');
-                        const match = lines.find(line => line.toLowerCase().includes(query));
+                        // const match = lines.find(line => line.toLowerCase().includes(query)); 
+                        const match = lines.find(line => line === query); // 大文字と小文字を区別して比較
                         if (match) {
                             return { filename: file, line1: lines[0], line2: lines[1] };
                         }
@@ -64,7 +65,7 @@
             });
             return Promise.all(promises).then(results => results.filter(Boolean));
         }
-
+      
         // 検索結果を表示する関数
         function displayResults(results) {
             const resultsDiv = document.getElementById('results');
