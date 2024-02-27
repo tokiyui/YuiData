@@ -7,14 +7,19 @@
 </head>
 <body>
     <h1>Setlist Search</h1>
-    <label for="searchInput">Search:</label>
-    <input type="text" id="searchInput">
-    <button onclick="search()">Search</button>
     <div id="results"></div>
 
     <script>
-        function search() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
+        // 検索文字列を取得する関数
+        function getQueryStringValue(key) {
+            return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
+        }
+
+        // 検索文字列を取得
+        const query = getQueryStringValue('name');
+
+        // 検索関数
+        function search(query) {
             const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
 
             fetchSetlistFiles(setlistDirectory)
@@ -23,6 +28,7 @@
                 .catch(error => console.error('Error:', error));
         }
 
+        // ディレクトリ内のファイルを取得する関数
         function fetchSetlistFiles(directory) {
             const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
             return fetch(url)
@@ -33,6 +39,7 @@
                 });
         }
 
+        // ファイル内を検索する関数
         function searchFiles(files, query) {
             const promises = files.map(file => {
                 const url = `setlist/${file}`;
@@ -49,6 +56,7 @@
             return Promise.all(promises).then(results => results.filter(Boolean));
         }
 
+        // 検索結果を表示する関数
         function displayResults(results) {
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
@@ -63,7 +71,9 @@
                 });
             }
         }
+
+        // 検索を実行
+        search(query);
     </script>
 </body>
 </html>
-
