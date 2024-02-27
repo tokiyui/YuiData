@@ -55,7 +55,9 @@
                     .then(response => response.text())
                     .then(text => {
                         const lines = text.split('\n');
-                        const match = lines.find(line => line.toLowerCase().includes(query)).toLowerCase(); 
+                        //const match = lines.find(line => line.toLowerCase().includes(query)).toLowerCase(); 
+                        const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
+
                         //const match = lines.find(line => line === query); // 大文字と小文字を区別して比較
                         console.log(match);
                         if (match) {
