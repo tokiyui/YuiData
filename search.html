@@ -6,55 +6,35 @@
     <title>File Content Display</title>
 </head>
 <body>
-    <div id="output"></div>
+    <div id="output">
+        <?php
+            // URLからnameパラメーターの値を取得
+            $searchString = $_GET['name'];
+            echo "<h2>Search String: $searchString</h2>";
 
-    <script>
-        // 引数の値を取得する関数
-        function getParameterByName(name, url) {
-            if (!url) url = window.location.href;
-            name = name.replace(/[\[\]]/g, '\\$&');
-            var regex = new RegExp('[?&]' + name + '(=([^&#]*)|&|#|$)'),
-                results = regex.exec(url);
-            if (!results) return null;
-            if (!results[2]) return '';
-            return decodeURIComponent(results[2].replace(/\+/g, ' '));
-        }
+            // setlistディレクトリ内のファイルを検索して、指定された文字列を含むファイルの内容を表示する関数
+            function searchFilesAndDisplayContent($searchString) {
+                $directory = 'setlist/';
+                $files = scandir($directory);
+                foreach ($files as $file) {
+                    if ($file === '.' || $file === '..') {
+                        continue;
+                    }
+                    $filePath = $directory . $file;
+                    $fileContent = file_get_contents($filePath);
+                    if (strpos($fileContent, $searchString) !== false) {
+                        // ファイルの内容から最初の2行を取得
+                        $lines = explode("\n", $fileContent);
+                        $content = implode('<br>', array_slice($lines, 0, 2));
+                        echo "<h3>$file</h3>";
+                        echo $content . '<hr>';
+                    }
+                }
+            }
 
-        // URLからnameパラメーターの値を取得
-        var searchString = getParameterByName('name');
-        document.getElementById('output').innerHTML += "<h2>Search String: " + searchString + "</h2>";
-
-        // setlistディレクトリ内のファイルを検索して、指定された文字列を含むファイルの内容を表示する関数
-        function searchFilesAndDisplayContent(searchString) {
-            fetch('setlist')
-            .then(response => response.text())
-            .then(text => {
-                const files = text.split('\n');
-                files.forEach(file => {
-                    fetch(`setlist/${file}`)
-                    .then(response => response.text())
-                    .then(fileContent => {
-                        if (fileContent.includes(searchString)) {
-                            const lines = fileContent.split('\n').slice(0, 2); // 最初の2行を取得
-                            const content = lines.join('<br>'); // HTMLで改行するために<br>タグを追加
-                            displayFileContent(file, content);
-                        }
-                    })
-                    .catch(error => console.error('Error reading file:', error));
-                });
-            })
-            .catch(error => console.error('Error reading directory:', error));
-        }
-
-        // ファイルの内容をHTMLに表示する関数
-        function displayFileContent(fileName, content) {
-            const outputDiv = document.getElementById('output');
-            const fileHeader = `<h3>${fileName}</h3>`;
-            outputDiv.innerHTML += fileHeader + content + '<hr>';
-        }
-
-        // ディレクトリ内のファイルを検索して表示
-        searchFilesAndDisplayContent(searchString);
-    </script>
+            // ディレクトリ内のファイルを検索して表示
+            searchFilesAndDisplayContent($searchString);
+        ?>
+    </div>
 </body>
 </html>
