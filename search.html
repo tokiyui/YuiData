@@ -6,16 +6,16 @@
     <title>Setlist Search Debug</title>
 </head>
 <body>
-    <h1>Setlist Search Debug</h1>
+    <h1 id="title">Setlist Search Debug</h1>
     <div id="results"></div>
 
     <script>
-        // 検索文字列を取得する関数
+        // URLのクエリ文字列から検索文字列を取得する関数
         function getQueryStringValue(key) {
             return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
         }
 
-        // 検索文字列を取得
+        // URLのクエリ文字列から検索文字列を取得
         const query = getQueryStringValue('name');
         console.log('Searching for:', query);
 
@@ -55,11 +55,8 @@
                     .then(response => response.text())
                     .then(text => {
                         const lines = text.split('\n');
-                        //const match = lines.find(line => line.toLowerCase().includes(query)).toLowerCase(); 
                         const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
 
-                        //const match = lines.find(line => line === query); // 大文字と小文字を区別して比較
-                        console.log(match);
                         if (match) {
                             return { filename: file, line1: lines[0], line2: lines[1] };
                         }
@@ -72,6 +69,9 @@
         function displayResults(results) {
             const resultsDiv = document.getElementById('results');
             resultsDiv.innerHTML = '';
+
+            const title = document.getElementById('title');
+            title.innerText = `Setlist Search Debug - Results for "${query}" (${results.length})`;
 
             if (results.length === 0) {
                 resultsDiv.innerHTML = '<p>No results found.</p>';
