@@ -37,14 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
             let isMedley = false;
             let encoreCount = 0; // Track the number of encore songs
             let medleyCount = 0; // Track the number of medleys
-            let medleySongCount = 0; // Track the number of songs in the current medley
             for (let i = 4; i < lines.length; i++) {
                 const line = lines[i].trim();
                 if (line === '<MEDLEY>') {
                     isMedley = true;
                     medleyCount++; // Increment medley count
-                    medleySongCount = 0; // Reset medley song count
-                    document.body.innerHTML += `<p>Medley ${medleyCount}:</p>`;
+                    document.body.innerHTML += `<p>${medleyCount}. Medley:</p>`;
                 } else if (line === '<MEDLEY END>') {
                     isMedley = false;
                 } else if (line === '<ENCORE>') {
@@ -59,8 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (line !== '') { // Check if line is not empty
                         if (isMedley) {
                             // Display medley song only if it's not empty
-                            medleySongCount++;
-                            document.body.innerHTML += `<p style="margin-left: 20px;">${medleySongCount}. ${line}</p>`;
+                            document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
                         } else {
                             let prefix = isEncore ? 'EC' : '';
                             encoreCount++; // Increment encore song count
