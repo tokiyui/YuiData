@@ -55,7 +55,7 @@
         const tbody = document.getElementById('songTableBody');
 
         // 各行のデータを処理して表に追加
-        lines.forEach(line => {
+        lines.forEach((line, index) => {
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
 
@@ -87,7 +87,7 @@
           tbody.appendChild(row);
 
           // 披露回数と最終披露日を更新
-          updatePerformanceData(fields[0], performanceCountCell, lastPerformanceDateCell);
+          updatePerformanceData(fields[0], performanceCountCell, lastPerformanceDateCell, index);
         });
       } else {
         console.error('Failed to load the file.');
@@ -103,8 +103,8 @@
   window.addEventListener('load', loadTextFile);
 
   // 披露回数と最終披露日を更新する関数
-  function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
-    // 遅延読み込みを実装する
+  function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell, index) {
+    // 各ファイルを読み込む間隔を開ける
     setTimeout(() => {
       getPerformanceCount(songName).then(performanceCount => {
         performanceCountCell.textContent = performanceCount;
@@ -113,7 +113,7 @@
       getLastPerformanceDate(songName).then(lastPerformanceDate => {
         lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
       });
-    }, 1000); // 遅延時間を設定する（ミリ秒単位）
+    }, index * 100); // インデックスに応じて待機時間を設定する（ミリ秒単位）
   }
 
   // 最終披露日を取得する関数
