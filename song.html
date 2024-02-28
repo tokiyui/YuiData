@@ -69,7 +69,9 @@
 
           // 披露回数のセル
           const performanceCountCell = document.createElement('td');
-          performanceCountCell.textContent = getPerformanceCount(fields[0]);
+          getPerformanceCount(fields[0]).then(performanceCount => {
+            performanceCountCell.textContent = performanceCount;
+          });
           row.appendChild(performanceCountCell);
 
           // 最終披露日のセル
@@ -148,7 +150,7 @@
   function getPerformanceCount(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
     const songId = getSongId(songName);
-    if (!songId) return 0;
+    if (!songId) return Promise.resolve(0);
 
     // 各ファイルを走査し、披露回数を取得
     // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
