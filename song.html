@@ -124,7 +124,7 @@
             const promises = files.map((file, index) => {
                 const url = `${setlistDirectory}/${file}`;
                 // 各ファイルを読み込む間隔を開ける
-                const delay = index * 1000;
+                const delay = 100; // 0.1秒
                 return new Promise((resolve, reject) => {
                     setTimeout(() => {
                         fetch(url)
@@ -147,7 +147,7 @@
                                 resolve({ performanceCount, lastPerformanceDate });
                             })
                             .catch(error => reject(error));
-                    }, delay);
+                    }, index * delay);
                 });
             });
             return Promise.all(promises);
