@@ -74,7 +74,9 @@
 
           // 最終披露日のセル
           const lastPerformanceDateCell = document.createElement('td');
-          lastPerformanceDateCell.textContent = getLastPerformanceDate(fields[0]) || "-";
+          getLastPerformanceDate(fields[0]).then(lastPerformanceDate => {
+            lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
+          });
           row.appendChild(lastPerformanceDateCell);
 
           // 楽曲情報のセルを追加
@@ -103,13 +105,43 @@
   function getLastPerformanceDate(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
     const songId = getSongId(songName);
-    if (!songId) return null;
+    if (!songId) return Promise.resolve(null);
 
     // 各ファイルを走査し、最終披露日を取得
-    // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
-
-    // 仮の値を返す
-    return "YYYYMMDD";
+    const setlistDirectory = 'setlist';
+    return fetchSetlistFiles(setlistDirectory)
+      .then(files => {
+        const promises = files.map(file => {
+          const url = `${setlistDirectory}/${file}`;
+          return fetch(url)
+            .then(response => response.text())
+            .then(text => {
+              const lines = text.split('\n');
+              const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
+              let lastDate = null;
+              lines.forEach(line => {
+                const match = line.match(dateRegex);
+                if (match && match[1]) {
+                  const currentDate = match[1];
+                  if (!lastDate || currentDate > lastDate) {
+                    lastDate = currentDate;
+                  }
+                }
+              });
+              return lastDate;
+            });
+        });
+        return Promise.all(promises);
+      })
+      .then(lastPerformanceDates => {
+        // 最終披露日のうち、最も新しい日付を返す
+        return lastPerformanceDates.reduce((latestDate, date) => {
+          if (!latestDate || date > latestDate) {
+            return date;
+          }
+          return latestDate;
+        }, null);
+      });
   }
 
   // 披露回数を取得する関数
@@ -120,18 +152,29 @@
 
     // 各ファイルを走査し、披露回数を取得
     // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
-
-    // 仮の値を返す
-    return 0;
+    const setlistDirectory = 'setlist';
+    return fetchSetlistFiles(setlistDirectory)
+      .then(files => {
+        const relevantFiles = files.filter(file => file.startsWith(songId));
+        return relevantFiles.length;
+      });
   }
 
   // 楽曲名からファイル名の一部を取得する関数
   function getSongId(songName) {
-    // ここで楽曲名からファイル名の一部を抽出する処理を行う
-    // 例えば、songNameが"楽曲名"の場合、"YYYYMMDD" の形式の文字列を返す
+    // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
+    return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+  }
 
-    // 仮の値を返す
-    return "YYYYMMDD";
+  // ディレクトリ内のファイルを取得する関数
+  function fetchSetlistFiles(directory) {
+    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+    return fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const files = data.filter(item => item.type === 'file').map(item => item.name);
+        return files;
+      });
   }
 </script>
 
