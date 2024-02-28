@@ -106,6 +106,7 @@
   function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell, index) {
     // 各ファイルを読み込む間隔を開ける
     setTimeout(() => {
+      console.log('Searching for:', songName); // 検索している文字列を表示
       getPerformanceCount(songName).then(performanceCount => {
         performanceCountCell.textContent = performanceCount;
       });
