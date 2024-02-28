@@ -27,6 +27,8 @@
   <thead>
     <tr>
       <th>楽曲名</th>
+      <th>披露回数</th>
+      <th>最終披露日</th>
       <th>作詞</th>
       <th>作曲</th>
       <th>編曲</th>
@@ -57,18 +59,30 @@
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
 
-          fields.forEach((field, index) => {
+          // 楽曲名のセルにリンクを追加
+          const songNameCell = document.createElement('td');
+          const link = document.createElement('a');
+          link.href = `search.html?name=${fields[0]}`;
+          link.textContent = fields[0];
+          songNameCell.appendChild(link);
+          row.appendChild(songNameCell);
+
+          // 披露回数のセル
+          const performanceCountCell = document.createElement('td');
+          performanceCountCell.textContent = getPerformanceCount(fields[0]);
+          row.appendChild(performanceCountCell);
+
+          // 最終披露日のセル
+          const lastPerformanceDateCell = document.createElement('td');
+          lastPerformanceDateCell.textContent = getLastPerformanceDate(fields[0]) || "-";
+          row.appendChild(lastPerformanceDateCell);
+
+          // 楽曲情報のセルを追加
+          for (let i = 1; i < fields.length; i++) {
             const cell = document.createElement('td');
-            if (index === 0) { // 最初の要素の場合
-              const link = document.createElement('a');
-              link.href = `search.html?name=${field}`;
-              link.textContent = field;
-              cell.appendChild(link);
-            } else {
-              cell.textContent = field;
-            }
+            cell.textContent = fields[i];
             row.appendChild(cell);
-          });
+          }
 
           tbody.appendChild(row);
         });
@@ -84,6 +98,41 @@
 
   // ページ読み込み完了後にsong.txtを読み込む
   window.addEventListener('load', loadTextFile);
+
+  // 最終披露日を取得する関数
+  function getLastPerformanceDate(songName) {
+    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
+    const songId = getSongId(songName);
+    if (!songId) return null;
+
+    // 各ファイルを走査し、最終披露日を取得
+    // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
+
+    // 仮の値を返す
+    return "YYYYMMDD";
+  }
+
+  // 披露回数を取得する関数
+  function getPerformanceCount(songName) {
+    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
+    const songId = getSongId(songName);
+    if (!songId) return 0;
+
+    // 各ファイルを走査し、披露回数を取得
+    // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
+
+    // 仮の値を返す
+    return 0;
+  }
+
+  // 楽曲名からファイル名の一部を取得する関数
+  function getSongId(songName) {
+    // ここで楽曲名からファイル名の一部を抽出する処理を行う
+    // 例えば、songNameが"楽曲名"の場合、"YYYYMMDD" の形式の文字列を返す
+
+    // 仮の値を返す
+    return "YYYYMMDD";
+  }
 </script>
 
 </body>
