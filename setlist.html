@@ -65,7 +65,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (line !== '') { // Check if line is not empty
                         if (isMedley) {
                             // Display medley song only if it's not empty
-                            document.body.innerHTML += `<p style="margin-left: 20px;">${line}</p>`;
+                            document.body.innerHTML += `<p style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
                         } else if (isEncore) {
                             let prefix = 'EC'
                             encoreCount++; // Increment encore song count
