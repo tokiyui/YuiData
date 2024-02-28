@@ -1,105 +1,186 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>セットリスト検索</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小倉唯楽曲一覧</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
 </head>
 <body>
-    <h1 id="title">セットリスト検索</h1>
-    <div id="results"></div>
 
-    <script>
-        // URLのクエリ文字列から検索文字列を取得する関数
-        function getQueryStringValue(key) {
-            return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
-        }
+<table id="songTable">
+  <thead>
+    <tr>
+      <th>楽曲名</th>
+      <th>披露回数</th>
+      <th>最終披露日</th>
+      <th>作詞</th>
+      <th>作曲</th>
+      <th>編曲</th>
+      <th>収録作品名</th>
+      <th>リリース日</th>
+    </tr>
+  </thead>
+  <tbody id="songTableBody">
+  </tbody>
+</table>
 
-        // URLのクエリ文字列から検索文字列を取得
-        const query = getQueryStringValue('name');
-        console.log('Searching for:', query);
+<script>
+  // song.txtを読み込む関数
+  function loadTextFile() {
+    // XMLHttpRequestオブジェクトを作成
+    const xhr = new XMLHttpRequest();
 
-        // 検索を実行する関数
-        function search(query) {
-            const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
+    // 読み込み完了時の処理
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // レスポンステキストを取得して処理
+        const text = xhr.responseText;
+        const lines = text.trim().split('\n');
+        const tbody = document.getElementById('songTableBody');
 
-            fetchSetlistFiles(setlistDirectory)
-                .then(files => {
-                    console.log('Files:', files);
-                    return searchFiles(files, query);
-                })
-                .then(results => {
-                    console.log('Search results:', results);
-                    displayResults(results);
-                })
-                .catch(error => console.error('Error:', error));
-        }
+        // 各行のデータを処理して表に追加
+        lines.forEach(line => {
+          const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
+          const row = document.createElement('tr');
 
-        // ディレクトリ内のファイルを取得する関数
-        function fetchSetlistFiles(directory) {
-            const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
-            console.log('Fetching files from:', url);
-            return fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const files = data.filter(item => item.type === 'file').map(item => item.name);
-                    return files;
-                });
-        }
+          // 楽曲名のセルにリンクを追加
+          const songNameCell = document.createElement('td');
+          const link = document.createElement('a');
+          link.href = `search.html?name=${fields[0]}`;
+          link.textContent = fields[0];
+          songNameCell.appendChild(link);
+          row.appendChild(songNameCell);
 
-        // ファイル内を検索する関数
-        function searchFiles(files, query) {
-            const promises = files.map(file => {
-                const url = `setlist/${file}`;
-                return fetch(url)
-                    .then(response => response.text())
-                    .then(text => {
-                        const lines = text.split('\n');
-                        const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
+          // 披露回数のセル
+          const performanceCountCell = document.createElement('td');
+          getPerformanceCount(fields[0]).then(performanceCount => {
+            performanceCountCell.textContent = performanceCount;
+          });
+          row.appendChild(performanceCountCell);
 
-                        if (match) {
-                            return { filename: file, line1: lines[0], line2: lines[1], fileId: getFileId(file) };
-                        }
-                    });
+          // 最終披露日のセル
+          const lastPerformanceDateCell = document.createElement('td');
+          getLastPerformanceDate(fields[0]).then(lastPerformanceDate => {
+            lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
+          });
+          row.appendChild(lastPerformanceDateCell);
+
+          // 楽曲情報のセルを追加
+          for (let i = 1; i < fields.length; i++) {
+            const cell = document.createElement('td');
+            cell.textContent = fields[i];
+            row.appendChild(cell);
+          }
+
+          tbody.appendChild(row);
+        });
+      } else {
+        console.error('Failed to load the file.');
+      }
+    };
+
+    // song.txtを非同期で取得
+    xhr.open('GET', 'song.txt', true);
+    xhr.send();
+  }
+
+  // ページ読み込み完了後にsong.txtを読み込む
+  window.addEventListener('load', loadTextFile);
+
+  // 最終披露日を取得する関数
+  function getLastPerformanceDate(songName) {
+    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
+    const songId = getSongId(songName);
+    if (!songId) return Promise.resolve(null);
+
+    // 各ファイルを走査し、最終披露日を取得
+    const setlistDirectory = 'setlist';
+    return fetchSetlistFiles(setlistDirectory)
+      .then(files => {
+        const promises = files.map(file => {
+          const url = `${setlistDirectory}/${file}`;
+          console.log(url);
+            
+          return fetch(url)
+            .then(response => response.text())
+            .then(text => {
+              const lines = text.split('\n');
+              const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
+              let lastDate = null;
+              lines.forEach(line => {
+                const match = line.match(dateRegex);
+                if (match && match[1]) {
+                  const currentDate = match[1];
+                  if (!lastDate || currentDate > lastDate) {
+                    lastDate = currentDate;
+                  }
+                }
+              });
+              return lastDate;
             });
-            return Promise.all(promises).then(results => results.filter(Boolean));
-        }
+        });
+        return Promise.all(promises);
+      })
+      .then(lastPerformanceDates => {
+        // 最終披露日のうち、最も新しい日付を返す
+        return lastPerformanceDates.reduce((latestDate, date) => {
+          if (!latestDate || date > latestDate) {
+            return date;
+          }
+          return latestDate;
+        }, null);
+      });
+  }
 
-        // ファイル名からIDを抽出する関数
-        function getFileId(filename) {
-            // 10桁の数字を抽出
-            const matches = filename.match(/\d{10}/);
-            if (matches) {
-                return matches[0];
-            }
-            return null;
-        }
+  // 披露回数を取得する関数
+  function getPerformanceCount(songName) {
+    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
+    const songId = getSongId(songName);
+    if (!songId) return Promise.resolve(0);
 
-        // 検索結果を表示する関数
-        function displayResults(results) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
+    // 各ファイルを走査し、披露回数を取得
+    // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
+    const setlistDirectory = 'setlist';
+    return fetchSetlistFiles(setlistDirectory)
+      .then(files => {
+        const relevantFiles = files.filter(file => file.startsWith(songId));
+        return relevantFiles.length;
+      });
+  }
 
-            const title = document.getElementById('title');
-            title.innerText = `「${query}」の披露実績 (計${results.length}回)`;
+  // 楽曲名からファイル名の一部を取得する関数
+  function getSongId(songName) {
+    // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
+    return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+  }
 
-            if (results.length === 0) {
-                resultsDiv.innerHTML = '<p>No results found.</p>';
-            } else {
-                results.forEach(result => {
-                    const resultDiv = document.createElement('div');
-                    // リンクを追加
-                    const link = document.createElement('a');
-                    link.href = `setlist.html?id=${result.fileId}`;
-                    link.textContent = `${result.line1} ${result.line2}`;
-                    resultDiv.appendChild(link);
-                    resultsDiv.appendChild(resultDiv);
-                });
-            }
-        }
+  // ディレクトリ内のファイルを取得する関数
+  function fetchSetlistFiles(directory) {
+    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+    return fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const files = data.filter(item => item.type === 'file').map(item => item.name);
+        return files;
+      });
+  }
+</script>
 
-        // 検索を実行
-        search(query);
-    </script>
 </body>
 </html>
