@@ -24,7 +24,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // Display date in the specified format
             const formattedDate = new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
-            document.body.innerHTML += `<p>${formattedDate}</p>`;
+            // 括弧で日付を囲む
+            const formattedDateWithParentheses = `（${formattedDate}）`;
+            document.body.innerHTML += `<p>${formattedDateWithParentheses}</p>`;
 
             // Display title in bold
             document.body.innerHTML += `<p><strong>${title}</strong></p>`;
