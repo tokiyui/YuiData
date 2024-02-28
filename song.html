@@ -104,13 +104,16 @@
 
   // 披露回数と最終披露日を更新する関数
   function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
-    getPerformanceCount(songName).then(performanceCount => {
-      performanceCountCell.textContent = performanceCount;
-    });
+    // 遅延読み込みを実装する
+    setTimeout(() => {
+      getPerformanceCount(songName).then(performanceCount => {
+        performanceCountCell.textContent = performanceCount;
+      });
 
-    getLastPerformanceDate(songName).then(lastPerformanceDate => {
-      lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
-    });
+      getLastPerformanceDate(songName).then(lastPerformanceDate => {
+        lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
+      });
+    }, 1000); // 遅延時間を設定する（ミリ秒単位）
   }
 
   // 最終披露日を取得する関数
