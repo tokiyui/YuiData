@@ -69,16 +69,12 @@
 
           // 披露回数のセル
           const performanceCountCell = document.createElement('td');
-          getPerformanceCount(fields[0]).then(performanceCount => {
-            performanceCountCell.textContent = performanceCount;
-          });
+          performanceCountCell.textContent = "-";
           row.appendChild(performanceCountCell);
 
           // 最終披露日のセル
           const lastPerformanceDateCell = document.createElement('td');
-          getLastPerformanceDate(fields[0]).then(lastPerformanceDate => {
-            lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
-          });
+          lastPerformanceDateCell.textContent = "-";
           row.appendChild(lastPerformanceDateCell);
 
           // 楽曲情報のセルを追加
@@ -89,6 +85,9 @@
           }
 
           tbody.appendChild(row);
+
+          // 披露回数と最終披露日を更新
+          updatePerformanceData(fields[0], performanceCountCell, lastPerformanceDateCell);
         });
       } else {
         console.error('Failed to load the file.');
@@ -103,6 +102,17 @@
   // ページ読み込み完了後にsong.txtを読み込む
   window.addEventListener('load', loadTextFile);
 
+  // 披露回数と最終披露日を更新する関数
+  function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
+    getPerformanceCount(songName).then(performanceCount => {
+      performanceCountCell.textContent = performanceCount;
+    });
+
+    getLastPerformanceDate(songName).then(lastPerformanceDate => {
+      lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
+    });
+  }
+
   // 最終披露日を取得する関数
   function getLastPerformanceDate(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
@@ -115,8 +125,6 @@
       .then(files => {
         const promises = files.map(file => {
           const url = `${setlistDirectory}/${file}`;
-          console.log(url);
-            
           return fetch(url)
             .then(response => response.text())
             .then(text => {
@@ -155,7 +163,6 @@
     if (!songId) return Promise.resolve(0);
 
     // 各ファイルを走査し、披露回数を取得
-    // ここでsetlistディレクトリ以下のファイルを検索して処理を行う
     const setlistDirectory = 'setlist';
     return fetchSetlistFiles(setlistDirectory)
       .then(files => {
