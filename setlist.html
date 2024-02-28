@@ -26,12 +26,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const dateObj = new Date(date);
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             const formatter = new Intl.DateTimeFormat('ja-JP', options);
-            const formattedDate = formatter.format(dateObj);
+            let formattedDate = formatter.format(dateObj);
 
             // 曜日を括弧で囲む
             const weekdayIndex = formattedDate.lastIndexOf('（');
-            const formattedDateWithParentheses = formattedDate.slice(0, weekdayIndex) + `（${formattedDate.slice(weekdayIndex)}`;
-            document.body.innerHTML += `<p>${formattedDateWithParentheses}</p>`;
+            formattedDate = formattedDate.slice(0, weekdayIndex) + `）${formattedDate.slice(weekdayIndex)}`;
+            document.body.innerHTML += `<p>${formattedDate}</p>`;
 
             // Display title in bold
             document.body.innerHTML += `<p><strong>${title}</strong></p>`;
