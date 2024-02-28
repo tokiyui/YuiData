@@ -114,7 +114,7 @@
       getLastPerformanceDate(songName).then(lastPerformanceDate => {
         lastPerformanceDateCell.textContent = lastPerformanceDate || "-";
       });
-    }, index * 1000); // インデックスに応じて待機時間を設定する（ミリ秒単位）
+    }, index * 250); // インデックスに応じて待機時間を設定する（ミリ秒単位）
   }
 
   // 最終披露日を取得する関数
