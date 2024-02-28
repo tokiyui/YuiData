@@ -30,8 +30,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
             // 曜日を括弧で囲む
             const weekdayIndex = formattedDate.lastIndexOf('（');
-            formattedDate = formattedDate.slice(0, weekdayIndex) + `）${formattedDate.slice(weekdayIndex)}`;
+            formattedDate = formattedDate.slice(0, weekdayIndex) + formattedDate.slice(weekdayIndex).replace('）', '日）');
             document.body.innerHTML += `<p>${formattedDate}</p>`;
+
 
             // Display title in bold
             document.body.innerHTML += `<p><strong>${title}</strong></p>`;
