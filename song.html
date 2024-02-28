@@ -117,21 +117,29 @@
     }, index * 100); // インデックスに応じて待機時間を設定する（ミリ秒単位）
   }
 
-  // 最終披露日を取得する関数
-  function getLastPerformanceDate(songName) {
+// 最終披露日を取得する関数
+function getLastPerformanceDate(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
     const songId = getSongId(songName);
+    console.log('Song ID:', songId); // デバッグ用ログ
+
     if (!songId) return Promise.resolve(null);
 
     // 各ファイルを走査し、最終披露日を取得
     const setlistDirectory = 'setlist';
     return fetchSetlistFiles(setlistDirectory)
       .then(files => {
+        console.log('Setlist Files:', files); // デバッグ用ログ
+
         const promises = files.map(file => {
           const url = `${setlistDirectory}/${file}`;
+          console.log('Fetching URL:', url); // デバッグ用ログ
+
           return fetch(url)
             .then(response => response.text())
             .then(text => {
+              console.log('Setlist Data:', text); // デバッグ用ログ
+
               const lines = text.split('\n');
               const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
               let lastDate = null;
@@ -139,6 +147,8 @@
                 const match = line.match(dateRegex);
                 if (match && match[1]) {
                   const currentDate = match[1];
+                  console.log('Found Date:', currentDate); // デバッグ用ログ
+
                   if (!lastDate || currentDate > lastDate) {
                     lastDate = currentDate;
                   }
@@ -150,6 +160,8 @@
         return Promise.all(promises);
       })
       .then(lastPerformanceDates => {
+        console.log('All Last Performance Dates:', lastPerformanceDates); // デバッグ用ログ
+
         // 最終披露日のうち、最も新しい日付を返す
         return lastPerformanceDates.reduce((latestDate, date) => {
           if (!latestDate || date > latestDate) {
@@ -158,22 +170,29 @@
           return latestDate;
         }, null);
       });
-  }
+}
 
-  // 披露回数を取得する関数
-  function getPerformanceCount(songName) {
+// 披露回数を取得する関数
+function getPerformanceCount(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
     const songId = getSongId(songName);
+    console.log('Song ID:', songId); // デバッグ用ログ
+
     if (!songId) return Promise.resolve(0);
 
     // 各ファイルを走査し、披露回数を取得
     const setlistDirectory = 'setlist';
     return fetchSetlistFiles(setlistDirectory)
       .then(files => {
+        console.log('Setlist Files:', files); // デバッグ用ログ
+
         const relevantFiles = files.filter(file => file.startsWith(songId));
+        console.log('Relevant Files:', relevantFiles); // デバッグ用ログ
+
         return relevantFiles.length;
       });
-  }
+}
+
 
   // 楽曲名からファイル名の一部を取得する関数
   function getSongId(songName) {
