@@ -23,9 +23,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const venue = lines[2].trim(); // Venue line
 
             // Display date in the specified format
-            const formattedDate = new Date(date).toLocaleDateString('ja-JP', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
-            // 括弧で日付を囲む
-            const formattedDateWithParentheses = `（${formattedDate}）`;
+            const dateObj = new Date(date);
+            const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
+            const formatter = new Intl.DateTimeFormat('ja-JP', options);
+            const formattedDate = formatter.format(dateObj);
+
+            // 曜日を括弧で囲む
+            const weekdayIndex = formattedDate.lastIndexOf('（');
+            const formattedDateWithParentheses = formattedDate.slice(0, weekdayIndex) + `（${formattedDate.slice(weekdayIndex)}`;
             document.body.innerHTML += `<p>${formattedDateWithParentheses}</p>`;
 
             // Display title in bold
