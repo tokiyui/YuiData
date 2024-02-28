@@ -58,13 +58,23 @@
                         const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
 
                         if (match) {
-                            return { filename: file, line1: lines[0], line2: lines[1] };
+                            return { filename: file, line1: lines[0], line2: lines[1], fileId: getFileId(file) };
                         }
                     });
             });
             return Promise.all(promises).then(results => results.filter(Boolean));
         }
-      
+
+        // ファイル名からIDを抽出する関数
+        function getFileId(filename) {
+            // 10桁の数字を抽出
+            const matches = filename.match(/\d{10}/);
+            if (matches) {
+                return matches[0];
+            }
+            return null;
+        }
+
         // 検索結果を表示する関数
         function displayResults(results) {
             const resultsDiv = document.getElementById('results');
@@ -78,7 +88,11 @@
             } else {
                 results.forEach(result => {
                     const resultDiv = document.createElement('div');
-                    resultDiv.innerHTML = `<p>${result.line1} ${result.line2}</p>`;
+                    // リンクを追加
+                    const link = document.createElement('a');
+                    link.href = `setlist.html?id=${result.fileId}`;
+                    link.textContent = `${result.line1} ${result.line2}`;
+                    resultDiv.appendChild(link);
                     resultsDiv.appendChild(resultDiv);
                 });
             }
