@@ -41,71 +41,69 @@
 </table>
 
 <script>
-  // song.txtを読み込む関数
-  function loadTextFile() {
+  // setlist以下のファイルを読み込む関数
+  function loadSetlistFiles() {
     // XMLHttpRequestオブジェクトを作成
     const xhr = new XMLHttpRequest();
 
     // 読み込み完了時の処理
     xhr.onload = function() {
       if (xhr.status === 200) {
-        // レスポンステキストを取得して処理
-        const text = xhr.responseText;
-        const lines = text.trim().split('\n');
+        const fileNames = xhr.responseText.trim().split('\n');
         const tbody = document.getElementById('songTableBody');
 
-        // 各行のデータを処理して表に追加
-        lines.forEach(line => {
-          const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
-          const row = document.createElement('tr');
-          let appearances = 0; // 披露回数
-          let lastAppearanceDate = ''; // 最終披露日
+        // 各ファイルを読み込んで楽曲一覧を作成
+        fileNames.forEach(fileName => {
+          const fileXhr = new XMLHttpRequest();
+          fileXhr.onload = function() {
+            if (fileXhr.status === 200) {
+              const text = fileXhr.responseText;
+              const lines = text.trim().split('\n');
+              let appearances = 0; // 披露回数
+              let lastAppearanceDate = ''; // 最終披露日
 
-          fields.forEach((field, index) => {
-            const cell = document.createElement('td');
-            if (index === 0) { // 最初の要素の場合
-              const link = document.createElement('a');
-              link.href = `search.html?name=${field}`;
-              link.textContent = field;
-              cell.appendChild(link);
+              // 各行のデータを処理して披露回数と最終披露日を求める
+              lines.forEach(line => {
+                const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
+                const appearanceDate = fields[0].substring(0, 8); // 披露日を取得
+                if (appearanceDate > lastAppearanceDate) {
+                  lastAppearanceDate = appearanceDate;
+                }
+                appearances++; // 披露回数をインクリメント
+              });
+
+              // 披露回数と最終披露日を表に追加
+              const row = document.createElement('tr');
+              const appearancesCell = document.createElement('td');
+              appearancesCell.textContent = appearances;
+              row.appendChild(appearancesCell);
+
+              const lastAppearanceDateCell = document.createElement('td');
+              lastAppearanceDateCell.textContent = lastAppearanceDate;
+              row.appendChild(lastAppearanceDateCell);
+
+              tbody.appendChild(row);
             } else {
-              cell.textContent = field;
+              console.error(`Failed to load file: ${fileName}`);
             }
-            row.appendChild(cell);
+          };
 
-            if (index === 5) { // リリース日の列の場合
-              const fileName = field.trim(); // ファイル名を取得
-              const appearanceDate = fileName.substring(0, 8); // 披露日を取得
-              if (appearanceDate > lastAppearanceDate) {
-                lastAppearanceDate = appearanceDate;
-              }
-              appearances++; // 披露回数をインクリメント
-            }
-          });
-
-          // 披露回数と最終披露日の列を追加
-          const appearancesCell = document.createElement('td');
-          appearancesCell.textContent = appearances;
-          row.appendChild(appearancesCell);
-
-          const lastAppearanceDateCell = document.createElement('td');
-          lastAppearanceDateCell.textContent = lastAppearanceDate;
-          row.appendChild(lastAppearanceDateCell);
-
-          tbody.appendChild(row);
+          // 各ファイルを非同期で取得
+          fileXhr.open('GET', `setlist/${fileName}`, true);
+          fileXhr.send();
         });
       } else {
-        console.error('Failed to load the file.');
+        console.error('Failed to load the file list.');
       }
     };
 
-    // song.txtを非同期で取得
-    xhr.open('GET', 'song.txt', true);
+    // setlist以下のファイル名を取得
+    xhr.open('GET', 'filelist.txt', true);
     xhr.send();
   }
 
-  // ページ読み込み完了後にsong.txtを読み込む
-  window.addEventListener('load', loadTextFile);
+  // ページ読み込み完了後にsetlist以下のファイルを読み込む
+  window.addEventListener('load', loadSetlistFiles);
 </script>
 
 </body>
