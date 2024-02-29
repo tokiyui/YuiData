@@ -43,18 +43,15 @@
 <script>
   // 最終披露日と披露回数を取得する関数
   function getPerformanceData(songName) {
-    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
     const songId = getSongId(songName);
     if (!songId) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
 
-    // 各ファイルを走査し、披露回数と最終披露日を取得
     const setlistDirectory = 'setlist';
     return fetchSetlistFiles(setlistDirectory)
       .then(files => {
         const promises = files.map((file, index) => {
           const url = `${setlistDirectory}/${file}`;
-          // 各ファイルを読み込む間隔を開ける
-          const delay = 100; // 0.1秒
+          const delay = 100; // ファイルを順に読み込むためのディレイ
           return new Promise((resolve, reject) => {
             setTimeout(() => {
               fetch(url)
@@ -83,7 +80,6 @@
         return Promise.all(promises);
       })
       .then(performanceDataArray => {
-        // 最終披露日のうち、最も新しい日付を取得
         const lastPerformanceDate = performanceDataArray.reduce((latestDate, data) => {
           if (!latestDate || data.lastPerformanceDate > latestDate) {
             return data.lastPerformanceDate;
@@ -91,7 +87,6 @@
           return latestDate;
         }, null);
 
-        // 披露回数の合計を計算
         const performanceCount = performanceDataArray.reduce((total, data) => {
           return total + data.performanceCount;
         }, 0);
@@ -113,29 +108,22 @@
 
   // 楽曲名からファイル名の一部を取得する関数
   function getSongId(songName) {
-    // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
     return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
   }
 
   // song.txtを読み込む関数
   function loadTextFile() {
-    // XMLHttpRequestオブジェクトを作成
     const xhr = new XMLHttpRequest();
-
-    // 読み込み完了時の処理
     xhr.onload = function() {
       if (xhr.status === 200) {
-        // レスポンステキストを取得して処理
         const text = xhr.responseText;
         const lines = text.trim().split('\n');
         const tbody = document.getElementById('songTableBody');
 
-        // 各行のデータを処理して表に追加
-        lines.forEach((line, index) => {
+        lines.forEach(line => {
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
 
-          // 楽曲名のセルにリンクを追加
           const songNameCell = document.createElement('td');
           const link = document.createElement('a');
           link.href = `search.html?name=${fields[0]}`;
@@ -143,14 +131,12 @@
           songNameCell.appendChild(link);
           row.appendChild(songNameCell);
 
-          // 披露回数と最終披露日を取得し、セルに表示
           const performanceCountCell = document.createElement('td');
           const lastPerformanceDateCell = document.createElement('td');
           row.appendChild(performanceCountCell);
           row.appendChild(lastPerformanceDateCell);
           tbody.appendChild(row);
 
-          // 披露回数と最終披露日を更新
           updatePerformanceData(fields[0], performanceCountCell, lastPerformanceDateCell);
         });
       } else {
@@ -158,17 +144,14 @@
       }
     };
 
-    // song.txtを非同期で取得
     xhr.open('GET', 'song.txt', true);
     xhr.send();
   }
 
-  // ページ読み込み完了後にsong.txtを読み込む
   window.addEventListener('load', loadTextFile);
 
   // 披露回数と最終披露日を更新する関数
   function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
-    console.log('Searching for:', songName); // 検索している文字列を表示
     getPerformanceData(songName).then(data => {
       performanceCountCell.textContent = data.performanceCount;
       lastPerformanceDateCell.textContent = data.lastPerformanceDate || "-";
