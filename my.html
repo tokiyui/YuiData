@@ -57,23 +57,25 @@ async function search() {
   const songText = await songResponse.text();
   const songLines = songText.split('\n').map(line => line.split(',')[0].trim());
 
-  songLines.forEach(async song => {
-    let foundInFiles = false;
-    checkboxes.forEach(async checkbox => {
-      const fileResponse = await fetch(checkbox.value);
-      const fileText = await fileResponse.text();
+  checkboxes.forEach(async checkbox => {
+    const fileResponse = await fetch(checkbox.value);
+    const fileText = await fileResponse.text();
+    const fileName = checkbox.nextSibling.textContent.trim();
+    
+    const foundSongs = songLines.map(song => {
       if (fileText.includes(song)) {
-        foundInFiles = true;
-        const resultDiv = document.createElement('div');
-        resultDiv.textContent = `${song}: あり (${checkbox.nextSibling.textContent.trim()})`;
-        searchResultsDiv.appendChild(resultDiv);
+        return `${song}: あり`;
+      } else {
+        return `${song}: なし`;
       }
     });
-    if (!foundInFiles) {
+
+    foundSongs.forEach(foundSong => {
       const resultDiv = document.createElement('div');
-      resultDiv.textContent = `${song}: なし`;
+      resultDiv.textContent = foundSong + ` (${fileName})`;
       searchResultsDiv.appendChild(resultDiv);
-    }
+    });
+
   });
 }
 
