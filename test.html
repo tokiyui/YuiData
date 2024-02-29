@@ -52,7 +52,7 @@
   async function loadSetlistFiles() {
     try {
       // リポジトリ内のファイルリストを取得
-      const response = await fetch(`https://api.github.com/repos/${username}/${repository}/contents/setlist`);
+      const response = await fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`);
       const files = await response.json();
 
       const tbody = document.getElementById('songTableBody');
