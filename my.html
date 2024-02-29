@@ -34,21 +34,25 @@ async function displayCheckboxes() {
   const checkboxesDiv = document.getElementById('checkboxes');
   for (const file of files) {
     if (file.type === 'file' && file.name.endsWith('.txt')) {
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.name = 'fileCheckbox';
-      checkbox.value = file.download_url;
-      checkboxesDiv.appendChild(checkbox);
-      const label = document.createElement('label');
-      label.htmlFor = 'fileCheckbox';
-      label.appendChild(document.createTextNode(file.name));
-      checkboxesDiv.appendChild(label);
-      checkboxesDiv.appendChild(document.createElement('br'));
+      const content = await getFileContent(file.download_url);
+      const lines = content.split('\n');
+      if (lines.length >= 2) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'fileCheckbox';
+        checkbox.value = file.download_url;
+        checkboxesDiv.appendChild(checkbox);
+        const label = document.createElement('label');
+        label.htmlFor = 'fileCheckbox';
+        label.textContent = lines[1].trim();
+        checkboxesDiv.appendChild(label);
+        checkboxesDiv.appendChild(document.createElement('br'));
+      }
     }
   }
 }
 
-// 楽曲名で検索を行う関数
+// 検索を行う関数
 async function search() {
   const checkboxes = document.querySelectorAll('input[name="fileCheckbox"]:checked');
   const searchResultsDiv = document.getElementById('searchResults');
@@ -62,37 +66,25 @@ async function search() {
     const fileText = await fileResponse.text();
     const fileName = checkbox.nextSibling.textContent.trim();
     
-    const foundSongs = songLines.filter(songLine => {
-      const songTitle = songLine.split(',')[0].trim();
-      return fileText.includes(songTitle);
-    });
-
-    foundSongs.forEach(foundSong => {
-      const songTitle = foundSong.split(',')[0].trim();
+    const foundSongs = songLines.map(line => line.split(',')[0].trim()).filter(song => fileText.includes(song));
+    foundSongs.forEach(song => {
       const resultDiv = document.createElement('div');
-      resultDiv.textContent = `${songTitle}: あり (${fileName})`;
+      resultDiv.textContent = `${song}: あり (${fileName})`;
       searchResultsDiv.appendChild(resultDiv);
     });
-
+    if (foundSongs.length === 0) {
+      const resultDiv = document.createElement('div');
+      resultDiv.textContent = `${fileName}: なし`;
+      searchResultsDiv.appendChild(resultDiv);
+    }
   });
+}
 
-  // 検索結果がない場合
-  const notFoundSongs = songLines.filter(songLine => {
-    const songTitle = songLine.split(',')[0].trim();
-    const checkboxesArray = Array.from(checkboxes);
-    return !checkboxesArray.some(checkbox => {
-      const fileText = checkbox.nextSibling.textContent.trim();
-      return fileText.includes(songTitle);
-    });
-  });
-
-  notFoundSongs.forEach(notFoundSong => {
-    const songTitle = notFoundSong.split(',')[0].trim();
-    const resultDiv = document.createElement('div');
-    resultDiv.textContent = `${songTitle}: なし`;
-    searchResultsDiv.appendChild(resultDiv);
-  });
-
+// GitHub APIを使用してファイルの内容を取得する関数
+async function getFileContent(filePath) {
+  const response = await fetch(filePath);
+  const data = await response.text();
+  return data;
 }
 
 // ページが読み込まれた時に呼び出す関数
