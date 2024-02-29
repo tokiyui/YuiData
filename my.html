@@ -59,34 +59,37 @@ async function search() {
 
   const results = {};
 
-  songLines.forEach(async songLine => {
-    const songTitle = songLine.split(',')[0];
-    results[songTitle] = {};
-    checkboxes.forEach(async checkbox => {
-      if (checkbox.checked) {
-        const fileResponse = await fetch(checkbox.value);
-        const fileText = await fileResponse.text();
-        const fileLines = fileText.split('\n');
+  checkboxes.forEach(async checkbox => {
+    if (checkbox.checked) {
+      const fileResponse = await fetch(checkbox.value);
+      const fileText = await fileResponse.text();
+      const fileLines = fileText.split('\n');
+
+      songLines.forEach(songLine => {
+        const songTitle = songLine.split(',')[0];
+        if (!results[songTitle]) {
+          results[songTitle] = [];
+        }
         const found = fileLines.some(fileLine => fileLine.includes(songTitle));
-        results[songTitle][checkbox.value] = found;
-      }
-    });
+        results[songTitle].push({ file: checkbox.value, found });
+      });
+    }
   });
 
   // 検索結果を表示
-  Object.entries(results).forEach(([songTitle, fileResults]) => {
+  Object.keys(results).forEach(songTitle => {
     const resultDiv = document.createElement('div');
-    resultDiv.textContent = `${songTitle}:`;
-    searchResultsDiv.appendChild(resultDiv);
-
-    Object.entries(fileResults).forEach(([file, found]) => {
-      const foundText = found ? 'あり' : 'なし';
-      const fileResultDiv = document.createElement('div');
-      fileResultDiv.textContent = `${file}: ${foundText}`;
-      searchResultsDiv.appendChild(fileResultDiv);
+    let songFound = false;
+    let resultText = `${songTitle}: `;
+    results[songTitle].forEach(result => {
+      if (result.found) {
+        songFound = true;
+        resultText += `${result.file}, `;
+      }
     });
-
-    searchResultsDiv.appendChild(document.createElement('br'));
+    resultText = songFound ? resultText.slice(0, -2) + " あり" : resultText + "なし";
+    resultDiv.textContent = resultText;
+    searchResultsDiv.appendChild(resultDiv);
   });
 }
 
