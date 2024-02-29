@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小倉唯楽曲一覧</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+
+<table id="songTable">
+  <thead>
+    <tr>
+      <th>楽曲名</th>
+      <th>披露回数</th>
+      <th>最終披露日</th>
+    </tr>
+  </thead>
+  <tbody id="songTableBody">
+  </tbody>
+</table>
+
+<script>
+  // ディレクトリ内のファイルを取得する関数
+  function fetchSetlistFiles(directory) {
+      const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+      console.log('Fetching files from:', url);
+      return fetch(url)
+          .then(response => response.json())
+          .then(data => {
+              const files = data.filter(item => item.type === 'file').map(item => item.name);
+              return files;
+          });
+  }
+
+  // ファイル内を検索して楽曲情報を取得する関数
+  function searchFilesForSong(files, songTitle) {
+      const promises = files.map(file => {
+          const url = `setlist/${file}`;
+          return fetch(url)
+              .then(response => response.text())
+              .then(text => {
+                  const lines = text.split('\n');
+                  const appearances = lines.filter(line => line.toLowerCase().includes(songTitle.toLowerCase())).length;
+                  const lastAppearanceDate = file.substring(0, 8); // ファイル名の最初の8文字を日付と仮定
+                  if (appearances > 0) {
+                      return {
+                          filename: file,
+                          songTitle: songTitle,
+                          appearances: appearances,
+                          lastAppearanceDate: lastAppearanceDate
+                      };
+                  }
+              })
+              .catch(error => {
+                  console.error(`Error fetching or processing file ${file}:`, error);
+                  return null;
+              });
+      });
+      return Promise.all(promises).then(results => results.filter(Boolean));
+  }
+
+  // ページ読み込み完了後にファイルを取得し、楽曲情報を表示する関数
+  window.addEventListener('load', function() {
+      const directory = "setlist";
+      const songTitle = "小倉唯"; // 検索する楽曲タイトル
+      const tbody = document.getElementById('songTableBody');
+
+      fetchSetlistFiles(directory)
+          .then(files => searchFilesForSong(files, songTitle))
+          .then(results => {
+              results.forEach(result => {
+                  const row = document.createElement('tr');
+                  row.innerHTML = `
+                      <td>${result.songTitle}</td>
+                      <td>${result.appearances}</td>
+                      <td>${result.lastAppearanceDate}</td>
+                  `;
+                  tbody.appendChild(row);
+              });
+          })
+          .catch(error => console.error("Error:", error));
+  });
+</script>
+
+</body>
+</html>
