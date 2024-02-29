@@ -29,6 +29,11 @@
       <th>楽曲名</th>
       <th>披露回数</th>
       <th>最終披露日</th>
+      <th>作詞</th>
+      <th>作曲</th>
+      <th>編曲</th>
+      <th>収録作品名</th>
+      <th>リリース日</th>
     </tr>
   </thead>
   <tbody id="songTableBody">
@@ -59,8 +64,8 @@
                   const appearances = lines.filter(line => line.toLowerCase().includes(songTitle.toLowerCase())).length;
                   const lastAppearanceDate = file.substring(0, 8); // ファイル名の最初の8文字を日付と仮定
                   if (appearances > 0) {
+                      // 曲の情報をテキストから抽出する処理を追加する場合、ここに追加
                       return {
-                          filename: file,
                           songTitle: songTitle,
                           appearances: appearances,
                           lastAppearanceDate: lastAppearanceDate
@@ -90,6 +95,11 @@
                       <td>${result.songTitle}</td>
                       <td>${result.appearances}</td>
                       <td>${result.lastAppearanceDate}</td>
+                      <td>作詞</td>
+                      <td>作曲</td>
+                      <td>編曲</td>
+                      <td>収録作品名</td>
+                      <td>リリース日</td>
                   `;
                   tbody.appendChild(row);
               });
