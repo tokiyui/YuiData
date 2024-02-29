@@ -1,127 +1,90 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>セットリスト検索</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小倉唯楽曲一覧</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
 </head>
 <body>
-    <h1 id="title">セットリスト検索</h1>
-    <div id="results"></div>
 
-    <script>
-        // URLのクエリ文字列から検索文字列を取得する関数
-        function getQueryStringValue(key) {
-            return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
-        }
+<table id="songTable">
+  <thead>
+    <tr>
+      <th>楽曲名</th>
+      <th>作詞</th>
+      <th>作曲</th>
+      <th>編曲</th>
+      <th>収録作品名</th>
+      <th>リリース日</th>
+    </tr>
+  </thead>
+  <tbody id="songTableBody">
+  </tbody>
+</table>
 
-        // URLのクエリ文字列から検索文字列を取得
-        const query = getQueryStringValue('name');
-        console.log('Searching for:', query);
+<script>
+  // song.txtを読み込む関数
+  function loadTextFile() {
+    // XMLHttpRequestオブジェクトを作成
+    const xhr = new XMLHttpRequest();
 
-        // 検索関数
-        function search(query) {
-            const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
-            const songInfoUrl = 'song.txt'; // 楽曲情報のファイルのURL
+    // 読み込み完了時の処理
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // レスポンステキストを取得して処理
+        const text = xhr.responseText;
+        const lines = text.trim().split('\n');
+        const tbody = document.getElementById('songTableBody');
 
-            // 楽曲情報を取得
-            fetch(songInfoUrl)
-                .then(response => response.text())
-                .then(songInfo => {
-                    console.log('Song Info:', songInfo);
-                    return fetchSetlistFiles(setlistDirectory, songInfo);
-                })
-                .then(files => {
-                    console.log('Files:', files);
-                    return searchFiles(files, query);
-                })
-                .then(results => {
-                    console.log('Search results:', results);
-                    displayResults(results);
-                })
-                .catch(error => console.error('Error:', error));
-        }
+        // 各行のデータを処理して表に追加
+        lines.forEach(line => {
+          const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
+          const row = document.createElement('tr');
 
-        // ディレクトリ内のファイルを取得する関数
-        function fetchSetlistFiles(directory, songInfo) {
-            const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
-            console.log('Fetching files from:', url);
-            return fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const files = data.filter(item => item.type === 'file').map(item => item.name);
-                    return { files, songInfo };
-                });
-        }
-
-        // ファイル内を検索する関数
-        function searchFiles(filesData, query) {
-            const { files, songInfo } = filesData;
-            const promises = files.map(file => {
-                const url = `setlist/${file}`;
-                return fetch(url)
-                    .then(response => response.text())
-                    .then(text => {
-                        const lines = text.split('\n');
-                        const match = lines.find(line => line.toLowerCase().includes(query.toLowerCase()));
-
-                        if (match) {
-                            const fileId = getFileId(file);
-                            const songName = getSongName(fileId, songInfo);
-                            return { filename: file, line1: lines[0], line2: lines[1], fileId, songName };
-                        }
-                    });
-            });
-            return Promise.all(promises).then(results => results.filter(Boolean));
-        }
-
-        // ファイル名からIDを抽出する関数
-        function getFileId(filename) {
-            // 10桁の数字を抽出
-            const matches = filename.match(/\d{10}/);
-            if (matches) {
-                return matches[0];
-            }
-            return null;
-        }
-
-        // 楽曲情報から楽曲名を取得する関数
-        function getSongName(fileId, songInfo) {
-            const lines = songInfo.split('\n');
-            for (const line of lines) {
-                const [id, name] = line.split(',');
-                if (id.trim() === fileId.trim()) {
-                    return name.trim();
-                }
-            }
-            return null;
-        }
-
-        // 検索結果を表示する関数
-        function displayResults(results) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-
-            const title = document.getElementById('title');
-            title.innerText = `「${query}」の披露実績 (計${results.length}回)`;
-
-            if (results.length === 0) {
-                resultsDiv.innerHTML = '<p>No results found.</p>';
+          fields.forEach((field, index) => {
+            const cell = document.createElement('td');
+            if (index === 0) { // 最初の要素の場合
+              const link = document.createElement('a');
+              link.href = `search.html?name=${field}`;
+              link.textContent = field;
+              cell.appendChild(link);
             } else {
-                results.forEach(result => {
-                    const resultDiv = document.createElement('div');
-                    // リンクを追加
-                    const link = document.createElement('a');
-                    link.href = `setlist.html?id=${result.fileId}`;
-                    link.textContent = `${result.songName} - ${result.line1} ${result.line2}`;
-                    resultDiv.appendChild(link);
-                    resultsDiv.appendChild(resultDiv);
-                });
+              cell.textContent = field;
             }
-        }
+            row.appendChild(cell);
+          });
 
-        // 検索を実行
-        search(query);
-    </script>
+          tbody.appendChild(row);
+        });
+      } else {
+        console.error('Failed to load the file.');
+      }
+    };
+
+    // song.txtを非同期で取得
+    xhr.open('GET', 'song.txt', true);
+    xhr.send();
+  }
+
+  // ページ読み込み完了後にsong.txtを読み込む
+  window.addEventListener('load', loadTextFile);
+</script>
+
 </body>
 </html>
