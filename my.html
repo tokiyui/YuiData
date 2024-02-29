@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setlist Checker</title>
+</head>
+<body>
+<h1>Setlist Checker</h1>
+<div id="checkboxes"></div>
+
+<script>
+// GitHub APIのベースURL
+const baseUrl = 'https://api.github.com/repos/';
+
+// リポジトリ情報
+const owner = 'ownerName'; // リポジトリの所有者名
+const repo = 'repoName'; // リポジトリ名
+const path = 'setlist/'; // チェックするファイルが含まれているディレクトリパス
+
+// GitHub APIを使用して指定されたパスのファイル一覧を取得する関数
+async function getFiles(path) {
+  const url = `${baseUrl}${owner}/${repo}/contents/${path}`;
+  const response = await fetch(url);
+  const data = await response.json();
+  return data;
+}
+
+// ファイルの内容をチェックボックスとして表示する関数
+async function displayCheckboxes() {
+  const files = await getFiles(path);
+  const checkboxesDiv = document.getElementById('checkboxes');
+  for (const file of files) {
+    if (file.type === 'file' && file.name.endsWith('.txt')) {
+      const contentResponse = await fetch(file.download_url);
+      const contentText = await contentResponse.text();
+      const lines = contentText.split('\n');
+      if (lines.length >= 2) {
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.name = 'fileCheckbox';
+        checkbox.value = file.download_url;
+        checkboxesDiv.appendChild(checkbox);
+        const label = document.createElement('label');
+        label.htmlFor = 'fileCheckbox';
+        label.appendChild(document.createTextNode(lines[1]));
+        checkboxesDiv.appendChild(label);
+        checkboxesDiv.appendChild(document.createElement('br'));
+      }
+    }
+  }
+}
+
+// ページが読み込まれた時に呼び出す関数
+window.onload = function() {
+  displayCheckboxes();
+};
+</script>
+</body>
+</html>
