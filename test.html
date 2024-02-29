@@ -1,89 +1,108 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>小倉唯楽曲一覧</title>
-<style>
-    table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-
-    th, td {
-        border: 1px solid #dddddd;
-        text-align: left;
-        padding: 8px;
-    }
-
-    th {
-        background-color: #f2f2f2;
-    }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>セットリスト検索</title>
 </head>
 <body>
+    <h1 id="title">セットリスト検索</h1>
+    <div id="results"></div>
 
-<table id="songTable">
-  <thead>
-    <tr>
-      <th>楽曲名</th>
-      <th>作詞</th>
-      <th>作曲</th>
-      <th>編曲</th>
-      <th>収録作品名</th>
-      <th>リリース日</th>
-      <th>披露回数</th>
-      <th>最終披露日</th>
-    </tr>
-  </thead>
-  <tbody id="songTableBody">
-  </tbody>
-</table>
-
-<script>
-  // GitHubリポジトリのユーザー名とリポジトリ名
-  const username = 'YourGitHubUsername';
-  const repository = 'YourRepositoryName';
-
-  // GitHub APIトークン
-  const token = 'YourGitHubAPIToken';
-
-  // GitHub APIを使用してsetlist/以下のファイルを読み込む関数
-  async function loadSetlistFiles() {
-    try {
-      // リポジトリ内のファイルリストを取得
-      const response = await fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`);
-      const files = await response.json();
-
-      const tbody = document.getElementById('songTableBody');
-
-      // setlist/以下のファイルを読み込む
-      for (const file of files) {
-        if (file.type === 'file') {
-          const fileResponse = await fetch(file.download_url);
-          const text = await fileResponse.text();
-          const lines = text.trim().split('\n');
-
-          // 各ファイルの内容を処理
-          lines.forEach(line => {
-            // 各行のデータを処理して表に追加する処理を記述
-            // 以下はサンプルとして追加しています
-            const row = document.createElement('tr');
-            const cell = document.createElement('td');
-            cell.textContent = line;
-            row.appendChild(cell);
-            tbody.appendChild(row);
-          });
+    <script>
+        // URLのクエリ文字列から検索文字列を取得する関数
+        function getQueryStringValue(key) {
+            return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
         }
-      }
-    } catch (error) {
-      console.error('Failed to load setlist files:', error);
-    }
-  }
 
-  // ページ読み込み完了後にsetlist以下のファイルを読み込む
-  window.addEventListener('load', loadSetlistFiles);
-</script>
+        // URLのクエリ文字列から検索文字列を取得
+        const query = getQueryStringValue('name');
+        console.log('Searching for:', query);
 
+        // 検索関数
+        function search(query) {
+            const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
+            const songInfoUrl = 'https://raw.githubusercontent.com/tokiyui/YuiData/main/song.txt'; // 楽曲情報のファイルのURL
+
+            // 楽曲情報を取得
+            fetch(songInfoUrl)
+                .then(response => response.text())
+                .then(songInfo => {
+                    console.log('Song Info:', songInfo);
+                    return fetchSetlistFiles(setlistDirectory, songInfo);
+                })
+                .then(files => {
+                    console.log('Files:', files);
+                    return searchFiles(files, query);
+                })
+                .then(results => {
+                    console.log('Search results:', results);
+                    displayResults(results);
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // ディレクトリ内のファイルを取得する関数
+        function fetchSetlistFiles(directory, songInfo) {
+            const url = `https://api.github.com/repos/tokiyui/YuiData/contents/`;
+            console.log('Fetching files from:', url);
+            return fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    const files = data.filter(item => item.path.startsWith(directory) && item.type === 'file').map(item => item.path);
+                    return { files, songInfo };
+                });
+        }
+
+        // ファイル内を検索する関数
+        function searchFiles(filesData, query) {
+            const { files, songInfo } = filesData;
+            const results = {};
+            files.forEach(file => {
+                const url = `https://raw.githubusercontent.com/tokiyui/YuiData/main/${file}`;
+                fetch(url)
+                    .then(response => response.text())
+                    .then(text => {
+                        const lines = text.split('\n');
+                        const count = lines.filter(line => line.toLowerCase().includes(query.toLowerCase())).length;
+                        if (count > 0) {
+                            const lastPerformance = lines.reverse().find(line => line.toLowerCase().includes(query.toLowerCase()));
+                            results[file] = { count, lastPerformance };
+                        }
+                    });
+            });
+            return Promise.all(Object.values(results)).then(results => results.filter(Boolean));
+        }
+
+        // 検索結果を表示する関数
+        function displayResults(results) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '';
+
+            const title = document.getElementById('title');
+            title.innerText = `「${query}」の披露実績`;
+
+            if (results.length === 0) {
+                resultsDiv.innerHTML = '<p>No results found.</p>';
+            } else {
+                results.forEach(result => {
+                    const resultDiv = document.createElement('div');
+                    const filename = document.createElement('p');
+                    filename.textContent = `ファイル名: ${result.filename}`;
+                    const count = document.createElement('p');
+                    count.textContent = `披露回数: ${result.count}回`;
+                    const lastPerformance = document.createElement('p');
+                    lastPerformance.textContent = `最終披露日: ${result.lastPerformance}`;
+                    resultDiv.appendChild(filename);
+                    resultDiv.appendChild(count);
+                    resultDiv.appendChild(lastPerformance);
+                    resultsDiv.appendChild(resultDiv);
+                });
+            }
+        }
+
+        // 検索を実行
+        search(query);
+    </script>
 </body>
 </html>
