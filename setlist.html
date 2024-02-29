@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // 括弧で曜日を囲む
             //formattedDate = formattedDate.slice(0, weekdayIndex + 1) + `）` + formattedDate.slice(weekdayIndex + 1);
             // 括弧で曜日を囲む
-            formattedDate = formattedDate.slice(0, weekdayIndex) + `（` + formattedDate.slice(weekdayIndex) + `）`;
+            formattedDate = formattedDate.slice(0, weekdayIndex - 2) + `（` + formattedDate.slice(weekdayIndex) + `）`;
 
             
             console.log(formattedDate);
