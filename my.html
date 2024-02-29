@@ -20,7 +20,7 @@ const owner = 'tokiyui'; // リポジトリの所有者名
 const repo = 'YuiData'; // リポジトリ名
 const path = 'setlist/'; // チェックするファイルが含まれているディレクトリパス
 
-// GitHub APIを使用して指定されたパスのファイル一覧を取得する関数
+// GitHub APIを使用して指定されたパスのファイルを取得する関数
 async function getFiles(path) {
   const url = `${baseUrl}${owner}/${repo}/contents/${path}`;
   const response = await fetch(url);
@@ -48,7 +48,7 @@ async function displayCheckboxes() {
   }
 }
 
-// 検索を行う関数
+// 楽曲名で検索を行う関数
 async function search() {
   const checkboxes = document.querySelectorAll('input[name="fileCheckbox"]:checked');
   const searchResultsDiv = document.getElementById('searchResults');
@@ -61,20 +61,37 @@ async function search() {
     const fileResponse = await fetch(checkbox.value);
     const fileText = await fileResponse.text();
     const fileName = checkbox.nextSibling.textContent.trim();
-    const fileLines = fileText.split('\n');
-
-    const foundSongs = songLines.reduce((found, songLine) => {
+    
+    const foundSongs = songLines.filter(songLine => {
       const songTitle = songLine.split(',')[0].trim();
-      if (fileLines.some(fileLine => fileLine.includes(songTitle))) {
-        found.push(songTitle);
-      }
-      return found;
-    }, []);
+      return fileText.includes(songTitle);
+    });
 
+    foundSongs.forEach(foundSong => {
+      const songTitle = foundSong.split(',')[0].trim();
+      const resultDiv = document.createElement('div');
+      resultDiv.textContent = `${songTitle}: あり (${fileName})`;
+      searchResultsDiv.appendChild(resultDiv);
+    });
+
+  });
+
+  // 検索結果がない場合
+  const notFoundSongs = songLines.filter(songLine => {
+    const songTitle = songLine.split(',')[0].trim();
+    return !checkboxes.some(checkbox => {
+      const fileText = checkbox.nextSibling.textContent.trim();
+      return fileText.includes(songTitle);
+    });
+  });
+
+  notFoundSongs.forEach(notFoundSong => {
+    const songTitle = notFoundSong.split(',')[0].trim();
     const resultDiv = document.createElement('div');
-    resultDiv.textContent = `${fileName}: ${foundSongs.length > 0 ? 'あり' : 'なし'}`;
+    resultDiv.textContent = `${songTitle}: なし`;
     searchResultsDiv.appendChild(resultDiv);
   });
+
 }
 
 // ページが読み込まれた時に呼び出す関数
