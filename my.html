@@ -79,7 +79,8 @@ async function search() {
   // 検索結果がない場合
   const notFoundSongs = songLines.filter(songLine => {
     const songTitle = songLine.split(',')[0].trim();
-    return !checkboxes.some(checkbox => {
+    const checkboxesArray = Array.from(checkboxes);
+    return !checkboxesArray.some(checkbox => {
       const fileText = checkbox.nextSibling.textContent.trim();
       return fileText.includes(songTitle);
     });
