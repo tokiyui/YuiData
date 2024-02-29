@@ -53,29 +53,24 @@ async function search() {
   const checkboxes = document.querySelectorAll('input[name="fileCheckbox"]:checked');
   const searchResultsDiv = document.getElementById('searchResults');
   searchResultsDiv.innerHTML = ''; // 検索結果をリセット
+
   const songResponse = await fetch(`${baseUrl}${owner}/${repo}/contents/song.txt`);
   const songText = await songResponse.text();
-  const songLines = songText.split('\n').map(line => line.split(',')[0].trim());
+  const songLines = songText.split('\n');
 
   checkboxes.forEach(async checkbox => {
     const fileResponse = await fetch(checkbox.value);
     const fileText = await fileResponse.text();
     const fileName = checkbox.nextSibling.textContent.trim();
     
-    const foundSongs = songLines.map(song => {
-      if (fileText.includes(song)) {
-        return `${song}: あり`;
-      } else {
-        return `${song}: なし`;
-      }
-    });
+    songLines.forEach(songLine => {
+      const songTitle = songLine.split(',')[0].trim();
+      const found = fileText.includes(songTitle);
 
-    foundSongs.forEach(foundSong => {
       const resultDiv = document.createElement('div');
-      resultDiv.textContent = foundSong + ` (${fileName})`;
+      resultDiv.textContent = `${songTitle}: ${found ? 'あり' : 'なし'} (${fileName})`;
       searchResultsDiv.appendChild(resultDiv);
     });
-
   });
 }
 
