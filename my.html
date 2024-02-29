@@ -34,21 +34,16 @@ async function displayCheckboxes() {
   const checkboxesDiv = document.getElementById('checkboxes');
   for (const file of files) {
     if (file.type === 'file' && file.name.endsWith('.txt')) {
-      const contentResponse = await fetch(file.download_url);
-      const contentText = await contentResponse.text();
-      const lines = contentText.split('\n');
-      if (lines.length >= 2) {
-        const checkbox = document.createElement('input');
-        checkbox.type = 'checkbox';
-        checkbox.name = 'fileCheckbox';
-        checkbox.value = file.download_url;
-        checkboxesDiv.appendChild(checkbox);
-        const label = document.createElement('label');
-        label.htmlFor = 'fileCheckbox';
-        label.appendChild(document.createTextNode(lines[1]));
-        checkboxesDiv.appendChild(label);
-        checkboxesDiv.appendChild(document.createElement('br'));
-      }
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.name = 'fileCheckbox';
+      checkbox.value = file.download_url;
+      checkboxesDiv.appendChild(checkbox);
+      const label = document.createElement('label');
+      label.htmlFor = 'fileCheckbox';
+      label.appendChild(document.createTextNode(file.name));
+      checkboxesDiv.appendChild(label);
+      checkboxesDiv.appendChild(document.createElement('br'));
     }
   }
 }
@@ -61,25 +56,37 @@ async function search() {
   const songResponse = await fetch(`${baseUrl}${owner}/${repo}/contents/song.txt`);
   const songText = await songResponse.text();
   const songLines = songText.split('\n');
-  
-  checkboxes.forEach(async checkbox => {
-    if (checkbox.checked) {
-      const fileResponse = await fetch(checkbox.value);
-      const fileText = await fileResponse.text();
-      const fileLines = fileText.split('\n');
-      
-      const results = {};
-      songLines.forEach(songLine => {
-        const songTitle = songLine.split(',')[0];
-        results[songTitle] = fileLines.some(fileLine => fileLine.includes(songTitle));
-      });
-      
-      Object.entries(results).forEach(([songTitle, found]) => {
-        const resultDiv = document.createElement('div');
-        resultDiv.textContent = `${songTitle} ${found ? 'あり' : 'なし'}`;
-        searchResultsDiv.appendChild(resultDiv);
-      });
-    }
+
+  const results = {};
+
+  songLines.forEach(async songLine => {
+    const songTitle = songLine.split(',')[0];
+    results[songTitle] = {};
+    checkboxes.forEach(async checkbox => {
+      if (checkbox.checked) {
+        const fileResponse = await fetch(checkbox.value);
+        const fileText = await fileResponse.text();
+        const fileLines = fileText.split('\n');
+        const found = fileLines.some(fileLine => fileLine.includes(songTitle));
+        results[songTitle][checkbox.value] = found;
+      }
+    });
+  });
+
+  // 検索結果を表示
+  Object.entries(results).forEach(([songTitle, fileResults]) => {
+    const resultDiv = document.createElement('div');
+    resultDiv.textContent = `${songTitle}:`;
+    searchResultsDiv.appendChild(resultDiv);
+
+    Object.entries(fileResults).forEach(([file, found]) => {
+      const foundText = found ? 'あり' : 'なし';
+      const fileResultDiv = document.createElement('div');
+      fileResultDiv.textContent = `${file}: ${foundText}`;
+      searchResultsDiv.appendChild(fileResultDiv);
+    });
+
+    searchResultsDiv.appendChild(document.createElement('br'));
   });
 }
 
