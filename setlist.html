@@ -27,6 +27,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             const formatter = new Intl.DateTimeFormat('ja-JP', options);
             let formattedDate = formatter.format(dateObj);
+            console.log(formattedDate);
 
             // 曜日を括弧で囲む
             const weekdayIndex = formattedDate.lastIndexOf('（');
