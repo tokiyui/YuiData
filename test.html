@@ -32,6 +32,8 @@
       <th>編曲</th>
       <th>収録作品名</th>
       <th>リリース日</th>
+      <th>披露回数</th>
+      <th>最終披露日</th>
     </tr>
   </thead>
   <tbody id="songTableBody">
@@ -56,6 +58,8 @@
         lines.forEach(line => {
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
+          let appearances = 0; // 披露回数
+          let lastAppearanceDate = ''; // 最終披露日
 
           fields.forEach((field, index) => {
             const cell = document.createElement('td');
@@ -68,7 +72,25 @@
               cell.textContent = field;
             }
             row.appendChild(cell);
+
+            if (index === 5) { // リリース日の列の場合
+              const fileName = field.trim(); // ファイル名を取得
+              const appearanceDate = fileName.substring(0, 8); // 披露日を取得
+              if (appearanceDate > lastAppearanceDate) {
+                lastAppearanceDate = appearanceDate;
+              }
+              appearances++; // 披露回数をインクリメント
+            }
           });
+
+          // 披露回数と最終披露日の列を追加
+          const appearancesCell = document.createElement('td');
+          appearancesCell.textContent = appearances;
+          row.appendChild(appearancesCell);
+
+          const lastAppearanceDateCell = document.createElement('td');
+          lastAppearanceDateCell.textContent = lastAppearanceDate;
+          row.appendChild(lastAppearanceDateCell);
 
           tbody.appendChild(row);
         });
