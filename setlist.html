@@ -27,11 +27,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
             const formatter = new Intl.DateTimeFormat('ja-JP', options);
             let formattedDate = formatter.format(dateObj);
-            console.log(formattedDate);
 
             // 曜日を括弧で囲む
             const weekdayIndex = formattedDate.lastIndexOf('（');
-            formattedDate = formattedDate.slice(0, weekdayIndex) + `）${formattedDate.slice(weekdayIndex + 1)}`;
+            // 括弧で曜日を囲む
+            formattedDate = formattedDate.slice(0, weekdayIndex + 1) + `）` + formattedDate.slice(weekdayIndex + 1);
             document.body.innerHTML += `<p>${formattedDate}</p>`;
 
             // Display title in bold
