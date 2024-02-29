@@ -41,6 +41,82 @@
 </table>
 
 <script>
+  // 最終披露日と披露回数を取得する関数
+  function getPerformanceData(songName) {
+    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
+    const songId = getSongId(songName);
+    if (!songId) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
+
+    // 各ファイルを走査し、披露回数と最終披露日を取得
+    const setlistDirectory = 'setlist';
+    return fetchSetlistFiles(setlistDirectory)
+      .then(files => {
+        const promises = files.map((file, index) => {
+          const url = `${setlistDirectory}/${file}`;
+          // 各ファイルを読み込む間隔を開ける
+          const delay = 100; // 0.1秒
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              fetch(url)
+                .then(response => response.text())
+                .then(text => {
+                  const lines = text.split('\n');
+                  const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
+                  let performanceCount = 0;
+                  let lastPerformanceDate = null;
+                  lines.forEach(line => {
+                    const match = line.match(dateRegex);
+                    if (match && match[1]) {
+                      const currentDate = match[1];
+                      if (!lastPerformanceDate || currentDate > lastPerformanceDate) {
+                        lastPerformanceDate = currentDate;
+                      }
+                      performanceCount++;
+                    }
+                  });
+                  resolve({ performanceCount, lastPerformanceDate });
+                })
+                .catch(error => reject(error));
+            }, index * delay);
+          });
+        });
+        return Promise.all(promises);
+      })
+      .then(performanceDataArray => {
+        // 最終披露日のうち、最も新しい日付を取得
+        const lastPerformanceDate = performanceDataArray.reduce((latestDate, data) => {
+          if (!latestDate || data.lastPerformanceDate > latestDate) {
+            return data.lastPerformanceDate;
+          }
+          return latestDate;
+        }, null);
+
+        // 披露回数の合計を計算
+        const performanceCount = performanceDataArray.reduce((total, data) => {
+          return total + data.performanceCount;
+        }, 0);
+
+        return { performanceCount, lastPerformanceDate };
+      });
+  }
+
+  // ディレクトリ内のファイルを取得する関数
+  function fetchSetlistFiles(directory) {
+    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+    return fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const files = data.filter(item => item.type === 'file').map(item => item.name);
+        return files;
+      });
+  }
+
+  // 楽曲名からファイル名の一部を取得する関数
+  function getSongId(songName) {
+    // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
+    return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+  }
+
   // song.txtを読み込む関数
   function loadTextFile() {
     // XMLHttpRequestオブジェクトを作成
@@ -109,83 +185,6 @@
       performanceCountCell.textContent = data.performanceCount;
       lastPerformanceDateCell.textContent = data.lastPerformanceDate || "-";
     });
-  }
-
-  // 最終披露日と披露回数を取得する関数
-  function getPerformanceData(songName) {
-    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
-    const songId = getSongId(songName);
-    if (!songId) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
-
-    // 各ファイルを走査し、披露回数と最終披露日を取得
-    const setlistDirectory = 'setlist';
-    return fetchSetlistFiles(setlistDirectory)
-        .then(files => {
-            const promises = files.map((file, index) => {
-                const url = `${setlistDirectory}/${file}`;
-                // 各ファイルを読み込む間隔を開ける
-                const delay = 100; // 0.1秒
-                return new Promise((resolve, reject) => {
-                    setTimeout(() => {
-                        fetch(url)
-                            .then(response => response.text())
-                            .then(text => {
-                                const lines = text.split('\n');
-                                const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
-                                let performanceCount = 0;
-                                let lastPerformanceDate = null;
-                                lines.forEach(line => {
-                                    const match = line.match(dateRegex);
-                                    if (match && match[1]) {
-                                        const currentDate = match[1];
-                                        if (!lastPerformanceDate || currentDate > lastPerformanceDate) {
-                                            lastPerformanceDate = currentDate;
-                                        }
-                                        performanceCount++;
-                                    }
-                                });
-                                resolve({ performanceCount, lastPerformanceDate });
-                            })
-                            .catch(error => reject(error));
-                    }, index * delay);
-                });
-            });
-            return Promise.all(promises);
-        })
-        .then(performanceDataArray => {
-            // 最終披露日のうち、最も新しい日付を取得
-            const lastPerformanceDate = performanceDataArray.reduce((latestDate, data) => {
-                if (!latestDate || data.lastPerformanceDate > latestDate) {
-                    return data.lastPerformanceDate;
-                }
-                return latestDate;
-            }, null);
-
-            // 披露回数の合計を計算
-            const performanceCount = performanceDataArray.reduce((total, data) => {
-                return total + data.performanceCount;
-            }, 0);
-
-            return { performanceCount, lastPerformanceDate };
-        });
-}
-
-
-  // 楽曲名からファイル名の一部を取得する関数
-  function getSongId(songName) {
-    // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
-    return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
-  }
-
-  // ディレクトリ内のファイルを取得する関数
-  function fetchSetlistFiles(directory) {
-    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
-    return fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        const files = data.filter(item => item.type === 'file').map(item => item.name);
-        return files;
-      });
   }
 </script>
 
