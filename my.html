@@ -8,14 +8,16 @@
 <body>
 <h1>Setlist Checker</h1>
 <div id="checkboxes"></div>
+<button id="searchButton">検索</button>
+<div id="searchResults"></div>
 
 <script>
 // GitHub APIのベースURL
 const baseUrl = 'https://api.github.com/repos/';
 
 // リポジトリ情報
-const owner = 'tokiyui'; // リポジトリの所有者名
-const repo = 'YuiData'; // リポジトリ名
+const owner = 'ownerName'; // リポジトリの所有者名
+const repo = 'repoName'; // リポジトリ名
 const path = 'setlist/'; // チェックするファイルが含まれているディレクトリパス
 
 // GitHub APIを使用して指定されたパスのファイル一覧を取得する関数
@@ -51,9 +53,34 @@ async function displayCheckboxes() {
   }
 }
 
+// 検索を行う関数
+function search() {
+  const checkboxes = document.querySelectorAll('input[name="fileCheckbox"]');
+  const searchResultsDiv = document.getElementById('searchResults');
+  searchResultsDiv.innerHTML = ''; // 検索結果をリセット
+  checkboxes.forEach(async checkbox => {
+    if (checkbox.checked) {
+      const contentResponse = await fetch(checkbox.value);
+      const contentText = await contentResponse.text();
+      const lines = contentText.split('\n');
+      const searchString = lines.map(line => line.split(',')[0]).join('|');
+      const regex = new RegExp(`(${searchString})`, 'g');
+      const searchResults = await fetch(`${baseUrl}${owner}/${repo}/contents/song.txt`);
+      const searchResultsText = await searchResults.text();
+      const matches = searchResultsText.match(regex);
+      if (matches) {
+        const resultDiv = document.createElement('div');
+        resultDiv.textContent = `${checkbox.value}: ${matches.join(', ')}`;
+        searchResultsDiv.appendChild(resultDiv);
+      }
+    }
+  });
+}
+
 // ページが読み込まれた時に呼び出す関数
 window.onload = function() {
   displayCheckboxes();
+  document.getElementById('searchButton').addEventListener('click', search);
 };
 </script>
 </body>
