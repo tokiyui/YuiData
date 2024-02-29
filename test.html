@@ -41,65 +41,44 @@
 </table>
 
 <script>
-  // setlist以下のファイルを読み込む関数
-  function loadSetlistFiles() {
-    // XMLHttpRequestオブジェクトを作成
-    const xhr = new XMLHttpRequest();
+  // GitHubリポジトリのユーザー名とリポジトリ名
+  const username = 'YourGitHubUsername';
+  const repository = 'YourRepositoryName';
 
-    // 読み込み完了時の処理
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        const fileNames = xhr.responseText.trim().split('\n');
-        const tbody = document.getElementById('songTableBody');
+  // GitHub APIトークン
+  const token = 'YourGitHubAPIToken';
 
-        // 各ファイルを読み込んで楽曲一覧を作成
-        fileNames.forEach(fileName => {
-          const fileXhr = new XMLHttpRequest();
-          fileXhr.onload = function() {
-            if (fileXhr.status === 200) {
-              const text = fileXhr.responseText;
-              const lines = text.trim().split('\n');
-              let appearances = 0; // 披露回数
-              let lastAppearanceDate = ''; // 最終披露日
+  // GitHub APIを使用してsetlist/以下のファイルを読み込む関数
+  async function loadSetlistFiles() {
+    try {
+      // リポジトリ内のファイルリストを取得
+      const response = await fetch(`https://api.github.com/repos/${username}/${repository}/contents/setlist`);
+      const files = await response.json();
 
-              // 各行のデータを処理して披露回数と最終披露日を求める
-              lines.forEach(line => {
-                const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
-                const appearanceDate = fields[0].substring(0, 8); // 披露日を取得
-                if (appearanceDate > lastAppearanceDate) {
-                  lastAppearanceDate = appearanceDate;
-                }
-                appearances++; // 披露回数をインクリメント
-              });
+      const tbody = document.getElementById('songTableBody');
 
-              // 披露回数と最終披露日を表に追加
-              const row = document.createElement('tr');
-              const appearancesCell = document.createElement('td');
-              appearancesCell.textContent = appearances;
-              row.appendChild(appearancesCell);
+      // setlist/以下のファイルを読み込む
+      for (const file of files) {
+        if (file.type === 'file') {
+          const fileResponse = await fetch(file.download_url);
+          const text = await fileResponse.text();
+          const lines = text.trim().split('\n');
 
-              const lastAppearanceDateCell = document.createElement('td');
-              lastAppearanceDateCell.textContent = lastAppearanceDate;
-              row.appendChild(lastAppearanceDateCell);
-
-              tbody.appendChild(row);
-            } else {
-              console.error(`Failed to load file: ${fileName}`);
-            }
-          };
-
-          // 各ファイルを非同期で取得
-          fileXhr.open('GET', `setlist/${fileName}`, true);
-          fileXhr.send();
-        });
-      } else {
-        console.error('Failed to load the file list.');
+          // 各ファイルの内容を処理
+          lines.forEach(line => {
+            // 各行のデータを処理して表に追加する処理を記述
+            // 以下はサンプルとして追加しています
+            const row = document.createElement('tr');
+            const cell = document.createElement('td');
+            cell.textContent = line;
+            row.appendChild(cell);
+            tbody.appendChild(row);
+          });
+        }
       }
-    };
-
-    // setlist以下のファイル名を取得
-    xhr.open('GET', 'filelist.txt', true);
-    xhr.send();
+    } catch (error) {
+      console.error('Failed to load setlist files:', error);
+    }
   }
 
   // ページ読み込み完了後にsetlist以下のファイルを読み込む
