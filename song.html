@@ -44,9 +44,8 @@
   // 最終披露日と披露回数を取得する関数
   function getPerformanceData(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
-    const songId = getSongId(songName);
-    if (!songId) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
-    console.log(songId)
+    if (!songName) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
+    console.log(songName)
     // 各ファイルを走査し、披露回数と最終披露日を取得
     const setlistDirectory = 'setlist';
     return fetchSetlistFiles(setlistDirectory)
@@ -112,7 +111,7 @@
   }
 
   // 楽曲名からファイル名の一部を取得する関数
-  function getSongId(songName) {
+  function getsongName(songName) {
     // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
     return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
   }
