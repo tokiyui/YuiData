@@ -9,97 +9,98 @@
     <h1 id="title">セットリスト検索</h1>
     <div id="results"></div>
 
-    <script>
-        // URLのクエリ文字列から検索文字列を取得する関数
-        function getQueryStringValue(key) {
-            return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
-        }
+<script>
+    // URLのクエリ文字列から検索文字列を取得する関数
+    function getQueryStringValue(key) {
+        return decodeURIComponent(window.location.search.replace(new RegExp(`^(?:.*[&\\?]${encodeURIComponent(key).replace(/[\\?&]$/, '')}(?:\\=([^&]*))?)?.*$`, 'i'), '$1'));
+    }
 
-        // URLのクエリ文字列から検索文字列を取得
-        const query = getQueryStringValue('name');
-        console.log('Searching for:', query);
+    // URLのクエリ文字列から検索文字列を取得
+    const query = getQueryStringValue('name');
+    console.log('Searching for:', query);
 
-        // 検索関数
-        function search(query) {
-            const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
+    // 検索関数
+    function search(query) {
+        const setlistDirectory = 'setlist'; // ディレクトリのパスを指定
 
-            fetchSetlistFiles(setlistDirectory)
-                .then(files => {
-                    console.log('Files:', files);
-                    return searchFiles(files, query);
-                })
-                .then(results => {
-                    console.log('Search results:', results);
-                    displayResults(results);
-                })
-                .catch(error => console.error('Error:', error));
-        }
+        fetchSetlistFiles(setlistDirectory)
+            .then(files => {
+                console.log('Files:', files);
+                return searchFiles(files, query);
+            })
+            .then(results => {
+                console.log('Search results:', results);
+                displayResults(results);
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
-        // ディレクトリ内のファイルを取得する関数
-        function fetchSetlistFiles(directory) {
-            const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
-            console.log('Fetching files from:', url);
-            return fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                    const files = data.filter(item => item.type === 'file').map(item => item.name);
-                    return files;
-                });
-        }
+    // ディレクトリ内のファイルを取得する関数
+    function fetchSetlistFiles(directory) {
+        const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+        console.log('Fetching files from:', url);
+        return fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                const files = data.filter(item => item.type === 'file').map(item => item.name);
+                return files;
+            });
+    }
 
-        // ファイル内を検索する関数
-        function searchFiles(files, query) {
-            const promises = files.map(file => {
+    // ファイル内を検索する関数
+    function searchFiles(files, query) {
+        const promises = files.map(file => {
             const url = `setlist/${file}`;
             return fetch(url)
                 .then(response => response.text())
                 .then(text => {
                     const lines = text.split('\n');
-                    const matchingLines = lines.filter(line => line.trim() === query); // 完全一致検索
+                    const match = lines.some(line => line.trim() === query.trim()); // 行が完全一致しているかチェック
 
-                    if (matchingLines.length > 0) {
-                        return { filename: file, lines: matchingLines, fileId: getFileId(file) };
-                   }
+                    if (match) {
+                        return { filename: file, line1: lines[0], line2: lines[1], fileId: getFileId(file) };
+                    }
                 });
+        });
+        return Promise.all(promises).then(results => results.filter(Boolean));
+    }
+
+    // ファイル名からIDを抽出する関数
+    function getFileId(filename) {
+        // 10桁の数字を抽出
+        const matches = filename.match(/\d{10}/);
+        if (matches) {
+            return matches[0];
+        }
+        return null;
+    }
+
+    // 検索結果を表示する関数
+    function displayResults(results) {
+        const resultsDiv = document.getElementById('results');
+        resultsDiv.innerHTML = '';
+
+        const title = document.getElementById('title');
+        title.innerText = `「${query}」の披露実績 (計${results.length}回)`;
+
+        if (results.length === 0) {
+            resultsDiv.innerHTML = '<p>No results found.</p>';
+        } else {
+            results.forEach(result => {
+                const resultDiv = document.createElement('div');
+                // リンクを追加
+                const link = document.createElement('a');
+                link.href = `setlist.html?id=${result.fileId}`;
+                link.textContent = `${result.line1} ${result.line2}`;
+                resultDiv.appendChild(link);
+                resultsDiv.appendChild(resultDiv);
             });
-            return Promise.all(promises).then(results => results.filter(Boolean));
         }
+    }
 
-        // ファイル名からIDを抽出する関数
-        function getFileId(filename) {
-            // 10桁の数字を抽出
-            const matches = filename.match(/\d{10}/);
-            if (matches) {
-                return matches[0];
-            }
-            return null;
-        }
+    // 検索を実行
+    search(query);
+</script>
 
-        // 検索結果を表示する関数
-        function displayResults(results) {
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-
-            const title = document.getElementById('title');
-            title.innerText = `「${query}」の披露実績 (計${results.length}回)`;
-
-            if (results.length === 0) {
-                resultsDiv.innerHTML = '<p>No results found.</p>';
-            } else {
-                results.forEach(result => {
-                    const resultDiv = document.createElement('div');
-                    // リンクを追加
-                    const link = document.createElement('a');
-                    link.href = `setlist.html?id=${result.fileId}`;
-                    link.textContent = `${result.line1} ${result.line2}`;
-                    resultDiv.appendChild(link);
-                    resultsDiv.appendChild(resultDiv);
-                });
-            }
-        }
-
-        // 検索を実行
-        search(query);
-    </script>
 </body>
 </html>
