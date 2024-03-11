@@ -64,6 +64,7 @@
                   let performanceCount = 0;
                   let lastPerformanceDate = null;
                   lines.forEach(line => {
+                    console.log(line);
                     const match = line.match(songName);
                     if (match && match[1]) {
                       const currentDate = match[1];
