@@ -147,7 +147,7 @@
       if (data.lastPerformanceDate) {
         const year = data.lastPerformanceDate.substring(0, 4);
         const month = parseInt(data.lastPerformanceDate.substring(4, 6), 10);
-        const day = data.lastPerformanceDate.substring(6, 8);
+        const day = parseInt(data.lastPerformanceDate.substring(6, 8), 10);
         const formattedLastDate = `${year}年${month}月${day}日`;
         lastPerformanceDateCell.textContent = formattedLastDate;
       } else {
