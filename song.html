@@ -27,6 +27,8 @@
   <thead>
     <tr>
       <th>楽曲名</th>
+      <th>検索対象ファイル数</th>
+      <th>最大数字の上位8桁</th>
       <th>披露回数</th>
       <th>最終披露日</th>
       <th>作詞</th>
@@ -41,96 +43,16 @@
 </table>
 
 <script>
-  // 最終披露日と披露回数を取得する関数
-  function getPerformanceData(songName) {
-    // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
-    const songId = getSongId(songName);
-    if (!songId) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
-
-    // 各ファイルを走査し、披露回数と最終披露日を取得
-    const setlistDirectory = 'setlist';
-    return fetchSetlistFiles(setlistDirectory)
-      .then(files => {
-        const promises = files.map((file, index) => {
-          const url = `${setlistDirectory}/${file}`;
-          // 各ファイルを読み込む間隔を開ける
-          const delay = 100; // 0.1秒
-          return new Promise((resolve, reject) => {
-            setTimeout(() => {
-              fetch(url)
-                .then(response => response.text())
-                .then(text => {
-                  const lines = text.split('\n');
-                  const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
-                  let performanceCount = 0;
-                  let lastPerformanceDate = null;
-                  lines.forEach(line => {
-                    const match = line.match(dateRegex);
-                    if (match && match[1]) {
-                      const currentDate = match[1];
-                      if (!lastPerformanceDate || currentDate > lastPerformanceDate) {
-                        lastPerformanceDate = currentDate;
-                      }
-                      performanceCount++;
-                    }
-                  });
-                  resolve({ performanceCount, lastPerformanceDate });
-                })
-                .catch(error => reject(error));
-            }, index * delay);
-          });
-        });
-        return Promise.all(promises);
-      })
-      .then(performanceDataArray => {
-        // 最終披露日のうち、最も新しい日付を取得
-        const lastPerformanceDate = performanceDataArray.reduce((latestDate, data) => {
-          if (!latestDate || data.lastPerformanceDate > latestDate) {
-            return data.lastPerformanceDate;
-          }
-          return latestDate;
-        }, null);
-
-        // 披露回数の合計を計算
-        const performanceCount = performanceDataArray.reduce((total, data) => {
-          return total + data.performanceCount;
-        }, 0);
-
-        return { performanceCount, lastPerformanceDate };
-      });
-  }
-
-  // ディレクトリ内のファイルを取得する関数
-  function fetchSetlistFiles(directory) {
-    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
-    return fetch(url)
-      .then(response => response.json())
-      .then(data => {
-        const files = data.filter(item => item.type === 'file').map(item => item.name);
-        return files;
-      });
-  }
-
-  // 楽曲名からファイル名の一部を取得する関数
-  function getSongId(songName) {
-    // 楽曲名から不要な文字を削除し、ファイル名の一部を生成する
-    return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
-  }
-
-  // song.txtを読み込む関数
+  // song.txtの読み込み
   function loadTextFile() {
-    // XMLHttpRequestオブジェクトを作成
     const xhr = new XMLHttpRequest();
 
-    // 読み込み完了時の処理
     xhr.onload = function() {
       if (xhr.status === 200) {
-        // レスポンステキストを取得して処理
         const text = xhr.responseText;
         const lines = text.trim().split('\n');
         const tbody = document.getElementById('songTableBody');
 
-        // 各行のデータを処理して表に追加
         lines.forEach((line, index) => {
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
@@ -142,6 +64,16 @@
           link.textContent = fields[0];
           songNameCell.appendChild(link);
           row.appendChild(songNameCell);
+
+          // 検索対象ファイル数のセル
+          const searchCountCell = document.createElement('td');
+          searchCountCell.textContent = "-";
+          row.appendChild(searchCountCell);
+
+          // 最大数字の上位8桁のセル
+          const maxNumberCell = document.createElement('td');
+          maxNumberCell.textContent = "-";
+          row.appendChild(maxNumberCell);
 
           // 披露回数のセル
           const performanceCountCell = document.createElement('td');
@@ -162,15 +94,14 @@
 
           tbody.appendChild(row);
 
-          // 披露回数と最終披露日を更新
-          updatePerformanceData(fields[0], performanceCountCell, lastPerformanceDateCell);
+          // song.txtの要素名を検索して情報を更新
+          updateSearchResults(fields[0], searchCountCell, maxNumberCell, performanceCountCell, lastPerformanceDateCell);
         });
       } else {
         console.error('Failed to load the file.');
       }
     };
 
-    // song.txtを非同期で取得
     xhr.open('GET', 'song.txt', true);
     xhr.send();
   }
@@ -178,15 +109,69 @@
   // ページ読み込み完了後にsong.txtを読み込む
   window.addEventListener('load', loadTextFile);
 
-  // 披露回数と最終披露日を更新する関数
-  function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
-    console.log('Searching for:', songName); // 検索している文字列を表示
-    getPerformanceData(songName).then(data => {
-      performanceCountCell.textContent = data.performanceCount;
-      lastPerformanceDateCell.textContent = data.lastPerformanceDate || "-";
-    });
-  }
-</script>
+  // song.txtの要素名を検索して情報を更新する関数
+  function updateSearchResults(songName, searchCountCell, maxNumberCell, performanceCountCell, lastPerformanceDateCell) {
+    const searchDirectory = 'setlist';
+    const songId = songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
 
-</body>
-</html>
+    fetchSetlistFiles(searchDirectory, songId)
+      .then(results => {
+        const totalCount = results.length;
+        const maxNumber = findMaxNumber(results);
+
+        searchCountCell.textContent = totalCount;
+        maxNumberCell.textContent = maxNumber || "-";
+
+        // 披露回数と最終披露日を更新
+        updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell);
+      })
+      .catch(error => console.error('Error searching:', error));
+  }
+
+  // setlistディレクトリ内のファイルを取得する関数
+  function fetchSetlistFiles(directory, songId) {
+    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+    return fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const files = data.filter(item => item.type === 'file' && item.name.endsWith('.txt')).map(item => item.name);
+        return Promise.all(files.map(file => fetchSetlistFileContent(directory, file, songId)));
+      });
+  }
+
+  // setlistディレクトリ内の各ファイルの中身を検索する関数
+  function fetchSetlistFileContent(directory, file, songId) {
+    const url = `https://raw.githubusercontent.com/tokiyui/YuiData/main/${directory}/${file}`;
+    return fetch(url)
+      .then(response => response.text())
+      .then(text => ({ fileName: file, content: text }))
+      .catch(error => console.error('Error fetching file:', error));
+  }
+
+  // 各ファイル内で要素名を検索して、その数と最大の数字を見つける関数
+  function findMaxNumber(results) {
+    let totalCount = 0;
+    let maxNumber = null;
+
+    results.forEach(result => {
+      const lines = result.content.split('\n');
+      lines.forEach(line => {
+        if (line.includes(songId)) {
+          totalCount++;
+          const match = line.match(/\d{10}/g);
+          if (match) {
+            match.forEach(number => {
+              if (!maxNumber || parseInt(number) > parseInt(maxNumber)) {
+                maxNumber = number.substring(0, 8);
+              }
+            });
+          }
+        }
+      });
+    });
+
+    return maxNumber;
+  }
+
+  // 披
+
