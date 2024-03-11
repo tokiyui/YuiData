@@ -93,7 +93,7 @@
 
   // GitHub APIを使用して指定された文字列の出現回数と最大の数字を持つファイル名の上位8桁を検索
   function searchOccurrences(searchTerm, resultCell) {
-    const apiUrl = 'https://api.github.com/search/code?q=' + searchTerm + '+in:path+filename:*.txt+repo:YourRepositoryName/setlist';
+    const apiUrl = 'https://api.github.com/search/code?q=' + searchTerm + '+in:path+filename:*.txt+repo:YuiData/setlist';
     fetch(apiUrl)
       .then(response => response.json())
       .then(data => {
