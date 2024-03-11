@@ -45,13 +45,13 @@
   function getPerformanceData(songName) {
     // 楽曲名からファイル名の一部を取得（先頭の8桁の数字）
     if (!songName) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
-    console.log(songName)
     // 各ファイルを走査し、披露回数と最終披露日を取得
     const setlistDirectory = 'setlist';
     return fetchSetlistFiles(setlistDirectory)
       .then(files => {
         const promises = files.map((file, index) => {
           const url = `${setlistDirectory}/${file}`;
+          console.log(url)
           // 各ファイルを読み込む間隔を開ける
           const delay = 100; // 0.1秒
           return new Promise((resolve, reject) => {
