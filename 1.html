@@ -32,6 +32,7 @@
       <th>編曲</th>
       <th>収録作品名</th>
       <th>リリース日</th>
+      <th>検索結果</th>
     </tr>
   </thead>
   <tbody id="songTableBody">
@@ -56,6 +57,8 @@
         lines.forEach(line => {
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
           const row = document.createElement('tr');
+          const searchResultCell = document.createElement('td'); // 新しいセルを作成して追加
+          row.appendChild(searchResultCell);
 
           fields.forEach((field, index) => {
             const cell = document.createElement('td');
@@ -64,9 +67,9 @@
               link.href = `search.html?name=${field}`;
               link.textContent = field;
               cell.appendChild(link);
-              
-              // ファイル検索の実行
-              searchFiles(field, cell);
+
+              // GitHub API を使用して検索を実行
+              searchOccurrences(field, searchResultCell);
             } else {
               cell.textContent = field;
             }
@@ -88,27 +91,26 @@
   // ページ読み込み完了後にsong.txtを読み込む
   window.addEventListener('load', loadTextFile);
 
-  // ファイル検索を行う関数
-  function searchFiles(query, cell) {
-    const xhr = new XMLHttpRequest();
+  // GitHub APIを使用して指定された文字列の出現回数と最大の数字を持つファイル名の上位8桁を検索
+  function searchOccurrences(searchTerm, resultCell) {
+    const apiUrl = 'https://api.github.com/search/code?q=' + searchTerm + '+in:path+filename:*.txt+repo:YourRepositoryName/setlist';
+    fetch(apiUrl)
+      .then(response => response.json())
+      .then(data => {
+        const totalFiles = data.total_count;
+        resultCell.textContent = `Files: ${totalFiles}`;
 
-    xhr.onload = function() {
-      if (xhr.status === 200) {
-        const fileList = xhr.responseText.trim().split('\n');
-        const matchCount = fileList.filter(file => file.includes(query)).length;
-        const maxNumber = fileList.reduce((max, file) => {
-          const number = parseInt(file.match(/\d{10}/)[0]);
-          return number > max ? number : max;
-        }, -Infinity);
-        
-        cell.textContent += ` (出現回数: ${matchCount}, 最大番号: ${maxNumber})`;
-      } else {
-        console.error(`Failed to load files for ${query}.`);
-      }
-    };
+        if (totalFiles > 0) {
+          const maxNumberFile = data.items.reduce((max, item) => {
+            const fileName = item.name.split('.')[0]; // Remove extension
+            const fileNumber = parseInt(fileName);
+            return fileNumber > max ? fileNumber : max;
+          }, 0);
 
-    xhr.open('GET', `setlist/${query.substring(0, 10)}*.txt`, true);
-    xhr.send();
+          resultCell.textContent += `, Max Number: ${maxNumberFile}`;
+        }
+      })
+      .catch(error => console.error('Error fetching data:', error));
   }
 </script>
 
