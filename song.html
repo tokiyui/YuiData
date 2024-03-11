@@ -52,7 +52,7 @@
         const promises = files.map((file, index) => {
           const url = `${setlistDirectory}/${file}`;
           // 各ファイルを読み込む間隔を開ける
-          const delay = 100; // 0.1秒
+          const delay = 10; // 0.1秒
           return new Promise((resolve, reject) => {
             setTimeout(() => {
               fetch(url)
@@ -60,15 +60,14 @@
                 .then(text => {
                   const lines = text.split('\n');
                   
-                  const dateRegex = /^\s*#\s*Date:\s*(\d{4}\d{2}\d{2})\s*$/;
+                  const regexString = "^" + songName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + "$";
+                  const lineRegex = new RegExp(regexString);
                   let performanceCount = 0;
                   let lastPerformanceDate = null;
                   lines.forEach(line => {
-                    
-                    const match = line.match(songName);
+                    const match = line.match(lineRegex);
                     if (match) {
                       const currentDate = getsongName(file);
-                      console.log(currentDate);
                       if (!lastPerformanceDate || currentDate > lastPerformanceDate) {
                         lastPerformanceDate = currentDate;
                       }
@@ -186,6 +185,15 @@
       performanceCountCell.textContent = data.performanceCount;
       lastPerformanceDateCell.textContent = data.lastPerformanceDate || "-";
     });
+  }
+
+  // YYYY年M月D日の形式に日付をフォーマットする関数
+  function formatDate(dateString) {
+    const date = new Date(dateString);
+    const year = date.getFullYear();
+    const month = date.getMonth() + 1; // 月は0から始まるため、1を足す
+    const day = date.getDate();
+    return `${year}年${month}月${day}日`;
   }
 </script>
 
