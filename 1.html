@@ -1,0 +1,73 @@
+<script>
+  // song.txtを読み込む関数
+  function loadTextFile() {
+    // XMLHttpRequestオブジェクトを作成
+    const xhr = new XMLHttpRequest();
+
+    // 読み込み完了時の処理
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        // レスポンステキストを取得して処理
+        const text = xhr.responseText;
+        const lines = text.trim().split('\n');
+        const tbody = document.getElementById('songTableBody');
+
+        // 各行のデータを処理して表に追加
+        lines.forEach(line => {
+          const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
+          const row = document.createElement('tr');
+
+          fields.forEach((field, index) => {
+            const cell = document.createElement('td');
+            if (index === 0) { // 最初の要素の場合
+              const link = document.createElement('a');
+              link.href = `search.html?name=${field}`;
+              link.textContent = field;
+              cell.appendChild(link);
+              
+              // ファイル検索の実行
+              searchFiles(field, cell);
+            } else {
+              cell.textContent = field;
+            }
+            row.appendChild(cell);
+          });
+
+          tbody.appendChild(row);
+        });
+      } else {
+        console.error('Failed to load the file.');
+      }
+    };
+
+    // song.txtを非同期で取得
+    xhr.open('GET', 'song.txt', true);
+    xhr.send();
+  }
+
+  // ページ読み込み完了後にsong.txtを読み込む
+  window.addEventListener('load', loadTextFile);
+
+  // ファイル検索を行う関数
+  function searchFiles(query, cell) {
+    const xhr = new XMLHttpRequest();
+
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        const fileList = xhr.responseText.trim().split('\n');
+        const matchCount = fileList.filter(file => file.includes(query)).length;
+        const maxNumber = fileList.reduce((max, file) => {
+          const number = parseInt(file.match(/\d{10}/)[0]);
+          return number > max ? number : max;
+        }, -Infinity);
+        
+        cell.textContent += ` (出現回数: ${matchCount}, 最大番号: ${maxNumber})`;
+      } else {
+        console.error(`Failed to load files for ${query}.`);
+      }
+    };
+
+    xhr.open('GET', `setlist/${query.substring(0, 10)}*.txt`, true);
+    xhr.send();
+  }
+</script>
