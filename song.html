@@ -145,8 +145,10 @@
     getPerformanceData(songName).then(data => {
       performanceCountCell.textContent = data.performanceCount;
       if (data.lastPerformanceDate) {
-        const lastDate = new Date(data.lastPerformanceDate);
-        const formattedLastDate = `${lastDate.getFullYear()}年${lastDate.getMonth() + 1}月${lastDate.getDate()}日`;
+        const year = data.lastPerformanceDate.substring(0, 4);
+        const month = data.lastPerformanceDate.substring(4, 6);
+        const day = data.lastPerformanceDate.substring(6, 8);
+        const formattedLastDate = `${year}年${month}月${day}日`;
         lastPerformanceDateCell.textContent = formattedLastDate;
       } else {
         lastPerformanceDateCell.textContent = "-";
