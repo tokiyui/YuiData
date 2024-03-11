@@ -32,7 +32,8 @@
       <th>編曲</th>
       <th>収録作品名</th>
       <th>リリース日</th>
-      <th>検索結果</th>
+      <th>出現数</th>
+      <th>最大数字の名前</th>
     </tr>
   </thead>
   <tbody id="songTableBody">
@@ -52,31 +53,69 @@
         const text = xhr.responseText;
         const lines = text.trim().split('\n');
         const tbody = document.getElementById('songTableBody');
+        const songsData = [];
 
         // 各行のデータを処理して表に追加
         lines.forEach(line => {
           const fields = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/).map(field => field.replace(/","/g, ',').replace(/\\/g, ','));
-          const row = document.createElement('tr');
-          const searchResultCell = document.createElement('td'); // 新しいセルを作成して追加
-          row.appendChild(searchResultCell);
+          const songData = {
+            name: fields[0],
+            lyrics: fields[1],
+            composition: fields[2],
+            arrangement: fields[3],
+            album: fields[4],
+            releaseDate: fields[5],
+            occurrences: 0,
+            maxFileName: ""
+          };
 
-          fields.forEach((field, index) => {
-            const cell = document.createElement('td');
-            if (index === 0) { // 最初の要素の場合
-              const link = document.createElement('a');
-              link.href = `search.html?name=${field}`;
-              link.textContent = field;
-              cell.appendChild(link);
+          songsData.push(songData);
+        });
 
-              // GitHub API を使用して検索を実行
-              searchOccurrences(field, searchResultCell);
-            } else {
-              cell.textContent = field;
-            }
-            row.appendChild(cell);
-          });
+        // 楽曲ごとに検索
+        songsData.forEach(song => {
+          const searchTerm = song.name;
+          let maxNumber = 0;
 
-          tbody.appendChild(row);
+          // setlist フォルダ内のファイルを検索
+          fetch(`https://api.github.com/search/code?q=${searchTerm}+in:path+filename:*.txt+repo:tokiyui/YuiData`)
+            .then(response => response.json())
+            .then(data => {
+              // 検索結果の処理
+              const items = data.items;
+              song.occurrences = items.length;
+
+              // 最大の数字を探す
+              items.forEach(item => {
+                const fileName = item.name.replace('.txt', '');
+                const number = parseInt(fileName);
+                if (!isNaN(number) && number > maxNumber) {
+                  maxNumber = number;
+                  song.maxFileName = fileName;
+                }
+              });
+
+              // 表に行を追加
+              const row = document.createElement('tr');
+              Object.values(song).forEach(value => {
+                const cell = document.createElement('td');
+                if (typeof value === 'number') {
+                  cell.textContent = value;
+                } else {
+                  if (value === song.maxFileName) {
+                    const link = document.createElement('a');
+                    link.href = `search.html?name=${value}`;
+                    link.textContent = value;
+                    cell.appendChild(link);
+                  } else {
+                    cell.textContent = value;
+                  }
+                }
+                row.appendChild(cell);
+              });
+              tbody.appendChild(row);
+            })
+            .catch(error => console.error('Error:', error));
         });
       } else {
         console.error('Failed to load the file.');
@@ -90,28 +129,6 @@
 
   // ページ読み込み完了後にsong.txtを読み込む
   window.addEventListener('load', loadTextFile);
-
-  // GitHub APIを使用して指定された文字列の出現回数と最大の数字を持つファイル名の上位8桁を検索
-  function searchOccurrences(searchTerm, resultCell) {
-    const apiUrl = 'https://api.github.com/search/code?q=' + searchTerm + '+in:path+filename:*.txt+repo:YuiData/setlist';
-    fetch(apiUrl)
-      .then(response => response.json())
-      .then(data => {
-        const totalFiles = data.total_count;
-        resultCell.textContent = `Files: ${totalFiles}`;
-
-        if (totalFiles > 0) {
-          const maxNumberFile = data.items.reduce((max, item) => {
-            const fileName = item.name.split('.')[0]; // Remove extension
-            const fileNumber = parseInt(fileName);
-            return fileNumber > max ? fileNumber : max;
-          }, 0);
-
-          resultCell.textContent += `, Max Number: ${maxNumberFile}`;
-        }
-      })
-      .catch(error => console.error('Error fetching data:', error));
-  }
 </script>
 
 </body>
