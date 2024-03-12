@@ -37,21 +37,14 @@ document.addEventListener('DOMContentLoaded', function() {
 
     fetchSetlists()
         .then(setlists => {
-            const dates = setlists.map(setlist => setlist.date);
-            const titles = setlists.map(setlist => setlist.title);
-            const venues = setlists.map(setlist => setlist.venue);
-            const setlistsData = setlists.map(setlist => setlist.setlist);
-
-            const datesRow = createRow(dates);
-            const titlesRow = createRow(titles);
-            const venuesRow = createRow(venues);
-            const setlistsRow = createRow(setlistsData);
-
-            setlistTable.innerHTML += datesRow + titlesRow + venuesRow + setlistsRow;
+            setlists.forEach(setlist => {
+                const row = createRow(setlist);
+                setlistTable.querySelector('#setlistBody').innerHTML += row;
+            });
         })
         .catch(error => {
             console.error('Error fetching setlists:', error);
-            setlistTable.innerHTML = '<tbody><tr><td colspan="3">Error fetching setlists. Please try again later.</td></tr></tbody>';
+            setlistTable.innerHTML = '<tbody><tr><td colspan="4">Error fetching setlists. Please try again later.</td></tr></tbody>';
         });
 
 function fetchSetlists() {
@@ -88,12 +81,12 @@ function parseSetlist(fileName, setlistData) {
     return { date, title, venue, setlist };
 }
 
-function createRow(data) {
-    let row = '<tr>';
-    data.forEach(item => {
-        row += `<td>${item}</td>`;
-    });
-    row += '</tr>';
+function createRow(setlist) {
+    let row = '';
+    row += `<tr><td>${setlist.date}</td></tr>`;
+    row += `<tr><td>${setlist.title}</td></tr>`;
+    row += `<tr><td>${setlist.venue}</td></tr>`;
+    row += `<tr><td>${setlist.setlist}</td></tr>`;
     return row;
 }
 });
