@@ -4,6 +4,25 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>セットリスト</title>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+</style>
 </head>
 <body>
 
@@ -21,12 +40,23 @@
   <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
 </select>
 
-<div id="setlist"></div>
+<table id="setlistTable">
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>タイトル</th>
+      <th>会場</th>
+      <th>セットリスト</th>
+    </tr>
+  </thead>
+  <tbody id="setlistBody">
+  </tbody>
+</table>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
-    const setlistDiv = document.getElementById('setlist');
+    const setlistTable = document.getElementById('setlistTable');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
@@ -34,11 +64,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fetch the setlist files
         fetchSetlist(selectedConcert)
             .then(data => {
-                setlistDiv.innerHTML = data;
+                setlistTable.innerHTML = data;
             })
             .catch(error => {
                 console.error('Error fetching setlist:', error);
-                setlistDiv.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
+                setlistTable.innerHTML = '<tbody><tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr></tbody>';
             });
     });
 
@@ -53,14 +83,14 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(response => response.text())
                             .then(data => {
                                 if (data.includes(selectedConcert)) {
-                                    return parseSetlist(data);
+                                    return parseSetlist(file.name, data);
                                 } else {
                                     return '';
                                 }
                             })
                             .catch(error => {
                                 console.error('Error fetching setlist file:', error);
-                                return '<p>Error fetching setlist. Please try again later.</p>';
+                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
                             }));
                     }
                 });
@@ -68,16 +98,22 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     }
 
-    function parseSetlist(setlistData) {
+    function parseSetlist(fileName, setlistData) {
         const lines = setlistData.split('\n');
         let setlistHTML = '';
 
+        const date = lines[0].trim(); // Date line
+        const title = lines[1].trim(); // Title line
+        const venue = lines[2].trim(); // Venue line
+
+        setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
         for (let i = 3; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line !== '') {
-                setlistHTML += `<p>${line}</p>`;
+                setlistHTML += `${line}<br>`;
             }
         }
+        setlistHTML += `</td></tr>`;
 
         return setlistHTML;
     }
