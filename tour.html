@@ -23,6 +23,14 @@ th {
 <body>
 
 <h1>セットリスト</h1>
+
+<p>以下のチェックボックスにチェックを入れてください。</p>
+<div id="checkboxes">
+    <!-- チェックボックスを自動生成 -->
+    <!-- setlist/以下にあるtxtファイルの数だけチェックボックスを生成 -->
+</div>
+<button onclick="searchSongs()">検索</button>
+
 <table id="setlist-table">
     <thead>
         <tr>
@@ -36,6 +44,30 @@ th {
 </table>
 
 <script>
+async function searchSongs() {
+    // チェックボックスの状態を取得
+    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+    const checkedIndexes = Array.from(checkboxes).map((checkbox, index) => checkbox.checked ? index : null).filter(index => index !== null);
+
+    // setlistの内容を表示
+    const table = document.getElementById('setlist-table');
+    const tbody = table.querySelector('tbody');
+    tbody.innerHTML = ''; // テーブルをクリア
+
+    // チェックされたtxtファイルの本文2行目を取得して表示
+    await Promise.all(checkedIndexes.map(async index => {
+        const response = await fetch(`https://raw.githubusercontent.com/tokiyui/YuiData/master/setlist/setlist${index + 1}.txt`);
+        const text = await response.text();
+        const lines = text.split('\n');
+        const secondLine = lines.length > 1 ? lines[1].trim() : ''; // 2行目のみ取得
+        const row = document.createElement('tr');
+        const cell = document.createElement('td');
+        cell.textContent = secondLine;
+        row.appendChild(cell);
+        tbody.appendChild(row);
+    }));
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     const checkboxesContainer = document.getElementById('checkboxes');
     const response = await fetch('https://api.github.com/repos/tokiyui/YuiData/contents/setlist');
@@ -51,27 +83,6 @@ document.addEventListener('DOMContentLoaded', async function() {
         checkboxesContainer.appendChild(label);
         checkboxesContainer.appendChild(document.createElement('br'));
     });
-
-    // チェックボックスの状態を取得
-    const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-    const checkedIndexes = Array.from(checkboxes).map((checkbox, index) => checkbox.checked ? index : null).filter(index => index !== null);
-
-    // setlistの内容を表示
-    const table = document.getElementById('setlist-table');
-    const tbody = table.querySelector('tbody');
-
-    // チェックされたtxtファイルの本文2行目を取得して表示
-    await Promise.all(checkedIndexes.map(async index => {
-        const response = await fetch(`https://raw.githubusercontent.com/tokiyui/YuiData/master/setlist/setlist${index + 1}.txt`);
-        const text = await response.text();
-        const lines = text.split('\n');
-        const secondLine = lines.length > 1 ? lines[1].trim() : ''; // 2行目のみ取得
-        const row = document.createElement('tr');
-        const cell = document.createElement('td');
-        cell.textContent = secondLine;
-        row.appendChild(cell);
-        tbody.appendChild(row);
-    }));
 });
 </script>
 
