@@ -23,7 +23,7 @@ th {
   background-color: #f2f2f2;
 }
 
-.pink-background {
+.diff-song {
   background-color: pink;
 }
 </style>
@@ -45,22 +45,10 @@ th {
 </select>
 
 <table>
-  <tr>
-    <th></th>
-    <th id="dateRow"></th>
-  </tr>
-  <tr>
-    <td id="numberCol"></td>
-    <td id="titleRow"></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td id="venueRow"></td>
-  </tr>
-  <tr>
-    <td></td>
-    <td id="setlistRow"></td>
-  </tr>
+  <tr id="dateRow"></tr>
+  <tr id="titleRow"></tr>
+  <tr id="venueRow"></tr>
+  <tr id="setlistRow"></tr>
 </table>
 
 <script>
@@ -126,21 +114,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const titleRow = document.getElementById('titleRow');
         const venueRow = document.getElementById('venueRow');
         const setlistRow = document.getElementById('setlistRow');
-        const numberCol = document.getElementById('numberCol');
 
         dateRow.innerHTML = dates.map(date => `<th>${date}</th>`).join('');
         titleRow.innerHTML = titles.map(title => `<td>${title}</td>`).join('');
         venueRow.innerHTML = venues.map(venue => `<td>${venue}</td>`).join('');
         setlistRow.innerHTML = setlistsData.map(setlist => `<td>${processSetlist(setlist)}</td>`).join('');
-
-        // Calculate number of songs for the rightmost concert
-        const numSongs = setlistsData.reduce((acc, setlist) => {
-            const lines = setlist.split('<hr>');
-            return acc + lines.filter(line => line.trim() !== '').length;
-        }, 0);
-
-        // Fill number column
-        numberCol.innerHTML = Array.from({ length: numSongs }, (_, i) => `<td>${i + 1}</td>`).join('');
     }
 
     function processSetlist(setlist) {
@@ -159,29 +137,35 @@ document.addEventListener('DOMContentLoaded', function() {
             if (line === '<MEDLEY>') {
                 isMedley = true;
                 medleyCount++; // Increment medley count
-                setlistHTML += `<p class="medley">${songCount + medleyCount}. 【メドレーコーナー】</p>`;
+                setlistHTML += `<p>${songCount + medleyCount}. 【メドレーコーナー】</p>`;
             } else if (line === '<MEDLEY END>') {
                isMedley = false;
             } else if (line === '<ENCORE>') {
                 isEncore = true;
                 encoreCount = 0; // Reset encore song count when new encore starts
-                setlistHTML += '<p class="encore">【アンコール】</p>';
+                setlistHTML += '<p>【アンコール】</p>';
             } else if (line === '<W ENCORE>') {
-                setlistHTML += '<p class="encore">【ダブルアンコール】</p>';
+                setlistHTML += '<p>【ダブルアンコール】</p>';
             } else if (line === '<FAN CLUB>') {
                 setlistHTML += '<p>【ファンクラブ限定】</p>';
             } else {
                 if (line !== '') { // Check if line is not empty
                     if (isMedley) {
                         // Display medley song only if it's not empty
-                        setlistHTML += `<p class="medley">${line}</p>`;
+                        setlistHTML += `<p style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
                     } else if (isEncore) {
                         let prefix = 'EC'
                         encoreCount++; // Increment encore song count
-                        setlistHTML += `<p class="encore">${prefix}${encoreCount}. ${line}</p>`;
+                        setlistHTML += `<p>${prefix}${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
                     } else {
                         songCount++; // Increment encore song count
-                        setlistHTML += `<p>${songCount + medleyCount}. ${line}</p>`;
+                        const previousSongs = lines.slice(0, i).filter(l => l.trim() !== '<MEDLEY>' && l.trim() !== '<ENCORE>' && l.trim() !== '<W ENCORE>' && l.trim() !== '<FAN CLUB>').map(l => l.trim());
+                        const previousSongsCount = previousSongs.filter(song => song === line).length;
+                        if (previousSongsCount > 0) {
+                            setlistHTML += `<p class="diff-song">${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                        } else {
+                            setlistHTML += `<p>${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                        }
                     }
                 }
             }
