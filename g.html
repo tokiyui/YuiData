@@ -26,24 +26,13 @@ th {
 </head>
 <body>
 
-<select id="concertSelector">
-  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
-  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
-  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
-  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
-  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
-  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
-  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
-  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
-  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
-  <option value="Animelo Summer Live">Animelo Summer Live</option>
-  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
-</select>
-
-<table>
+<table id="setlistTable">
   <thead>
-    <tr id="headerRow">
-      <!-- Header row stays empty, will be filled dynamically -->
+    <tr>
+      <th>日付</th>
+      <th>タイトル</th>
+      <th>会場</th>
+      <!-- Concert options will be added dynamically here -->
     </tr>
   </thead>
   <tbody id="setlistBody">
@@ -53,55 +42,54 @@ th {
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const concertSelector = document.getElementById('concertSelector');
-    const headerRow = document.getElementById('headerRow');
+    const setlistTable = document.getElementById('setlistTable');
     const setlistBody = document.getElementById('setlistBody');
 
-    concertSelector.addEventListener('change', function() {
-        const selectedConcert = this.value;
+    // Fetch setlist options on page load
+    fetchSetlistOptions()
+        .then(options => {
+            const concertOptionsHTML = options.map(option => `<option value="${option}">${option}</option>`).join('');
+            setlistTable.getElementsByTagName('tr')[0].innerHTML += `<th><select id="concertSelector">${concertOptionsHTML}</select></th>`;
 
-        // Fetch the setlist files
-        fetchSetlist(selectedConcert)
-            .then(data => {
-                setlistBody.innerHTML = data;
-                console.log(data)
-            })
-            .catch(error => {
-                console.error('Error fetching setlist:', error);
-                setlistBody.innerHTML = '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
+            const concertSelector = document.getElementById('concertSelector');
+            concertSelector.addEventListener('change', function() {
+                const selectedConcert = this.value;
+
+                // Fetch the setlist for the selected concert
+                fetchSetlist(selectedConcert)
+                    .then(data => {
+                        setlistBody.innerHTML = data;
+                    })
+                    .catch(error => {
+                        console.error('Error fetching setlist:', error);
+                        setlistBody.innerHTML = '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
+                    });
             });
-    });
+        })
+        .catch(error => {
+            console.error('Error fetching setlist options:', error);
+        });
 
-    function fetchSetlist(selectedConcert) {
+    function fetchSetlistOptions() {
         return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
             .then(response => response.json())
             .then(files => {
-                const setlistPromises = [];
-                files.forEach(file => {
-                    if (file.type === 'file' && file.name.endsWith('.txt')) {
-                        const setlistPromise = fetch(`setlist/${file.name}`)
-                            .then(response => response.text())
-                            .then(data => {
-                                if (data.includes(selectedConcert)) {
-                                    console.log(data)
-                                    return parseSetlist(file.name, data);
-                                } else {
-                                    return null; // Return null if setlist not found
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching setlist file:', error);
-                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
-                            });
-                        setlistPromises.push(setlistPromise);
-                    }
-                });
-                return Promise.all(setlistPromises)
-                    .then(setlists => setlists.filter(setlist => setlist !== null)); // Filter out null values
+                const options = files
+                    .filter(file => file.type === 'file' && file.name.endsWith('.txt'))
+                    .map(file => file.name.replace('.txt', ''));
+                return options;
             });
     }
 
-    function parseSetlist(fileName, setlistData) {
+    function fetchSetlist(selectedConcert) {
+        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist/${selectedConcert}.txt`)
+            .then(response => response.text())
+            .then(data => {
+                return parseSetlist(data);
+            });
+    }
+
+    function parseSetlist(setlistData) {
         const lines = setlistData.split('\n');
         let setlistHTML = '';
 
@@ -109,13 +97,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
 
-        // Add headers if not already added
-        if (headerRow.innerHTML === '') {
-            headerRow.innerHTML = `<th>日付</th><th>タイトル</th><th>会場</th><th>セットリスト</th>`;
-        }
-
         setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
-        console.log(setlistHTML);
         for (let i = 3; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line !== '') {
