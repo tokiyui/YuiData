@@ -7,7 +7,7 @@
 <style>
 table {
   border-collapse: collapse;
-  width: 100%;
+  width: auto; /* Width set to auto for dynamic resizing */
 }
 
 table, th, td {
@@ -40,25 +40,22 @@ th {
   <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
 </select>
 
-<table id="setlistTable">
+<table>
   <thead>
-    <tr>
-      <th>日付</th>
-      <th>タイトル</th>
-      <th>会場</th>
-      <th id="concertTitles"></th>
+    <tr id="headerRow">
+      <!-- Header row stays empty, will be filled dynamically -->
     </tr>
   </thead>
   <tbody id="setlistBody">
-    <!-- セットリストの内容 -->
+    <!-- Setlist data will be filled dynamically here -->
   </tbody>
 </table>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
+    const headerRow = document.getElementById('headerRow');
     const setlistBody = document.getElementById('setlistBody');
-    const concertTitlesRow = document.getElementById('concertTitles');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
@@ -66,20 +63,8 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fetch the setlist files
         fetchSetlist(selectedConcert)
             .then(data => {
-                // Clear table body
-                setlistBody.innerHTML = '';
-
-                // Populate setlist data
-                data.forEach(entry => {
-                    const tr = document.createElement('tr');
-                    tr.innerHTML = `
-                        <td>${entry.date}</td>
-                        <td>${entry.title}</td>
-                        <td>${entry.venue}</td>
-                        <td>${entry.setlist}</td>
-                    `;
-                    setlistBody.appendChild(tr);
-                });
+                setlistBody.innerHTML = data;
+                console.log(data)
             })
             .catch(error => {
                 console.error('Error fetching setlist:', error);
@@ -91,54 +76,55 @@ document.addEventListener('DOMContentLoaded', function() {
         return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
             .then(response => response.json())
             .then(files => {
-                const setlistPromises = files.map(file => {
+                const setlistPromises = [];
+                files.forEach(file => {
                     if (file.type === 'file' && file.name.endsWith('.txt')) {
-                        return fetch(`setlist/${file.name}`)
+                        const setlistPromise = fetch(`setlist/${file.name}`)
                             .then(response => response.text())
-                            .then(data => parseSetlist(file.name, data, selectedConcert))
+                            .then(data => {
+                                if (data.includes(selectedConcert)) {
+                                    console.log(data)
+                                    return parseSetlist(file.name, data);
+                                } else {
+                                    return null; // Return null if setlist not found
+                                }
+                            })
                             .catch(error => {
                                 console.error('Error fetching setlist file:', error);
-                                return null;
+                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
                             });
+                        setlistPromises.push(setlistPromise);
                     }
                 });
                 return Promise.all(setlistPromises)
-                    .then(setlists => setlists.filter(setlist => setlist !== null).flat());
+                    .then(setlists => setlists.filter(setlist => setlist !== null)); // Filter out null values
             });
     }
 
-    function parseSetlist(fileName, setlistData, selectedConcert) {
+    function parseSetlist(fileName, setlistData) {
         const lines = setlistData.split('\n');
-        const setlistEntries = [];
-        let currentEntry = null;
+        let setlistHTML = '';
 
-        lines.forEach(line => {
-            if (line.startsWith('#')) {
-                if (currentEntry) {
-                    setlistEntries.push(currentEntry);
-                }
-                currentEntry = {
-                    date: line.substring(1).trim(),
-                    title: '',
-                    venue: '',
-                    setlist: ''
-                };
-            } else if (line.startsWith('タイトル:')) {
-                currentEntry.title = line.substring(5).trim();
-            } else if (line.startsWith('会場:')) {
-                currentEntry.venue = line.substring(3).trim();
-            } else if (line.startsWith(selectedConcert)) {
-                currentEntry.setlist = '';
-            } else if (currentEntry && currentEntry.setlist !== undefined) {
-                currentEntry.setlist += line.trim() + '<br>';
-            }
-        });
+        const date = lines[0].trim(); // Date line
+        const title = lines[1].trim(); // Title line
+        const venue = lines[2].trim(); // Venue line
 
-        if (currentEntry) {
-            setlistEntries.push(currentEntry);
+        // Add headers if not already added
+        if (headerRow.innerHTML === '') {
+            headerRow.innerHTML = `<th>日付</th><th>タイトル</th><th>会場</th><th>セットリスト</th>`;
         }
 
-        return setlistEntries;
+        setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
+        console.log(setlistHTML);
+        for (let i = 3; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line !== '') {
+                setlistHTML += `${line}<br>`;
+            }
+        }
+        setlistHTML += `</td></tr>`;
+
+        return setlistHTML;
     }
 });
 </script>
