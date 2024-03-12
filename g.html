@@ -5,10 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>セットリスト</title>
 <style>
-.table-container {
-  overflow-x: auto;
-}
-
 table {
   border-collapse: collapse;
   width: 100%;
@@ -44,25 +40,23 @@ th {
   <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
 </select>
 
-<div class="table-container">
-  <table id="setlistTable">
-    <thead>
-      <tr>
-        <th>日付</th>
-        <th>タイトル</th>
-        <th>会場</th>
-        <th>セットリスト</th>
-      </tr>
-    </thead>
-    <tbody id="setlistBody">
-    </tbody>
-  </table>
-</div>
+<table id="setlistTable">
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>タイトル</th>
+      <th>会場</th>
+      <th>セットリスト</th>
+    </tr>
+  </thead>
+  <tbody id="setlistBody">
+  </tbody>
+</table>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
-    const setlistBody = document.getElementById('setlistBody');
+    const setlistTable = document.getElementById('setlistTable');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
@@ -70,11 +64,11 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fetch the setlist files
         fetchSetlist(selectedConcert)
             .then(data => {
-                setlistBody.innerHTML = data;
+                setlistTable.innerHTML = data;
             })
             .catch(error => {
                 console.error('Error fetching setlist:', error);
-                setlistBody.innerHTML = '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
+                setlistTable.innerHTML = '<tbody><tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr></tbody>';
             });
     });
 
@@ -102,9 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     }
                 });
                 return Promise.all(setlistPromises)
-                    .then(setlists => {
-                        return setlists.filter(setlist => setlist !== null).join('');
-                    }); // Filter out nulls and join the setlist HTML
+                    .then(setlists => setlists.filter(setlist => setlist !== null).join('')); // Filter out nulls and join the setlist HTML
             });
     }
 
