@@ -26,69 +26,86 @@ th {
 </head>
 <body>
 
-<table id="setlistTable">
-  <tbody id="setlistBody">
-  </tbody>
-</table>
+<select id="concertSelector">
+  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
+  <option value="Animelo Summer Live">Animelo Summer Live</option>
+  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
+</select>
+
+<div id="setlistContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const setlistTable = document.getElementById('setlistTable');
+    const concertSelector = document.getElementById('concertSelector');
+    const setlistContainer = document.getElementById('setlistContainer');
 
-    fetchSetlists()
-        .then(setlists => {
-            setlists.forEach(setlist => {
-                const row = createRow(setlist);
-                setlistTable.querySelector('#setlistBody').innerHTML += row;
+    concertSelector.addEventListener('change', function() {
+        const selectedConcert = this.value;
+
+        // Fetch the setlist files
+        fetchSetlist(selectedConcert)
+            .then(data => {
+                setlistContainer.innerHTML = data;
+                console.log(data)
+            })
+            .catch(error => {
+                console.error('Error fetching setlist:', error);
+                setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
             });
-        })
-        .catch(error => {
-            console.error('Error fetching setlists:', error);
-            setlistTable.innerHTML = '<tbody><tr><td colspan="4">Error fetching setlists. Please try again later.</td></tr></tbody>';
-        });
+    });
 
-function fetchSetlists() {
-    return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
-        .then(response => response.json())
-        .then(files => {
-            const setlistPromises = [];
-            files.forEach(file => {
-                if (file.type === 'file' && file.name.endsWith('.txt')) {
-                    const setlistPromise = fetch(`setlist/${file.name}`)
-                        .then(response => response.text())
-                        .then(data => {
-                            const setlist = parseSetlist(file.name, data);
-                            return setlist;
-                        })
-                        .catch(error => {
-                            console.error('Error fetching setlist file:', error);
-                            return null;
-                        });
-                    setlistPromises.push(setlistPromise);
-                }
+    function fetchSetlist(selectedConcert) {
+        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+            .then(response => response.json())
+            .then(files => {
+                const setlistPromises = [];
+                files.forEach(file => {
+                    if (file.type === 'file' && file.name.endsWith('.txt')) {
+                        const setlistPromise = fetch(`setlist/${file.name}`)
+                            .then(response => response.text())
+                            .then(data => {
+                                if (data.includes(selectedConcert)) {
+                                    console.log(data)
+                                    return parseSetlist(file.name, data);
+                                } else {
+                                    return null; // セットリストが見つからない場合はnullを返す
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching setlist file:', error);
+                                return '<p>Error fetching setlist. Please try again later.</p>';
+                            });
+                        setlistPromises.push(setlistPromise);
+                    }
+                });
+                return Promise.all(setlistPromises)
+                    .then(setlists => setlists.filter(setlist => setlist !== null).join('')); // nullをフィルタリングして配列に含めない
             });
-            return Promise.all(setlistPromises)
-                .then(setlists => setlists.filter(setlist => setlist !== null));
-        });
-}
+    }
 
-function parseSetlist(fileName, setlistData) {
-    const lines = setlistData.split('\n');
-    const date = lines[0].trim();
-    const title = lines[1].trim();
-    const venue = lines[2].trim();
-    const setlist = lines.slice(3).map(line => line.trim()).join('<br>');
-    return { date, title, venue, setlist };
-}
+    function parseSetlist(fileName, setlistData) {
+        const lines = setlistData.split('\n');
+        let setlistHTML = '';
 
-function createRow(setlist) {
-    let row = '';
-    row += `<tr><td>${setlist.date}</td></tr>`;
-    row += `<tr><td>${setlist.title}</td></tr>`;
-    row += `<tr><td>${setlist.venue}</td></tr>`;
-    row += `<tr><td>${setlist.setlist}</td></tr>`;
-    return row;
-}
+        const date = lines[0].trim(); // Date line
+        const title = lines[1].trim(); // Title line
+        const venue = lines[2].trim(); // Venue line
+
+        setlistHTML += `<table><tr><th>日付</th><td>${date}</td></tr>`;
+        setlistHTML += `<tr><th>タイトル</th><td>${title}</td></tr>`;
+        setlistHTML += `<tr><th>会場</th><td>${venue}</td></tr>`;
+        setlistHTML += `<tr><th>セットリスト</th><td>${lines.slice(3).join('<br>')}</td></tr></table>`;
+
+        return setlistHTML;
+    }
 });
 </script>
 
