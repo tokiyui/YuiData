@@ -7,34 +7,29 @@
 </head>
 <body>
 
-<!-- プルダウンメニュー -->
-<select id="concertSelect">
-    <option value="1">小倉唯 1st LIVE「HAPPY JAM」</option>
-    <option value="2">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
-    <option value="3">小倉唯 LIVE「Smiley Cherry」</option>
-    <option value="4">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
-    <option value="5">小倉唯 LIVE TOUR 2019「Step Apple」</option>
-    <option value="6">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
-    <option value="7">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
-    <option value="8">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
-    <option value="9">KING SUPER LIVE</option>
-    <option value="10">Animelo Summer Live</option>
-    <option value="11">ANIMAX MUSIX</option>
+<select id="artistSelect">
+  <option value="HappyJam">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="HighTouchSummer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="SmileyCherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="PlatinumAirline">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="StepApple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="ReLovecall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="MemorialEleven">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="MemorialAnniversary">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+  <option value="KingSuperLive">KING SUPER LIVE</option>
+  <option value="AnimeloSummerLive">Animelo Summer Live</option>
+  <option value="AnimaxMusix">ANIMAX MUSIX</option>
 </select>
 
-<!-- セットリスト表示 -->
 <div id="setlistContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const concertSelect = document.getElementById('concertSelect');
+    const artistSelect = document.getElementById('artistSelect');
     const setlistContainer = document.getElementById('setlistContainer');
 
-    // プルダウンメニュー選択時の処理
-    concertSelect.addEventListener('change', function() {
-        const concertID = this.value;
-
-        // Fetch the setlist file based on selected concert
+    // Function to fetch and display setlist
+    function fetchAndDisplaySetlist(concertID) {
         fetch(`setlist/${concertID}.txt`)
             .then(response => response.text())
             .then(data => {
@@ -71,7 +66,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         medleyCount++; // Increment medley count
                         setlistContainer.innerHTML += `<p>${songCount + medleyCount}. 【メドレーコーナー】</p>`;
                     } else if (line === '<MEDLEY END>') {
-                        isMedley = false;
+                       isMedley = false;
                     } else if (line === '<ENCORE>') {
                         isEncore = true;
                         encoreCount = 0; // Reset encore song count when new encore starts
@@ -101,7 +96,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.error('Error fetching setlist:', error);
                 setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
             });
+    }
+
+    // Event listener for select change
+    artistSelect.addEventListener('change', function() {
+        const selectedValue = artistSelect.value;
+        fetchAndDisplaySetlist(selectedValue);
     });
+
+    // Initial fetch and display setlist
+    const initialSelectedValue = artistSelect.value;
+    fetchAndDisplaySetlist(initialSelectedValue);
 });
 </script>
 
