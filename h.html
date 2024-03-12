@@ -26,10 +26,6 @@ th {
 .pink-background {
   background-color: pink;
 }
-
-.medley-background {
-  background-color: lightblue;
-}
 </style>
 </head>
 <body>
@@ -138,10 +134,29 @@ document.addEventListener('DOMContentLoaded', function() {
             const songCells = setlists.map((setlist, index) => {
                 const song = setlist[i];
                 let className = '';
-                if (song && i > 0 && song !== setlists[0][i]) {
-                    className = 'pink-background'; // Add pink background if song is different from the first concert
+                if (song) {
+                    // Check for special song markers
+                    if (song === '<MEDLEY>') {
+                        className = 'pink-background'; // Add pink background for medley
+                        return `<td colspan="${dates.length}">${song}</td>`;
+                    } else if (song === '<MEDLEY END>') {
+                        return ''; // Skip medley end marker
+                    } else if (song === '<ENCORE>') {
+                        className = 'pink-background'; // Add pink background for encore
+                        return `<td colspan="${dates.length}">${song}</td>`;
+                    } else if (song === '<W ENCORE>') {
+                        return ''; // Skip double encore marker
+                    } else if (song === '<FAN CLUB>') {
+                        return `<td colspan="${dates.length}">${song}</td>`; // Fan club special marker
+                    } else {
+                        if (i > 0 && song !== setlists[0][i]) {
+                            className = 'pink-background'; // Add pink background if song is different from the first concert
+                        }
+                        return `<td class="${className}">${song}</td>`;
+                    }
+                } else {
+                    return `<td></td>`;
                 }
-                return `<td class="${className}">${song}</td>`;
             });
             setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
         }
