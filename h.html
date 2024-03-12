@@ -26,6 +26,10 @@ th {
 .pink-background {
   background-color: pink;
 }
+
+.medley-background {
+  background-color: lightblue;
+}
 </style>
 </head>
 <body>
@@ -133,15 +137,11 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 0; i < maxSongs; i++) {
             const songCells = setlists.map((setlist, index) => {
                 const song = setlist[i];
-                if (song) {
-                    let className = '';
-                    if (i > 0 && song !== setlists[0][i]) {
-                        className = 'pink-background'; // Add pink background if song is different from the first concert
-                    }
-                    return `<td class="${className}">${song}</td>`;
-                } else {
-                    return '<td></td>';
+                let className = '';
+                if (song && i > 0 && song !== setlists[0][i]) {
+                    className = 'pink-background'; // Add pink background if song is different from the first concert
                 }
+                return `<td class="${className}">${song}</td>`;
             });
             setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
         }
