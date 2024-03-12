@@ -7,77 +7,79 @@
 </head>
 <body>
 
-<select id="concertSelect">
-  <option value="" disabled selected>セットリストを選択してください</option>
-  <option value="小倉唯 1st LIVE「HAPPY JAM」">小倉唯 1st LIVE「HAPPY JAM」</option>
-  <option value="小倉唯 1st LIVE TOUR「High-Touch☆Summer」">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
-  <option value="小倉唯 LIVE「Smiley Cherry」">小倉唯 LIVE「Smiley Cherry」</option>
-  <option value="小倉唯 2nd LIVE TOUR「Platinum Airline☆」">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
-  <option value="小倉唯 LIVE TOUR 2019「Step Apple」">小倉唯 LIVE TOUR 2019「Step Apple」</option>
-  <option value="小倉唯 LIVE 2021「#Re♥LOVEcall」">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
-  <option value="小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
-  <option value="小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+<select id="concertSelector">
+  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
   <option value="KING SUPER LIVE">KING SUPER LIVE</option>
   <option value="Animelo Summer Live">Animelo Summer Live</option>
   <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
 </select>
 
-<div id="setlistContainer"></div>
+<div id="setlist"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const concertSelect = document.getElementById('concertSelect');
-    const setlistContainer = document.getElementById('setlistContainer');
+    const concertSelector = document.getElementById('concertSelector');
+    const setlistDiv = document.getElementById('setlist');
 
-    concertSelect.addEventListener('change', function() {
-        const selectedConcert = concertSelect.value;
-        setlistContainer.innerHTML = ''; // Clear previous setlist
+    concertSelector.addEventListener('change', function() {
+        const selectedConcert = this.value;
 
-        fetchSetlist(selectedConcert);
+        // Fetch the setlist files
+        fetchSetlist(selectedConcert)
+            .then(data => {
+                setlistDiv.innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error fetching setlist:', error);
+                setlistDiv.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
+            });
     });
 
     function fetchSetlist(selectedConcert) {
-        fetch('setlist/')
-            .then(response => response.text()) // HTML形式でのレスポンスを取得
-            .then(html => {
-                const parser = new DOMParser();
-                const doc = parser.parseFromString(html, 'text/html');
-                const links = doc.querySelectorAll('a');
-
-                // ファイル名を抽出
-                const setlists = Array.from(links)
-                    .map(link => link.textContent.trim())
-                    .filter(setlist => setlist.includes(selectedConcert));
-
-                if (setlists.length > 0) {
-                    setlists.forEach(setlist => {
-                        fetch(`setlist/${setlist}`)
+        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+            .then(response => response.json())
+            .then(files => {
+                const setlistPromises = [];
+                files.forEach(file => {
+                    if (file.type === 'file' && file.name.endsWith('.txt')) {
+                        setlistPromises.push(fetch(`setlist/${file.name}`)
                             .then(response => response.text())
                             .then(data => {
-                                const lines = data.split('\n');
-                                const date = lines[0].trim();
-                                const title = lines[1].trim();
-                                const venue = lines[2].trim();
-
-                                let formattedDate = new Date(date).toLocaleDateString('ja-JP', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-                                setlistContainer.innerHTML += `<p>${formattedDate}</p>`;
-                                setlistContainer.innerHTML += `<p><strong>${title}</strong></p>`;
-                                setlistContainer.innerHTML += `<p>@${venue}</p>`;
-
-                                for (let i = 4; i < lines.length; i++) {
-                                    const line = lines[i].trim();
-                                    if (line !== '' && !line.startsWith('<')) {
-                                        setlistContainer.innerHTML += `<p>${line}</p>`;
-                                    }
+                                if (data.includes(selectedConcert)) {
+                                    return parseSetlist(data);
+                                } else {
+                                    return '';
                                 }
                             })
-                            .catch(error => console.error('Error fetching setlist:', error));
-                    });
-                } else {
-                    setlistContainer.innerHTML = '<p>No setlist found for the selected concert.</p>';
-                }
-            })
-            .catch(error => console.error('Error fetching setlist index:', error));
+                            .catch(error => {
+                                console.error('Error fetching setlist file:', error);
+                                return '<p>Error fetching setlist. Please try again later.</p>';
+                            }));
+                    }
+                });
+                return Promise.all(setlistPromises);
+            });
+    }
+
+    function parseSetlist(setlistData) {
+        const lines = setlistData.split('\n');
+        let setlistHTML = '';
+
+        for (let i = 3; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line !== '') {
+                setlistHTML += `<p>${line}</p>`;
+            }
+        }
+
+        return setlistHTML;
     }
 });
 </script>
