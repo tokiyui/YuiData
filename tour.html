@@ -73,31 +73,35 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 
-    function fetchSetlist(selectedConcert) {
-        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
-            .then(response => response.json())
-            .then(files => {
-                const setlistPromises = [];
-                files.forEach(file => {
-                    if (file.type === 'file' && file.name.endsWith('.txt')) {
-                        setlistPromises.push(fetch(`setlist/${file.name}`)
-                            .then(response => response.text())
-                            .then(data => {
-                                if (data.includes(selectedConcert)) {
-                                    console.log(data)
-                                    return parseSetlist(file.name, data);
-                                    
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching setlist file:', error);
-                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
-                            }));
-                    }
-                });
-                return Promise.all(setlistPromises);
+function fetchSetlist(selectedConcert) {
+    return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+        .then(response => response.json())
+        .then(files => {
+            const setlistPromises = [];
+            files.forEach(file => {
+                if (file.type === 'file' && file.name.endsWith('.txt')) {
+                    const setlistPromise = fetch(`setlist/${file.name}`)
+                        .then(response => response.text())
+                        .then(data => {
+                            if (data.includes(selectedConcert)) {
+                                console.log(data)
+                                return parseSetlist(file.name, data);
+                            } else {
+                                return null; // セットリストが見つからない場合はnullを返す
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error fetching setlist file:', error);
+                            return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
+                        });
+                    setlistPromises.push(setlistPromise);
+                }
             });
-    }
+            return Promise.all(setlistPromises)
+                .then(setlists => setlists.filter(setlist => setlist !== null)); // nullをフィルタリングして配列に含めない
+        });
+}
+
 
     function parseSetlist(fileName, setlistData) {
         const lines = setlistData.split('\n');
