@@ -110,7 +110,48 @@ document.addEventListener('DOMContentLoaded', function() {
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
         const setlist = lines.slice(3).filter(line => line.trim() !== ''); // Setlist lines
-        return { date, title, venue, setlist };
+
+        // Variables for handling medleys, encores, etc.
+        let isMedley = false;
+        let isEncore = false;
+        let medleyCount = 0;
+        let encoreCount = 0;
+
+        const parsedSetlist = [];
+
+        for (let i = 0; i < setlist.length; i++) {
+            const line = setlist[i].trim();
+            if (line === '<MEDLEY>') {
+                isMedley = true;
+                medleyCount++;
+                parsedSetlist.push(`<p>${medleyCount}. 【メドレーコーナー】</p>`);
+            } else if (line === '<MEDLEY END>') {
+                isMedley = false;
+            } else if (line === '<ENCORE>') {
+                isEncore = true;
+                encoreCount = 0;
+                parsedSetlist.push('<p>【アンコール】</p>');
+            } else if (line === '<W ENCORE>') {
+                parsedSetlist.push('<p>【ダブルアンコール】</p>');
+            } else if (line === '<FAN CLUB>') {
+                parsedSetlist.push('<p>【ファンクラブ限定】</p>');
+            } else {
+                let formattedLine = '';
+                if (line !== '') {
+                    if (isMedley) {
+                        formattedLine = `<p style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                    } else if (isEncore) {
+                        encoreCount++;
+                        formattedLine = `<p>EC${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                    } else {
+                        formattedLine = `<p>${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                    }
+                }
+                parsedSetlist.push(formattedLine);
+            }
+        }
+
+        return { date, title, venue, setlist: parsedSetlist };
     }
 
     function displaySetlists(dates, titles, venues, setlists) {
