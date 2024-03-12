@@ -1,95 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Song Checker</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Setlist Checker</title>
+<script>
+    // GitHub API を呼び出して処理を行う関数
+    async function searchSongs() {
+        // チェックボックスの状態を取得
+        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+        const checkedIndexes = Array.from(checkboxes).map((checkbox, index) => checkbox.checked ? index : null).filter(index => index !== null);
+
+        // チェックされたtxtファイルの本文2行目を取得
+        const textContents = await Promise.all(checkedIndexes.map(async index => {
+            const response = await fetch(`https://raw.githubusercontent.com/tokiyui/YuiData/master/setlist/setlist${index + 1}.txt`);
+            const text = await response.text();
+            return text.split('\n')[1]; // 2行目のみ取得
+        }));
+
+        // song.txtの内容を取得
+        const songResponse = await fetch('https://raw.githubusercontent.com/tokiyui/YuiData/master/song.txt');
+        const songText = await songResponse.text();
+        const songs = songText.trim().split('\n').map(line => line.split(','));
+
+        // テーブルを構築
+        const table = document.getElementById('result-table');
+        table.innerHTML = ''; // テーブルをクリア
+
+        // テーブルヘッダを追加
+        const headerRow = table.insertRow();
+        headerRow.insertCell().textContent = '曲名';
+        checkedIndexes.forEach(index => {
+            headerRow.insertCell().textContent = `setlist${index + 1}.txt`;
+        });
+
+        // チェックされたtxtファイルとsong.txtの内容を照合
+        songs.forEach(song => {
+            const row = table.insertRow();
+            const songName = song[0];
+            row.insertCell().textContent = songName;
+
+            checkedIndexes.forEach(index => {
+                const checkboxText = textContents[index];
+                const isInSetlist = checkboxText && checkboxText.includes(songName);
+                row.insertCell().textContent = isInSetlist ? 'O' : '-';
+            });
+        });
+    }
+</script>
 </head>
 <body>
-    <h1>Song Checker</h1>
-    <form id="songCheckerForm">
-        <fieldset>
-            <legend>Choose Setlists</legend>
-            <div id="setlistCheckboxes">
-                <!-- Setlist checkboxes will be populated here -->
-            </div>
-        </fieldset>
-        <button type="button" onclick="searchSongs()">Search Songs</button>
-    </form>
-    <div id="searchResults">
-        <!-- Search results will be displayed here -->
-    </div>
-
-    <script>
-        async function fetchSetlists() {
-            const response = await fetch('https://api.github.com/repos/tokiyui/YuiData/contents/setlist');
-            const data = await response.json();
-            return data;
-        }
-
-        async function fetchFileContent(path) {
-            const response = await fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/${path}`);
-            const data = await response.json();
-            const content = atob(data.content); // Decode base64 content
-            return content;
-        }
-
-        async function searchSongs() {
-            const setlistCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
-            const setlists = await fetchSetlists();
-            const searchResults = document.getElementById('searchResults');
-
-            if (setlistCheckboxes.length === 0) {
-                searchResults.innerHTML = '<p>Please select at least one setlist.</p>';
-                return;
-            }
-
-            const setlistPaths = Array.from(setlistCheckboxes).map(checkbox => checkbox.value);
-
-            const results = [];
-            for (const setlistPath of setlistPaths) {
-                const setlistContent = await fetchFileContent(setlistPath);
-                const setlistLines = setlistContent.split('\n');
-                const songFile = setlistLines[1].trim();
-
-                if (!songFile.endsWith('.txt')) {
-                    results.push(`<p>Invalid song file path in ${setlistPath}.</p>`);
-                    continue;
-                }
-
-                const songContent = await fetchFileContent(`setlist/${songFile}`);
-                const songLines = songContent.split('\n');
-
-                for (const line of songLines) {
-                    const [songName] = line.split(',');
-                    const found = setlistLines.some(setlistLine => setlistLine.trim().startsWith(songName.trim()));
-                    results.push(`<p>${songName}: ${found ? 'Exists' : 'Not Found'}</p>`);
-                }
-            }
-
-            searchResults.innerHTML = results.join('');
-        }
-
-        async function populateSetlistCheckboxes() {
-            const setlists = await fetchSetlists();
-            const setlistCheckboxes = document.getElementById('setlistCheckboxes');
-
-            setlists.forEach(setlist => {
-                const checkbox = document.createElement('input');
-                checkbox.type = 'checkbox';
-                checkbox.value = setlist.path;
-                checkbox.id = setlist.name;
-                const label = document.createElement('label');
-                label.htmlFor = setlist.name;
-                label.textContent = setlist.name;
-                const br = document.createElement('br');
-                setlistCheckboxes.appendChild(checkbox);
-                setlistCheckboxes.appendChild(label);
-                setlistCheckboxes.appendChild(br);
-            });
-        }
-
-        populateSetlistCheckboxes();
-    </script>
+<h1>Setlist Checker</h1>
+<p>以下のチェックボックスにチェックを入れてください。</p>
+<div id="checkboxes">
+    <!-- チェックボックスを自動生成 -->
+    <!-- setlist/以下にあるtxtファイルの数だけチェックボックスを生成 -->
+</div>
+<button onclick="searchSongs()">検索</button>
+<table id="result-table" border="1">
+    <!-- 検索結果がここに表示されます -->
+</table>
+<script>
+    // ページロード時にチェックボックスを生成
+    async function loadCheckboxes() {
+        const checkboxesContainer = document.getElementById('checkboxes');
+        const response = await fetch('https://api.github.com/repos/tokiyui/YuiData/contents/setlist');
+        const data = await response.json();
+        data.forEach((file, index) => {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = `setlist${index + 1}`;
+            const label = document.createElement('label');
+            label.htmlFor = `setlist${index + 1}`;
+            label.textContent = `setlist${index + 1}.txt`;
+            checkboxesContainer.appendChild(checkbox);
+            checkboxesContainer.appendChild(label);
+            checkboxesContainer.appendChild(document.createElement('br'));
+        });
+    }
+    loadCheckboxes();
+</script>
 </body>
 </html>
