@@ -4,26 +4,60 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>セットリスト</title>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+</style>
 </head>
 <body>
+
+<select id="concertSelector">
+  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
+  <option value="Animelo Summer Live">Animelo Summer Live</option>
+  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
+</select>
 
 <div id="setlistContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const concertSelector = document.getElementById('concertSelector');
     const setlistContainer = document.getElementById('setlistContainer');
-    // 選択されたコンサートのリスト
-    const selectedConcerts = ['HAPPY JAM', 'High-Touch☆Summer', 'Smiley Cherry']; // 例としていくつかのコンサートを追加
 
-    // 各コンサートのセットリストを取得し、setlistContainerに追加
-    selectedConcerts.forEach(concert => {
-        fetchSetlist(concert)
+    concertSelector.addEventListener('change', function() {
+        const selectedConcert = this.value;
+
+        // Fetch the setlist files
+        fetchSetlist(selectedConcert)
             .then(data => {
-                setlistContainer.innerHTML += data;
+                setlistContainer.innerHTML = data;
             })
             .catch(error => {
                 console.error('Error fetching setlist:', error);
-                setlistContainer.innerHTML += '<p>Error fetching setlist for ' + concert + '. Please try again later.</p>';
+                setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
             });
     });
 
@@ -31,28 +65,33 @@ document.addEventListener('DOMContentLoaded', function() {
         return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
             .then(response => response.json())
             .then(files => {
-                let setlistHTML = ''; // 各公演のセットリストを保持する変数
-
+                const setlistPromises = [];
                 files.forEach(file => {
                     if (file.type === 'file' && file.name.endsWith('.txt')) {
-                        fetch(`setlist/${file.name}`)
+                        const setlistPromise = fetch(`setlist/${file.name}`)
                             .then(response => response.text())
                             .then(data => {
                                 if (data.includes(selectedConcert)) {
-                                    setlistHTML += parseSetlist(data);
+                                    return parseSetlist(file.name, data);
+                                } else {
+                                    return null; // If setlist not found, return null
                                 }
                             })
                             .catch(error => {
                                 console.error('Error fetching setlist file:', error);
-                                setlistHTML += '<p>Error fetching setlist. Please try again later.</p>';
+                                return '<p>Error fetching setlist. Please try again later.</p>';
                             });
+                        setlistPromises.push(setlistPromise);
                     }
                 });
-                return setlistHTML;
+                return Promise.all(setlistPromises)
+                    .then(setlists => {
+                        return setlists.filter(setlist => setlist !== null).join('');
+                    }); // Filter out nulls and join the setlist HTML
             });
     }
 
-    function parseSetlist(setlistData) {
+    function parseSetlist(fileName, setlistData) {
         const lines = setlistData.split('\n');
         let setlistHTML = '';
 
@@ -60,16 +99,14 @@ document.addEventListener('DOMContentLoaded', function() {
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
 
-        setlistHTML += `<p>日付: ${date}</p>`;
-        setlistHTML += `<p>タイトル: ${title}</p>`;
-        setlistHTML += `<p>会場: ${venue}</p>`;
-        setlistHTML += `<p>セットリスト:</p>`;
+        setlistHTML += `<div><h3>${title}</h3><p>Date: ${date}</p><p>Venue: ${venue}</p><ul>`;
         for (let i = 3; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line !== '') {
-                setlistHTML += `<p>${line}</p>`;
+                setlistHTML += `<li>${line}</li>`;
             }
         }
+        setlistHTML += `</ul></div>`;
 
         return setlistHTML;
     }
