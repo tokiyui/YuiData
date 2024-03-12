@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(data => {
                                 if (data.includes(selectedConcert)) {
                                     return parseSetlist(file.name, data);
-                                    console.log(file.name, data);
+                                    
                                 } else {
                                     return '';
                                 }
@@ -108,6 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const venue = lines[2].trim(); // Venue line
 
         setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
+        console.log(setlistHTML);
         for (let i = 3; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line !== '') {
