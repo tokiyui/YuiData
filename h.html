@@ -109,41 +109,46 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = lines[0].trim(); // Date line
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
-        const setlist = lines.slice(3).filter(line => line.trim() !== ''); // Setlist lines
+        const setlist = [];
 
-        // Process setlist for encore and medley
-        const processedSetlist = [];
-        let isEncore = false;
         let isMedley = false;
-        let songCount = 0;
+        let isEncore = false;
         let medleyCount = 0;
         let encoreCount = 0;
+        let songCount = 0;
 
-        setlist.forEach(line => {
-            if (line === '<ENCORE>') {
-                isEncore = true;
-                songCount = 0;
-                processedSetlist.push('<ENCORE>');
-            } else if (line === '<MEDLEY>') {
+        for (let i = 4; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line === '<MEDLEY>') {
                 isMedley = true;
-                medleyCount++;
-                processedSetlist.push(`<MEDLEY>【メドレー${medleyCount}】`);
+                medleyCount++; // Increment medley count
+                setlist.push(`${songCount + medleyCount}. 【メドレーコーナー】`);
             } else if (line === '<MEDLEY END>') {
-                isMedley = false;
+               isMedley = false;
+            } else if (line === '<ENCORE>') {
+                isEncore = true;
+                encoreCount = 0; // Reset encore song count when new encore starts
+                setlist.push('【アンコール】');
+            } else if (line === '<W ENCORE>') {
+                setlist.push('【ダブルアンコール】');
+            } else if (line === '<FAN CLUB>') {
+                setlist.push('【ファンクラブ限定】');
             } else {
-                if (isEncore) {
-                    encoreCount++;
-                    processedSetlist.push(`EC${encoreCount}. ${line}`);
-                } else if (isMedley) {
-                    processedSetlist.push(line);
-                } else {
-                    songCount++;
-                    processedSetlist.push(`${songCount}. ${line}`);
+                if (line !== '') { // Check if line is not empty
+                    let prefix = '';
+                    if (isMedley) {
+                        prefix = 'MEDLEY';
+                    } else if (isEncore) {
+                        prefix = `EC${++encoreCount}.`;
+                    } else {
+                        prefix = `${++songCount}.`;
+                    }
+                    setlist.push(`${prefix} ${line}`);
                 }
             }
-        });
+        }
 
-        return { date, title, venue, setlist: processedSetlist };
+        return { date, title, venue, setlist };
     }
 
     function displaySetlists(dates, titles, venues, setlists) {
