@@ -40,113 +40,126 @@ th {
   <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
 </select>
 
-<table id="setlistTable">
-  <thead>
-    <tr>
-      <th>日付</th>
-      <th>タイトル</th>
-      <th>会場</th>
-      <th>セットリスト</th>
-    </tr>
-  </thead>
-  <tbody id="setlistBody">
-  </tbody>
+<table>
+  <tr id="dateRow"></tr>
+  <tr id="titleRow"></tr>
+  <tr id="venueRow"></tr>
+  <tr id="setlistRow"></tr>
 </table>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
-    const setlistTable = document.getElementById('setlistTable');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
-
-        // Fetch the setlist files
-        fetchSetlist(selectedConcert)
-            .then(data => {
-                setlistTable.innerHTML = data;
-            })
-            .catch(error => {
-                console.error('Error fetching setlist:', error);
-                setlistTable.innerHTML = '<tbody><tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr></tbody>';
-            });
+        fetchSetlist(selectedConcert);
     });
 
     function fetchSetlist(selectedConcert) {
-        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+        fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
             .then(response => response.json())
             .then(files => {
-                const setlistPromises = [];
-                files.forEach(file => {
+                const setlistPromises = files.map(file => {
                     if (file.type === 'file' && file.name.endsWith('.txt')) {
-                        const setlistPromise = fetch(`setlist/${file.name}`)
+                        return fetch(`setlist/${file.name}`)
                             .then(response => response.text())
                             .then(data => {
                                 if (data.includes(selectedConcert)) {
                                     return parseSetlist(file.name, data);
                                 } else {
-                                    return null; // セットリストが見つからない場合はnullを返す
+                                    return null;
                                 }
                             })
                             .catch(error => {
                                 console.error('Error fetching setlist file:', error);
-                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
+                                return '<td colspan="4">Error fetching setlist. Please try again later.</td>';
                             });
-                        setlistPromises.push(setlistPromise);
                     }
                 });
-                return Promise.all(setlistPromises)
-                    .then(setlists => setlists.filter(setlist => setlist !== null)); // nullをフィルタリングして配列に含めない
+                Promise.all(setlistPromises)
+                    .then(setlists => {
+                        const dates = [];
+                        const titles = [];
+                        const venues = [];
+                        const setlistsData = [];
+                        setlists.forEach(setlist => {
+                            if (setlist) {
+                                dates.push(setlist.date);
+                                titles.push(setlist.title);
+                                venues.push(setlist.venue);
+                                setlistsData.push(setlist.setlist);
+                            }
+                        });
+                        displaySetlists(dates, titles, venues, setlistsData);
+                    });
             });
     }
 
     function parseSetlist(fileName, setlistData) {
         const lines = setlistData.split('\n');
-        let setlistHTML = '';
-
         const date = lines[0].trim(); // Date line
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
+        const setlist = lines.slice(3).filter(line => line.trim() !== '').map(line => line.trim()).join('<hr>'); // Setlist lines with horizontal rule between songs
+        return { date, title, venue, setlist };
+    }
 
-        setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
-        
-        let isMedley = false;
-        let medleyCount = 0;
-        let isEncore = false;
-        let encoreCount = 0;
+    function displaySetlists(dates, titles, venues, setlistsData) {
+        const dateRow = document.getElementById('dateRow');
+        const titleRow = document.getElementById('titleRow');
+        const venueRow = document.getElementById('venueRow');
+        const setlistRow = document.getElementById('setlistRow');
 
-        for (let i = 3; i < lines.length; i++) {
+        dateRow.innerHTML = dates.map(date => `<th>${date}</th>`).join('');
+        titleRow.innerHTML = titles.map(title => `<td>${title}</td>`).join('');
+        venueRow.innerHTML = venues.map(venue => `<td>${venue}</td>`).join('');
+        setlistRow.innerHTML = setlistsData.map(setlist => `<td>${processSetlist(setlist)}</td>`).join('');
+    }
+
+    function processSetlist(setlist) {
+        let songCount = 0; // Counter for regular songs
+        let medleyCount = 0; // Counter for medleys
+        let encoreCount = 0; // Counter for encore songs
+        let isMedley = false; // Flag to track if currently in a medley section
+        let isEncore = false; // Flag to track if currently in an encore section
+
+        let setlistHTML = '';
+
+        const lines = setlist.split('<hr>'); // Split setlist by horizontal rule
+
+        for (let i = 0; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line === '<MEDLEY>') {
                 isMedley = true;
                 medleyCount++; // Increment medley count
-                setlistHTML += `${songCount + medleyCount}. 【メドレーコーナー】<br>`;
+                setlistHTML += `<p>${songCount + medleyCount}. 【メドレーコーナー】</p>`;
             } else if (line === '<MEDLEY END>') {
-                isMedley = false;
+               isMedley = false;
             } else if (line === '<ENCORE>') {
                 isEncore = true;
                 encoreCount = 0; // Reset encore song count when new encore starts
-                setlistHTML += '【アンコール】<br>';
+                setlistHTML += '<p>【アンコール】</p>';
             } else if (line === '<W ENCORE>') {
-                setlistHTML += '【ダブルアンコール】<br>';
+                setlistHTML += '<p>【ダブルアンコール】</p>';
             } else if (line === '<FAN CLUB>') {
-                setlistHTML += '【ファンクラブ限定】<br>';
+                setlistHTML += '<p>【ファンクラブ限定】</p>';
             } else {
                 if (line !== '') { // Check if line is not empty
                     if (isMedley) {
                         // Display medley song only if it's not empty
-                        setlistHTML += `<a href="search.html?name=${encodeURIComponent(line)}">${line}</a><br>`;
+                        setlistHTML += `<p style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
                     } else if (isEncore) {
-                        let prefix = 'EC';
+                        let prefix = 'EC'
                         encoreCount++; // Increment encore song count
-                        setlistHTML += `${prefix}${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a><br>`;
+                        setlistHTML += `<p>${prefix}${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
                     } else {
-                        setlistHTML += `${line}<br>`;
+                        songCount++; // Increment encore song count
+                        setlistHTML += `<p>${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
                     }
                 }
             }
         }
-        setlistHTML += `</td></tr>`;
         return setlistHTML;
     }
 });
