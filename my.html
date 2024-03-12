@@ -3,72 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Song in Setlist</title>
+    <title>Song Checker</title>
 </head>
 <body>
-    <h1>Search Song in Setlist</h1>
-    <div id="fileList"></div>
-    <button onclick="searchSongs()">Search Songs</button>
-    <div id="searchResults"></div>
+    <h1>Song Checker</h1>
+    <form id="songCheckerForm">
+        <fieldset>
+            <legend>Choose Setlists</legend>
+            <div id="setlistCheckboxes">
+                <!-- Setlist checkboxes will be populated here -->
+            </div>
+        </fieldset>
+        <button type="button" onclick="searchSongs()">Search Songs</button>
+    </form>
+    <div id="searchResults">
+        <!-- Search results will be displayed here -->
+    </div>
 
     <script>
-        // Function to fetch files from GitHub repository
-        async function fetchFiles() {
-            const repoUrl = "https://api.github.com/repos/tokiyui/YuiData/contents/setlist";
-            const response = await fetch(repoUrl);
+        async function fetchSetlists() {
+            const response = await fetch('https://api.github.com/repos/tokiyui/YuiData/contents/setlist');
             const data = await response.json();
             return data;
         }
 
-        // Function to read file content from GitHub
-        async function readFileContent(fileUrl) {
-            const response = await fetch(fileUrl);
-            const text = await response.text();
-            return text;
+        async function fetchFileContent(path) {
+            const response = await fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/${path}`);
+            const data = await response.json();
+            const content = atob(data.content); // Decode base64 content
+            return content;
         }
 
-        // Function to search songs in selected files
         async function searchSongs() {
-            const fileList = document.querySelectorAll('input[type="checkbox"]:checked');
+            const setlistCheckboxes = document.querySelectorAll('input[type="checkbox"]:checked');
+            const setlists = await fetchSetlists();
             const searchResults = document.getElementById('searchResults');
-            searchResults.innerHTML = "";
 
-            for (const fileCheckbox of fileList) {
-                const filePath = fileCheckbox.value;
-                const fileContent = await readFileContent(filePath);
-                const lines = fileContent.split('\n');
-                const songNames = lines.map(line => line.split(',')[0].trim());
-                
-                const songListUrl = "https://raw.githubusercontent.com/tokiyui/YuiData/main/" + filePath.replace(' ', '%20').replace('setlist/', '');
-                const songListContent = await readFileContent(songListUrl);
-                const songsInFile = songListContent.split('\n');
+            if (setlistCheckboxes.length === 0) {
+                searchResults.innerHTML = '<p>Please select at least one setlist.</p>';
+                return;
+            }
 
-                const foundSongs = [];
-                for (const songName of songNames) {
-                    if (songsInFile.includes(songName)) {
-                        foundSongs.push(songName);
-                    }
+            const setlistPaths = Array.from(setlistCheckboxes).map(checkbox => checkbox.value);
+
+            const results = [];
+            for (const setlistPath of setlistPaths) {
+                const setlistContent = await fetchFileContent(setlistPath);
+                const setlistLines = setlistContent.split('\n');
+                const songFile = setlistLines[1].trim();
+
+                if (!songFile.endsWith('.txt')) {
+                    results.push(`<p>Invalid song file path in ${setlistPath}.</p>`);
+                    continue;
                 }
 
-                searchResults.innerHTML += `<h2>${filePath}</h2>`;
-                searchResults.innerHTML += "<ul>";
-                foundSongs.forEach(song => {
-                    searchResults.innerHTML += `<li>${song}</li>`;
-                });
-                searchResults.innerHTML += "</ul>";
+                const songContent = await fetchFileContent(`setlist/${songFile}`);
+                const songLines = songContent.split('\n');
+
+                for (const line of songLines) {
+                    const [songName] = line.split(',');
+                    const found = setlistLines.some(setlistLine => setlistLine.trim().startsWith(songName.trim()));
+                    results.push(`<p>${songName}: ${found ? 'Exists' : 'Not Found'}</p>`);
+                }
             }
+
+            searchResults.innerHTML = results.join('');
         }
 
-        // Initialize the file list with checkboxes
-        window.onload = async function() {
-            const files = await fetchFiles();
-            const fileListDiv = document.getElementById('fileList');
-            files.forEach(file => {
-                if (file.name.endsWith('.txt')) {
-                    fileListDiv.innerHTML += `<input type="checkbox" value="${file.path}">${file.name}<br>`;
-                }
+        async function populateSetlistCheckboxes() {
+            const setlists = await fetchSetlists();
+            const setlistCheckboxes = document.getElementById('setlistCheckboxes');
+
+            setlists.forEach(setlist => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.value = setlist.path;
+                checkbox.id = setlist.name;
+                const label = document.createElement('label');
+                label.htmlFor = setlist.name;
+                label.textContent = setlist.name;
+                const br = document.createElement('br');
+                setlistCheckboxes.appendChild(checkbox);
+                setlistCheckboxes.appendChild(label);
+                setlistCheckboxes.appendChild(br);
             });
         }
+
+        populateSetlistCheckboxes();
     </script>
 </body>
 </html>
