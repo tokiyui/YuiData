@@ -38,9 +38,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
     function fetchSetlist(selectedConcert) {
         fetch('setlist/')
-            .then(response => response.text())
-            .then(data => {
-                const setlists = data.filter(setlist => setlist.includes(selectedConcert));
+            .then(response => response.text()) // HTML形式でのレスポンスを取得
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const links = doc.querySelectorAll('a');
+
+                // ファイル名を抽出
+                const setlists = Array.from(links)
+                    .map(link => link.textContent.trim())
+                    .filter(setlist => setlist.includes(selectedConcert));
 
                 if (setlists.length > 0) {
                     setlists.forEach(setlist => {
