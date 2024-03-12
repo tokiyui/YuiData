@@ -26,85 +26,55 @@ th {
 </head>
 <body>
 
-<select id="concertSelector">
-  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
-  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
-  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
-  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
-  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
-  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
-  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
-  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
-  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
-  <option value="Animelo Summer Live">Animelo Summer Live</option>
-  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
-</select>
-
-<div id="setlistContainer"></div>
+<div id="concertContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const concertSelector = document.getElementById('concertSelector');
-    const setlistContainer = document.getElementById('setlistContainer');
+    const concerts = [
+        { title: '小倉唯 1st LIVE「HAPPY JAM」', date: '日付1', venue: '会場1', setlist: 'セットリスト1' },
+        { title: '小倉唯 1st LIVE TOUR「High-Touch☆Summer」', date: '日付2', venue: '会場2', setlist: 'セットリスト2' },
+        { title: '小倉唯 LIVE「Smiley Cherry」', date: '日付3', venue: '会場3', setlist: 'セットリスト3' }
+        // 他の公演の情報をここに追加
+    ];
 
-    concertSelector.addEventListener('change', function() {
-        const selectedConcert = this.value;
+    const concertContainer = document.getElementById('concertContainer');
 
-        // Fetch the setlist files
-        fetchSetlist(selectedConcert)
-            .then(data => {
-                setlistContainer.innerHTML = data;
-                console.log(data)
-            })
-            .catch(error => {
-                console.error('Error fetching setlist:', error);
-                setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
-            });
-    });
+    renderConcerts(concerts);
 
-    function fetchSetlist(selectedConcert) {
-        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
-            .then(response => response.json())
-            .then(files => {
-                const setlistPromises = [];
-                files.forEach(file => {
-                    if (file.type === 'file' && file.name.endsWith('.txt')) {
-                        const setlistPromise = fetch(`setlist/${file.name}`)
-                            .then(response => response.text())
-                            .then(data => {
-                                if (data.includes(selectedConcert)) {
-                                    console.log(data)
-                                    return parseSetlist(file.name, data);
-                                } else {
-                                    return null; // セットリストが見つからない場合はnullを返す
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error fetching setlist file:', error);
-                                return '<p>Error fetching setlist. Please try again later.</p>';
-                            });
-                        setlistPromises.push(setlistPromise);
-                    }
-                });
-                return Promise.all(setlistPromises)
-                    .then(setlists => setlists.filter(setlist => setlist !== null).join('')); // nullをフィルタリングして配列に含めない
-            });
-    }
+    function renderConcerts(concerts) {
+        // ヘッダー行の作成
+        let headerRow = '<tr>';
+        concerts.forEach(concert => {
+            headerRow += `<th>${concert.date}</th>`;
+        });
+        headerRow += '</tr>';
 
-    function parseSetlist(fileName, setlistData) {
-        const lines = setlistData.split('\n');
-        let setlistHTML = '';
+        // タイトル行の作成
+        let titleRow = '<tr>';
+        concerts.forEach(concert => {
+            titleRow += `<td>${concert.title}</td>`;
+        });
+        titleRow += '</tr>';
 
-        const date = lines[0].trim(); // Date line
-        const title = lines[1].trim(); // Title line
-        const venue = lines[2].trim(); // Venue line
+        // 会場行の作成
+        let venueRow = '<tr>';
+        concerts.forEach(concert => {
+            venueRow += `<td>${concert.venue}</td>`;
+        });
+        venueRow += '</tr>';
 
-        setlistHTML += `<table><tr><th>日付</th><td>${date}</td></tr>`;
-        setlistHTML += `<tr><th>タイトル</th><td>${title}</td></tr>`;
-        setlistHTML += `<tr><th>会場</th><td>${venue}</td></tr>`;
-        setlistHTML += `<tr><th>セットリスト</th><td>${lines.slice(3).join('<br>')}</td></tr></table>`;
+        // セットリスト行の作成
+        let setlistRow = '<tr>';
+        concerts.forEach(concert => {
+            setlistRow += `<td>${concert.setlist}</td>`;
+        });
+        setlistRow += '</tr>';
 
-        return setlistHTML;
+        // テーブルの作成
+        const tableHTML = `<table>${headerRow}${titleRow}${venueRow}${setlistRow}</table>`;
+
+        // HTMLに挿入
+        concertContainer.innerHTML = tableHTML;
     }
 });
 </script>
