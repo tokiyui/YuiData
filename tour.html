@@ -7,90 +7,48 @@
 </head>
 <body>
 
-<select id="artistSelect">
-  <option value="HappyJam">小倉唯 1st LIVE「HAPPY JAM」</option>
-  <option value="HighTouchSummer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
-  <option value="SmileyCherry">小倉唯 LIVE「Smiley Cherry」</option>
-  <option value="PlatinumAirline">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
-  <option value="StepApple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
-  <option value="ReLovecall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
-  <option value="MemorialEleven">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
-  <option value="MemorialAnniversary">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
-  <option value="KingSuperLive">KING SUPER LIVE</option>
-  <option value="AnimeloSummerLive">Animelo Summer Live</option>
-  <option value="AnimaxMusix">ANIMAX MUSIX</option>
+<select id="searchTerm">
+  <option value="小倉唯">小倉唯</option>
+  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
+  <option value="Animelo Summer Live">Animelo Summer Live</option>
+  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
 </select>
 
 <div id="setlistContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const artistSelect = document.getElementById('artistSelect');
+    const searchTermSelect = document.getElementById('searchTerm');
     const setlistContainer = document.getElementById('setlistContainer');
 
     // Function to fetch and display setlist
-    function fetchAndDisplaySetlist(concertID) {
-        fetch(`setlist/${concertID}.txt`)
+    function fetchAndDisplaySetlist(searchTerm) {
+        fetch('setlist/')
             .then(response => response.text())
             .then(data => {
-                const lines = data.split('\n');
-                const date = lines[0].trim(); // Date line
-                const title = lines[1].trim(); // Title line
-                const venue = lines[2].trim(); // Venue line
-
-                // Display date in the specified format
-                const dateObj = new Date(date);
-                const options = { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' };
-                const formatter = new Intl.DateTimeFormat('ja-JP', options);
-                let formattedDate = formatter.format(dateObj);
-                const weekdayIndex = formattedDate.lastIndexOf('（');
-                formattedDate = formattedDate.slice(0, weekdayIndex - 2) + `（` + formattedDate.slice(weekdayIndex - 2) + `）`;
-                setlistContainer.innerHTML = `<p>${formattedDate}</p>`;
-
-                // Display title in bold
-                setlistContainer.innerHTML += `<p><strong>${title}</strong></p>`;
-
-                // Display venue
-                setlistContainer.innerHTML += `<p>@${venue}</p>`;
-
-                // Process setlist
-                let isEncore = false;
-                let isMedley = false;
-                let songCount = 0;
-                let encoreCount = 0; // Track the number of encore songs
-                let medleyCount = 0; // Track the number of medleys
-                for (let i = 4; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (line === '<MEDLEY>') {
-                        isMedley = true;
-                        medleyCount++; // Increment medley count
-                        setlistContainer.innerHTML += `<p>${songCount + medleyCount}. 【メドレーコーナー】</p>`;
-                    } else if (line === '<MEDLEY END>') {
-                       isMedley = false;
-                    } else if (line === '<ENCORE>') {
-                        isEncore = true;
-                        encoreCount = 0; // Reset encore song count when new encore starts
-                        setlistContainer.innerHTML += '<p>【アンコール】</p>';
-                    } else if (line === '<W ENCORE>') {
-                        setlistContainer.innerHTML += '<p>【ダブルアンコール】</p>';
-                    } else if (line === '<FAN CLUB>') {
-                        setlistContainer.innerHTML += '<p>【ファンクラブ限定】</p>';
-                    } else {
-                        if (line !== '') { // Check if line is not empty
-                            if (isMedley) {
-                                // Display medley song only if it's not empty
-                                setlistContainer.innerHTML += `<p style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
-                            } else if (isEncore) {
-                                let prefix = 'EC'
-                                encoreCount++; // Increment encore song count
-                                setlistContainer.innerHTML += `<p>${prefix}${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
-                            } else {
-                                songCount++; // Increment encore song count
-                                setlistContainer.innerHTML += `<p>${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
-                            }
-                        }
+                const fileList = data.split('\n');
+                let promises = [];
+                fileList.forEach(file => {
+                    if (file !== '') {
+                        promises.push(
+                            fetch(`setlist/${file}`)
+                                .then(response => response.text())
+                                .then(content => {
+                                    if (content.includes(searchTerm)) {
+                                        setlistContainer.innerHTML += `<p><strong>${file}</strong></p>`;
+                                        setlistContainer.innerHTML += `<pre>${content}</pre>`;
+                                    }
+                                })
+                                .catch(error => console.error('Error fetching setlist:', error))
+                        );
                     }
-                }
+                });
+                Promise.all(promises)
+                    .then(() => {
+                        if (setlistContainer.innerHTML === '') {
+                            setlistContainer.innerHTML = `<p>No setlists found containing "${searchTerm}"</p>`;
+                        }
+                    });
             })
             .catch(error => {
                 console.error('Error fetching setlist:', error);
@@ -99,13 +57,14 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listener for select change
-    artistSelect.addEventListener('change', function() {
-        const selectedValue = artistSelect.value;
+    searchTermSelect.addEventListener('change', function() {
+        const selectedValue = searchTermSelect.value;
+        setlistContainer.innerHTML = ''; // Clear previous results
         fetchAndDisplaySetlist(selectedValue);
     });
 
     // Initial fetch and display setlist
-    const initialSelectedValue = artistSelect.value;
+    const initialSelectedValue = searchTermSelect.value;
     fetchAndDisplaySetlist(initialSelectedValue);
 });
 </script>
