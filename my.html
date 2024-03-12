@@ -1,90 +1,96 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Setlist Checker</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Song Search</title>
 </head>
 <body>
-<h1>Setlist Checker</h1>
-<div id="checkboxes"></div>
-<button id="searchButton">検索</button>
-<div id="searchResults"></div>
+    <h1>Song Search</h1>
+    <form id="searchForm">
+        <fieldset>
+            <legend>Select Files</legend>
+            <!-- Dynamically populate checkboxes with file names -->
+            <div id="checkboxes"></div>
+        </fieldset>
+        <button type="button" onclick="searchSongs()">Search Songs</button>
+    </form>
+    <div id="results"></div>
 
-<script>
-// GitHub APIのベースURL
-const baseUrl = 'https://api.github.com/repos/';
+    <script>
+        // Function to fetch file names from setlist/ directory
+        async function fetchFileNames() {
+            const response = await fetch('setlist/');
+            const html = await response.text();
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const files = Array.from(doc.querySelectorAll('a')).map(a => a.textContent.trim());
+            return files.filter(file => file.endsWith('.txt'));
+        }
 
-// リポジトリ情報
-const owner = 'tokiyui'; // リポジトリの所有者名
-const repo = 'YuiData'; // リポジトリ名
-const path = 'setlist/'; // チェックするファイルが含まれているディレクトリパス
+        // Function to populate checkboxes with file names
+        async function populateCheckboxes() {
+            const files = await fetchFileNames();
+            const checkboxesDiv = document.getElementById('checkboxes');
+            files.forEach(file => {
+                const checkbox = document.createElement('input');
+                checkbox.type = 'checkbox';
+                checkbox.name = 'file';
+                checkbox.value = file;
+                const label = document.createElement('label');
+                label.textContent = file;
+                label.appendChild(checkbox);
+                checkboxesDiv.appendChild(label);
+                checkboxesDiv.appendChild(document.createElement('br'));
+            });
+        }
 
-// GitHub APIを使用して指定されたパスのファイルを取得する関数
-async function getFiles(path) {
-  const url = `${baseUrl}${owner}/${repo}/contents/${path}`;
-  const response = await fetch(url);
-  const data = await response.json();
-  return data;
-}
+        // Function to search songs based on selected checkboxes
+        async function searchSongs() {
+            const form = document.getElementById('searchForm');
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]:checked');
+            const selectedFiles = Array.from(checkboxes).map(checkbox => checkbox.value);
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = ''; // Clear previous results
 
-// チェックボックスとしてファイルを表示する関数
-async function displayCheckboxes() {
-  const files = await getFiles(path);
-  const checkboxesDiv = document.getElementById('checkboxes');
-  for (const file of files) {
-    if (file.type === 'file' && file.name.endsWith('.txt')) {
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.name = 'fileCheckbox';
-      checkbox.value = file.download_url;
-      checkboxesDiv.appendChild(checkbox);
-      const label = document.createElement('label');
-      label.htmlFor = 'fileCheckbox';
-      label.appendChild(document.createTextNode(file.name));
-      checkboxesDiv.appendChild(label);
-      checkboxesDiv.appendChild(document.createElement('br'));
-    }
-  }
-}
+            for (const file of selectedFiles) {
+                const response = await fetch(`setlist/${file}`);
+                const text = await response.text();
+                const lines = text.split('\n');
+                const songFile = lines[1].trim(); // Assuming the second line contains the song.txt file name
 
-// song.txtの内容を取得する関数
-async function getSongText() {
-  const response = await fetch(`${baseUrl}${owner}/${repo}/contents/song.txt`);
-  const text = await response.text();
-  return text;
-}
+                const songResponse = await fetch(`setlist/${songFile}`);
+                const songText = await songResponse.text();
+                const songs = songText.trim().split(',');
 
-// 検索を行う関数
-async function search() {
-  const checkboxes = document.querySelectorAll('input[name="fileCheckbox"]:checked');
-  const searchResultsDiv = document.getElementById('searchResults');
-  searchResultsDiv.innerHTML = ''; // 検索結果をリセット
+                const table = document.createElement('table');
+                const headerRow = document.createElement('tr');
+                const fileHeader = document.createElement('th');
+                fileHeader.textContent = file;
+                headerRow.appendChild(fileHeader);
+                const songHeader = document.createElement('th');
+                songHeader.textContent = 'Song';
+                headerRow.appendChild(songHeader);
+                table.appendChild(headerRow);
 
-  const songText = await getSongText();
-  const songLines = songText.split('\n');
+                for (const song of songs) {
+                    const row = document.createElement('tr');
+                    const cell1 = document.createElement('td');
+                    cell1.textContent = song;
+                    row.appendChild(cell1);
+                    const cell2 = document.createElement('td');
+                    const exists = lines.some(line => line.startsWith(song.trim()));
+                    cell2.textContent = exists ? 'Yes' : 'No';
+                    row.appendChild(cell2);
+                    table.appendChild(row);
+                }
 
-  checkboxes.forEach(async checkbox => {
-    const fileResponse = await fetch(checkbox.value);
-    const fileText = await fileResponse.text();
-    const fileName = checkbox.nextSibling.textContent.trim();
-    
-    songLines.forEach(async songLine => {
-      const songTitle = songLine.split(',')[0].trim();
-      const found = fileText.includes(songTitle);
+                resultsDiv.appendChild(table);
+            }
+        }
 
-      const resultDiv = document.createElement('div');
-      resultDiv.textContent = `${songTitle}: ${found ? 'あり' : 'なし'} (${fileName})`;
-      searchResultsDiv.appendChild(resultDiv);
-    });
-  });
-}
-
-// ページが読み込まれた時に呼び出す関数
-window.onload = function() {
-  displayCheckboxes();
-  document.getElementById('searchButton').addEventListener('click', search);
-};
-</script>
+        // Populate checkboxes on page load
+        populateCheckboxes();
+    </script>
 </body>
 </html>
