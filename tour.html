@@ -7,57 +7,54 @@
 </head>
 <body>
 
-<select id="setlistSelect">
+<select id="concertSelect">
   <option value="">セットリストを選択してください</option>
-  <option value="HappyJam">小倉唯 1st LIVE「HAPPY JAM」</option>
-  <option value="HighTouchSummer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
-  <option value="SmileyCherry">小倉唯 LIVE「Smiley Cherry」</option>
-  <option value="PlatinumAirline">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
-  <option value="StepApple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
-  <option value="ReLOVEcall">#Re♥LOVEcall</option>
-  <option value="Memorial2023">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~/10th Anniversary Assemble!!~</option>
-  <option value="KingSuperLive">KING SUPER LIVE</option>
-  <option value="AnimeloSummerLive">Animelo Summer Live</option>
-  <option value="AnimaxMusix">ANIMAX MUSIX</option>
+  <option value="happy_jam.txt">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="high_touch_summer.txt">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="smiley_cherry.txt">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="platinum_airline.txt">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="step_apple.txt">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="re_lovecall.txt">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="memorial_2023_11eleven.txt">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="memorial_2023_10th_anniversary.txt">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+  <option value="king_super_live.txt">KING SUPER LIVE</option>
+  <option value="animelo_summer_live.txt">Animelo Summer Live</option>
+  <option value="animax_musix.txt">ANIMAX MUSIX</option>
 </select>
 
 <div id="setlistContainer"></div>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const setlistSelect = document.getElementById('setlistSelect');
+    const concertSelect = document.getElementById('concertSelect');
     const setlistContainer = document.getElementById('setlistContainer');
 
-    setlistSelect.addEventListener('change', function() {
-        const selectedSetlist = setlistSelect.value;
+    concertSelect.addEventListener('change', function() {
+        const selectedSetlist = concertSelect.value;
+
         if (selectedSetlist) {
-            fetchSetlist(selectedSetlist);
+            fetch(`setlist/${selectedSetlist}`)
+                .then(response => response.text())
+                .then(data => {
+                    const lines = data.split('\n');
+                    let html = '<table border="1">';
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (line !== '') {
+                            html += `<tr><td>${line}</td></tr>`;
+                        }
+                    }
+                    html += '</table>';
+                    setlistContainer.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Error fetching setlist:', error);
+                    setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
+                });
         } else {
             setlistContainer.innerHTML = ''; // Clear setlist container if no setlist is selected
         }
     });
-
-    function fetchSetlist(selectedSetlist) {
-        fetch(`setlist/${selectedSetlist}.txt`)
-            .then(response => response.text())
-            .then(data => displaySetlist(data))
-            .catch(error => {
-                console.error('Error fetching setlist:', error);
-                setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
-            });
-    }
-
-    function displaySetlist(data) {
-        const lines = data.split('\n');
-        let setlistHTML = '<table>';
-        for (let i = 0; i < lines.length; i++) {
-            setlistHTML += '<tr>';
-            setlistHTML += `<td>${lines[i]}</td>`;
-            setlistHTML += '</tr>';
-        }
-        setlistHTML += '</table>';
-        setlistContainer.innerHTML = setlistHTML;
-    }
 });
 </script>
 
