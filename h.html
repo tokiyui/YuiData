@@ -110,7 +110,40 @@ document.addEventListener('DOMContentLoaded', function() {
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
         const setlist = lines.slice(3).filter(line => line.trim() !== ''); // Setlist lines
-        return { date, title, venue, setlist };
+
+        // Process setlist for encore and medley
+        const processedSetlist = [];
+        let isEncore = false;
+        let isMedley = false;
+        let songCount = 0;
+        let medleyCount = 0;
+        let encoreCount = 0;
+
+        setlist.forEach(line => {
+            if (line === '<ENCORE>') {
+                isEncore = true;
+                songCount = 0;
+                processedSetlist.push('<ENCORE>');
+            } else if (line === '<MEDLEY>') {
+                isMedley = true;
+                medleyCount++;
+                processedSetlist.push(`<MEDLEY>【メドレー${medleyCount}】`);
+            } else if (line === '<MEDLEY END>') {
+                isMedley = false;
+            } else {
+                if (isEncore) {
+                    encoreCount++;
+                    processedSetlist.push(`EC${encoreCount}. ${line}`);
+                } else if (isMedley) {
+                    processedSetlist.push(line);
+                } else {
+                    songCount++;
+                    processedSetlist.push(`${songCount}. ${line}`);
+                }
+            }
+        });
+
+        return { date, title, venue, setlist: processedSetlist };
     }
 
     function displaySetlists(dates, titles, venues, setlists) {
@@ -133,29 +166,14 @@ document.addEventListener('DOMContentLoaded', function() {
         for (let i = 0; i < maxSongs; i++) {
             const songCells = setlists.map((setlist, index) => {
                 const song = setlist[i];
-                let className = '';
                 if (song) {
-                    // Check for special song markers
-                    if (song === '<MEDLEY>') {
-                        className = 'pink-background'; // Add pink background for medley
-                        return `<td colspan="${dates.length}">${song}</td>`;
-                    } else if (song === '<MEDLEY END>') {
-                        return ''; // Skip medley end marker
-                    } else if (song === '<ENCORE>') {
-                        className = 'pink-background'; // Add pink background for encore
-                        return `<td colspan="${dates.length}">${song}</td>`;
-                    } else if (song === '<W ENCORE>') {
-                        return ''; // Skip double encore marker
-                    } else if (song === '<FAN CLUB>') {
-                        return `<td colspan="${dates.length}">${song}</td>`; // Fan club special marker
-                    } else {
-                        if (i > 0 && song !== setlists[0][i]) {
-                            className = 'pink-background'; // Add pink background if song is different from the first concert
-                        }
-                        return `<td class="${className}">${song}</td>`;
+                    let className = '';
+                    if (i > 0 && song !== setlists[0][i]) {
+                        className = 'pink-background'; // Add pink background if song is different from the first concert
                     }
+                    return `<td class="${className}">${song}</td>`;
                 } else {
-                    return `<td></td>`;
+                    return '<td></td>';
                 }
             });
             setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
