@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(data => {
                                 if (data.includes(selectedConcert)) {
                                     return parseSetlist(file.name, data);
+                                    console.log(file.name, data);
                                 } else {
                                     return '';
                                 }
