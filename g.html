@@ -42,14 +42,12 @@ th {
 
 <table id="setlistTable">
   <thead>
-    <tr>
-      <th>日付</th>
-      <th>タイトル</th>
-      <th>会場</th>
-      <th>セットリスト</th>
+    <tr id="headerRow">
+      <!-- ヘッダー行 -->
     </tr>
   </thead>
   <tbody id="setlistBody">
+    <!-- セットリストの内容 -->
   </tbody>
 </table>
 
@@ -57,6 +55,7 @@ th {
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
     const setlistTable = document.getElementById('setlistTable');
+    const headerRow = document.getElementById('headerRow');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
@@ -64,7 +63,31 @@ document.addEventListener('DOMContentLoaded', function() {
         // Fetch the setlist files
         fetchSetlist(selectedConcert)
             .then(data => {
-                setlistTable.innerHTML = data;
+                const concerts = Object.keys(data);
+                // Set header row
+                headerRow.innerHTML = '';
+                concerts.forEach(concert => {
+                    const th = document.createElement('th');
+                    th.textContent = concert;
+                    headerRow.appendChild(th);
+                });
+
+                // Populate setlist data
+                setlistTable.innerHTML = '';
+                const dates = Object.values(data);
+                dates.forEach(dateData => {
+                    const tr = document.createElement('tr');
+                    concerts.forEach(concert => {
+                        const td = document.createElement('td');
+                        if (dateData[concert]) {
+                            td.innerHTML = dateData[concert];
+                        } else {
+                            td.textContent = '-';
+                        }
+                        tr.appendChild(td);
+                    });
+                    setlistTable.appendChild(tr);
+                });
             })
             .catch(error => {
                 console.error('Error fetching setlist:', error);
@@ -76,48 +99,47 @@ document.addEventListener('DOMContentLoaded', function() {
         return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
             .then(response => response.json())
             .then(files => {
+                const setlistData = {};
                 const setlistPromises = [];
                 files.forEach(file => {
                     if (file.type === 'file' && file.name.endsWith('.txt')) {
                         const setlistPromise = fetch(`setlist/${file.name}`)
                             .then(response => response.text())
                             .then(data => {
-                                if (data.includes(selectedConcert)) {
-                                    return parseSetlist(file.name, data);
-                                } else {
-                                    return null; // If setlist not found, return null
-                                }
+                                const concerts = parseSetlist(file.name, data);
+                                setlistData[file.name] = concerts;
                             })
                             .catch(error => {
                                 console.error('Error fetching setlist file:', error);
-                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
                             });
                         setlistPromises.push(setlistPromise);
                     }
                 });
                 return Promise.all(setlistPromises)
-                    .then(setlists => setlists.filter(setlist => setlist !== null).join('')); // Filter out nulls and join the setlist HTML
+                    .then(() => setlistData);
             });
     }
 
     function parseSetlist(fileName, setlistData) {
         const lines = setlistData.split('\n');
-        let setlistHTML = '';
-
-        const date = lines[0].trim(); // Date line
-        const title = lines[1].trim(); // Title line
-        const venue = lines[2].trim(); // Venue line
-
-        setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
-        for (let i = 3; i < lines.length; i++) {
+        const concerts = {};
+        const date = lines[0].trim();
+        concerts['Date'] = date;
+        for (let i = 1; i < lines.length; i++) {
             const line = lines[i].trim();
-            if (line !== '') {
-                setlistHTML += `${line}<br>`;
+            if (line.startsWith('#')) {
+                const concertName = line.substring(1);
+                let setlist = '';
+                i++;
+                while (i < lines.length && !lines[i].startsWith('#')) {
+                    setlist += lines[i] + '<br>';
+                    i++;
+                }
+                concerts[concertName] = setlist;
+                i--; // Decrease i to correctly handle the next line in the outer loop
             }
         }
-        setlistHTML += `</td></tr>`;
-
-        return setlistHTML;
+        return concerts;
     }
 });
 </script>
