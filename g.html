@@ -46,7 +46,7 @@ th {
       <th>日付</th>
       <th>タイトル</th>
       <th>会場</th>
-      <!-- 公演タイトルを追加 -->
+      <th id="concertTitles"></th>
     </tr>
   </thead>
   <tbody id="setlistBody">
@@ -57,8 +57,8 @@ th {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
-    const setlistTable = document.getElementById('setlistTable');
     const setlistBody = document.getElementById('setlistBody');
+    const concertTitlesRow = document.getElementById('concertTitles');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
