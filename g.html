@@ -101,7 +101,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const date = lines[0].trim(); // Date line
         const title = lines[1].trim(); // Title line
         const venue = lines[2].trim(); // Venue line
-        const setlist = lines.slice(3).filter(line => line.trim() !== '').join('<br>'); // Setlist lines
+        const setlist = lines.slice(3).filter(line => line.trim() !== '').map(line => line.trim()).join('<hr>'); // Setlist lines with horizontal rule between songs
         return { date, title, venue, setlist };
     }
 
