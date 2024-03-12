@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>セットリスト</title>
+<style>
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+table, th, td {
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.pink-background {
+  background-color: pink;
+}
+</style>
+</head>
+<body>
+
+<select id="concertSelector">
+  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
+  <option value="Animelo Summer Live">Animelo Summer Live</option>
+  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
+</select>
+
+<table>
+  <tr>
+    <th></th>
+    <th id="dateRow"></th>
+  </tr>
+  <tr>
+    <td id="numberCol"></td>
+    <td id="titleRow"></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td id="venueRow"></td>
+  </tr>
+  <tr>
+    <td></td>
+    <td id="setlistRow"></td>
+  </tr>
+</table>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const concertSelector = document.getElementById('concertSelector');
+
+    concertSelector.addEventListener('change', function() {
+        const selectedConcert = this.value;
+        fetchSetlist(selectedConcert);
+    });
+
+    function fetchSetlist(selectedConcert) {
+        fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+            .then(response => response.json())
+            .then(files => {
+                const setlistPromises = files.map(file => {
+                    if (file.type === 'file' && file.name.endsWith('.txt')) {
+                        return fetch(`setlist/${file.name}`)
+                            .then(response => response.text())
+                            .then(data => {
+                                if (data.includes(selectedConcert)) {
+                                    return parseSetlist(file.name, data);
+                                } else {
+                                    return null;
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching setlist file:', error);
+                                return '<td colspan="4">Error fetching setlist. Please try again later.</td>';
+                            });
+                    }
+                });
+                Promise.all(setlistPromises)
+                    .then(setlists => {
+                        const dates = [];
+                        const titles = [];
+                        const venues = [];
+                        const setlistsData = [];
+                        setlists.forEach(setlist => {
+                            if (setlist) {
+                                dates.push(setlist.date);
+                                titles.push(setlist.title);
+                                venues.push(setlist.venue);
+                                setlistsData.push(setlist.setlist);
+                            }
+                        });
+                        displaySetlists(dates, titles, venues, setlistsData);
+                    });
+            });
+    }
+
+    function parseSetlist(fileName, setlistData) {
+        const lines = setlistData.split('\n');
+        const date = lines[0].trim(); // Date line
+        const title = lines[1].trim(); // Title line
+        const venue = lines[2].trim(); // Venue line
+        const setlist = lines.slice(3).filter(line => line.trim() !== '').map(line => line.trim()).join('<hr>'); // Setlist lines with horizontal rule between songs
+        return { date, title, venue, setlist };
+    }
+
+    function displaySetlists(dates, titles, venues, setlistsData) {
+        const dateRow = document.getElementById('dateRow');
+        const titleRow = document.getElementById('titleRow');
+        const venueRow = document.getElementById('venueRow');
+        const setlistRow = document.getElementById('setlistRow');
+        const numberCol = document.getElementById('numberCol');
+
+        dateRow.innerHTML = dates.map(date => `<th>${date}</th>`).join('');
+        titleRow.innerHTML = titles.map(title => `<td>${title}</td>`).join('');
+        venueRow.innerHTML = venues.map(venue => `<td>${venue}</td>`).join('');
+        setlistRow.innerHTML = setlistsData.map(setlist => `<td>${processSetlist(setlist)}</td>`).join('');
+
+        // Calculate number of songs for the rightmost concert
+        const numSongs = setlistsData.reduce((acc, setlist) => {
+            const lines = setlist.split('<hr>');
+            return acc + lines.filter(line => line.trim() !== '').length;
+        }, 0);
+
+        // Fill number column
+        numberCol.innerHTML = Array.from({ length: numSongs }, (_, i) => `<td>${i + 1}</td>`).join('');
+    }
+
+    function processSetlist(setlist) {
+        let songCount = 0; // Counter for regular songs
+        let medleyCount = 0; // Counter for medleys
+        let encoreCount = 0; // Counter for encore songs
+        let isMedley = false; // Flag to track if currently in a medley section
+        let isEncore = false; // Flag to track if currently in an encore section
+
+        let setlistHTML = '';
+
+        const lines = setlist.split('<hr>'); // Split setlist by horizontal rule
+
+        for (let i = 0; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line === '<MEDLEY>') {
+                isMedley = true;
+                medleyCount++; // Increment medley count
+                setlistHTML += `<p class="medley">${songCount + medleyCount}. 【メドレーコーナー】</p>`;
+            } else if (line === '<MEDLEY END>') {
+               isMedley = false;
+            } else if (line === '<ENCORE>') {
+                isEncore = true;
+                encoreCount = 0; // Reset encore song count when new encore starts
+                setlistHTML += '<p class="encore">【アンコール】</p>';
+            } else if (line === '<W ENCORE>') {
+                setlistHTML += '<p class="encore">【ダブルアンコール】</p>';
+            } else if (line === '<FAN CLUB>') {
+                setlistHTML += '<p>【ファンクラブ限定】</p>';
+            } else {
+                if (line !== '') { // Check if line is not empty
+                    if (isMedley) {
+                        // Display medley song only if it's not empty
+                        setlistHTML += `<p class="medley">${line}</p>`;
+                    } else if (isEncore) {
+                        let prefix = 'EC'
+                        encoreCount++; // Increment encore song count
+                        setlistHTML += `<p class="encore">${prefix}${encoreCount}. ${line}</p>`;
+                    } else {
+                        songCount++; // Increment encore song count
+                        setlistHTML += `<p>${songCount + medleyCount}. ${line}</p>`;
+                    }
+                }
+            }
+        }
+        return setlistHTML;
+    }
+});
+</script>
+
+</body>
+</html>
