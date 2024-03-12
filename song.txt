@@ -1,10 +1,10 @@
 Raise,只野菜摘,俊龍,藤田淳平,Raise\Strawberry JAM,2012年7月18日
-PON de Fighting!,大森祥子,大久保薫,大久保薫,Raise,2012年7月18日
-Baby Sweet Berry Love,山崎寛子,俊龍,Sizuk,Baby Sweet Berry Love,2013年5月8日
+PON de Fighting!,大森祥子,大久保薫,大久保薫,Raise\Strawberry JAM,2012年7月18日
+Baby Sweet Berry Love,山崎寛子,俊龍,Sizuk,Baby Sweet Berry Love\Strawberry JAM,2013年5月8日
 おねがいBe with you,こだまさおり,KEYTARO,KEYTARO,Baby Sweet Berry Love,2013年5月8日
-Charming Do!,磯谷佳江,奥井康介,奥井康介,Charming Do!,2014年1月29日
+Charming Do!,磯谷佳江,奥井康介,奥井康介,Charming Do!\Strawberry JAM,2014年1月29日
 パンドラ♡ショコラ,畑亜貴,小野貴光,大久保薫,Charming Do!,2014年1月29日
-Tinkling Smile,磯谷佳江,小野貴光,大久保薫,Tinkling Smile,2014年8月13日
+Tinkling Smile,磯谷佳江,小野貴光,大久保薫,Tinkling Smile\Strawberry JAM,2014年8月13日
 thx!!,前山田健一,CHI-MEY,大久保友裕\CHI-MEY,Tinkling Smile,2014年8月13日
 FUN FUN MERRY JAM,中原徹也,ARM,大久保薫,Strawberry JAM,2015年3月25日
 いつだって Call Me!,松井五郎,板垣祐介,菊谷知樹,Strawberry JAM,2015年3月25日
@@ -13,11 +13,11 @@ Get over,松井五郎,小野貴光,山口朗彦\大久保薫,Strawberry JAM,2015
 シュガーハートエイク,こだまさおり,小野貴光,山崎寛子,Strawberry JAM,2015年3月25日
 Happy Strawberry,山口朗彦\中原徹也,山口朗彦,山口朗彦,Strawberry JAM,2015年3月25日
 Sing-a-ling-a-Harmony,こだまさおり,俊龍,大久保薫,Strawberry JAM,2015年3月25日
-Honey♥Come!!,大森祥子,俊龍,大久保薫,Honey♥Come!!,2015年8月12日
+Honey♥Come!!,大森祥子,俊龍,大久保薫,Honey♥Come!!\Cherry Passport,2015年8月12日
 ガーリッシュエイジ,こだまさおり,神谷礼,河合英嗣,Honey♥Come!!,2015年8月12日
-ハイタッチ☆メモリー,ワタナベハジメ,高尾奏之介,奈良悠樹,ハイタッチ☆メモリー,2016年5月18日
+ハイタッチ☆メモリー,ワタナベハジメ,高尾奏之介,奈良悠樹,ハイタッチ☆メモリー\Cherry Passport,2016年5月18日
 TO BE ALIVE,磯谷佳江,駒形めぐみ,菊谷知樹,ハイタッチ☆メモリー,2016年5月18日
-Future Strike,服部祐希,俊龍,小高光太郎,Future Strike,2016年11月2日
+Future Strike,服部祐希,俊龍,小高光太郎,Future Strike\Cherry Passport,2016年11月2日
 winter tale,磯谷佳江,小野貴光,玉木千尋,Future Strike,2016年11月2日
 プラチナ・パスポート,磯谷佳江,森本貴大,森本貴大,Cherry Passport,2017年7月26日
 Baby"," Baby"," Baby♡,山崎寛子,山口朗彦,山口朗彦,Cherry Passport,2017年7月26日
@@ -28,11 +28,11 @@ Tomorrow,絵伊子,小野貴光,玉木千尋,Cherry Passport,2017年7月26日
 ドキドキラビリンス,Haggy Rock,Haggy Rock,玉木千尋,Cherry Passport,2017年7月26日
 Merry de Cherry,KOCHO,奥井康介,奥井康介,Cherry Passport,2017年7月26日
 エブリデイ☆ハッピーデイ,ヒラタクミ,三井真一,服部祐希,Cherry Passport,2017年7月26日
-白く咲く花,大森祥子,俊龍,玉木千尋,白く咲く花,2018年3月14日
+白く咲く花,大森祥子,俊龍,玉木千尋,白く咲く花\ホップ・ステップ・アップル,2018年3月14日
 ずっとふたりで,遠藤直弥,遠藤直弥,遠藤直弥,白く咲く花,2018年3月14日
 かけがえのない瞬間,小倉唯,三井真一,三井真一,白く咲く花,2018年3月14日
-永遠少年,磯谷佳江,小野貴光,玉木千尋,永遠少年,2018年7月25日
-Love Me × Love Me,宇田川翔,宇田川翔,宇田川翔,永遠少年,2018年7月25日
+永遠少年,磯谷佳江,小野貴光,玉木千尋,永遠少年\ホップ・ステップ・アップル,2018年7月25日
+Love Me × Love Me,宇田川翔,宇田川翔,宇田川翔,永遠少年\ホップ・ステップ・アップル,2018年7月25日
 アップル・ガール,遠藤直弥,遠藤直弥,EFFY,ホップ・ステップ・アップル,2019年2月20日
 Hop Step Jump!,大森祥子,本田正樹,本田正樹,ホップ・ステップ・アップル,2019年2月20日
 君が好きです,詩歩,佐々木裕,佐々木裕,ホップ・ステップ・アップル,2019年2月20日
@@ -43,17 +43,17 @@ FARAWAY,藤田卓也,藤田卓也,藤田卓也,ホップ・ステップ・アッ
 ショコラ,クボナオキ,クボナオキ,クボナオキ\辻伶,ホップ・ステップ・アップル,2019年2月20日
 ピーナッツ!,小倉唯,俊龍,大久保薫,ホップ・ステップ・アップル,2019年2月20日
 Reflect,磯谷佳江,小野貴光,玉木千尋,ホップ・ステップ・アップル,2019年2月20日
-Destiny,織田あすか,上松範康,岩橋星実,Destiny,2019年10月30日
+Destiny,織田あすか,上松範康,岩橋星実,Destiny\Tarte,2019年10月30日
 赤いリボン,小倉唯\塚田耕平,塚田耕平,塚田耕平,Destiny,2019年10月30日
-I・LOVE・YOU!!,小倉唯,遠藤直弥,遠藤直弥,I・LOVE・YOU!!,2020年2月12日
+I・LOVE・YOU!!,小倉唯,遠藤直弥,遠藤直弥,I・LOVE・YOU!!\Tarte,2020年2月12日
 バレンタイン・キッス,秋元康,瀬井広明,大久保薫,I・LOVE・YOU!!,2020年2月12日
-ハピネス*センセーション,Kamy,鶴﨑輝一,鶴﨑輝一,ハピネス*センセーション,2020年6月10日
+ハピネス*センセーション,Kamy,鶴﨑輝一,鶴﨑輝一,ハピネス*センセーション\Tarte,2020年6月10日
 Look@Me♡,大森祥子,三井真一,塚田耕平,ハピネス*センセーション,2020年6月10日
 瞳の国のアリス -Dance Music Edition-,磯崎輪太郎,川崎智哉,SHIBU,ハピネス*センセーション,2020年6月10日
-Very Merry Happy Christmas,日南田あおば,本田正樹,本田正樹,Very Merry Happy Christmas,2020年12月9日
-Clear Morning,磯谷佳江,小野貴光,玉木千尋,Clear Morning,2021年3月31日
+Very Merry Happy Christmas,日南田あおば,本田正樹,本田正樹,Very Merry Happy Christmas\Tarte,2020年12月9日
+Clear Morning,磯谷佳江,小野貴光,玉木千尋,Clear Morning\Tarte,2021年3月31日
 pyu♥a purely,小倉唯,太田晴之,太田晴之,Clear Morning,2021年3月31日
-Fightin★Pose,小倉唯\KIKUE,雨漏りP,藤田卓也,Fightin★Pose,2021年8月11日
+Fightin★Pose,小倉唯\KIKUE,雨漏りP,藤田卓也,Fightin★Pose\Tarte,2021年8月11日
 ハートフォレスト,磯谷佳江,小野貴光,小野貴光,Fightin★Pose,2021年8月11日
 ta・ta・tarte♪,小倉唯,服部祐希,服部祐希,Tarte,2022年2月16日
 PRISM BEAT,Maho Hamaguchi,鶴﨑輝一,鶴﨑輝一,Tarte,2022年2月16日
