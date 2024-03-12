@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>セットリスト</title>
+</head>
+<body>
+
+<select id="setlistSelect">
+  <option value="">セットリストを選択してください</option>
+  <option value="HappyJam">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="HighTouchSummer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="SmileyCherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="PlatinumAirline">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="StepApple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="ReLOVEcall">#Re♥LOVEcall</option>
+  <option value="Memorial2023">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~/10th Anniversary Assemble!!~</option>
+  <option value="KingSuperLive">KING SUPER LIVE</option>
+  <option value="AnimeloSummerLive">Animelo Summer Live</option>
+  <option value="AnimaxMusix">ANIMAX MUSIX</option>
+</select>
+
+<div id="setlistContainer"></div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const setlistSelect = document.getElementById('setlistSelect');
+    const setlistContainer = document.getElementById('setlistContainer');
+
+    setlistSelect.addEventListener('change', function() {
+        const selectedSetlist = setlistSelect.value;
+        if (selectedSetlist) {
+            fetchSetlist(selectedSetlist);
+        } else {
+            setlistContainer.innerHTML = ''; // Clear setlist container if no setlist is selected
+        }
+    });
+
+    function fetchSetlist(selectedSetlist) {
+        fetch(`setlist/${selectedSetlist}.txt`)
+            .then(response => response.text())
+            .then(data => displaySetlist(data))
+            .catch(error => {
+                console.error('Error fetching setlist:', error);
+                setlistContainer.innerHTML = '<p>Error fetching setlist. Please try again later.</p>';
+            });
+    }
+
+    function displaySetlist(data) {
+        const lines = data.split('\n');
+        let setlistHTML = '<table>';
+        for (let i = 0; i < lines.length; i++) {
+            setlistHTML += '<tr>';
+            setlistHTML += `<td>${lines[i]}</td>`;
+            setlistHTML += '</tr>';
+        }
+        setlistHTML += '</table>';
+        setlistContainer.innerHTML = setlistHTML;
+    }
+});
+</script>
+
+</body>
+</html>
