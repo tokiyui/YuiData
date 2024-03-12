@@ -1,98 +1,121 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>セットリスト</title>
 <style>
 table {
-    border-collapse: collapse;
-    width: 100%;
+  border-collapse: collapse;
+  width: 100%;
 }
 
 table, th, td {
-    border: 1px solid black;
-    padding: 8px;
+  border: 1px solid black;
+}
+
+th, td {
+  padding: 8px;
+  text-align: left;
 }
 
 th {
-    background-color: #f2f2f2;
+  background-color: #f2f2f2;
 }
 </style>
 </head>
 <body>
 
-<h1>セットリスト</h1>
+<select id="concertSelector">
+  <option value="HAPPY JAM">小倉唯 1st LIVE「HAPPY JAM」</option>
+  <option value="High-Touch☆Summer">小倉唯 1st LIVE TOUR「High-Touch☆Summer」</option>
+  <option value="Smiley Cherry">小倉唯 LIVE「Smiley Cherry」</option>
+  <option value="Platinum Airline☆">小倉唯 2nd LIVE TOUR「Platinum Airline☆」</option>
+  <option value="Step Apple">小倉唯 LIVE TOUR 2019「Step Apple」</option>
+  <option value="#Re♥LOVEcall">小倉唯 LIVE 2021「#Re♥LOVEcall」</option>
+  <option value="Memorial LIVE 2023 ~To the 11'Eleven~">小倉唯 Memorial LIVE 2023 ~To the 11'Eleven~</option>
+  <option value="Memorial LIVE 2023 ~10th Anniversary Assemble!!~">小倉唯 Memorial LIVE 2023 ~10th Anniversary Assemble!!~</option>
+  <option value="KING SUPER LIVE">KING SUPER LIVE</option>
+  <option value="Animelo Summer Live">Animelo Summer Live</option>
+  <option value="ANIMAX MUSIX">ANIMAX MUSIX</option>
+</select>
 
-<table id="setlist-table">
-    <thead>
-        <tr>
-            <th>曲名</th>
-            <!-- setlist/以下にあるtxtファイルの数だけヘッダを生成 -->
-        </tr>
-    </thead>
-    <tbody>
-        <!-- setlistの内容がここに表示されます -->
-    </tbody>
+<table id="setlistTable">
+  <thead>
+    <tr>
+      <th>日付</th>
+      <th>タイトル</th>
+      <th>会場</th>
+      <th>セットリスト</th>
+    </tr>
+  </thead>
+  <tbody id="setlistBody">
+  </tbody>
 </table>
 
 <script>
-document.addEventListener('DOMContentLoaded', async function() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const concertID = urlParams.get('id');
-    if (concertID) {
-        // Fetch the setlist file
-        const response = await fetch(`https://raw.githubusercontent.com/tokiyui/YuiData/master/setlist/${concertID}.txt`);
-        const data = await response.text();
-        const lines = data.split('\n');
-        const tbody = document.getElementById('setlist-table').querySelector('tbody');
-        
-        for (let i = 1; i < lines.length; i++) {
+document.addEventListener('DOMContentLoaded', function() {
+    const concertSelector = document.getElementById('concertSelector');
+    const setlistTable = document.getElementById('setlistTable');
+
+    concertSelector.addEventListener('change', function() {
+        const selectedConcert = this.value;
+
+        // Fetch the setlist files
+        fetchSetlist(selectedConcert)
+            .then(data => {
+                setlistTable.innerHTML = data;
+            })
+            .catch(error => {
+                console.error('Error fetching setlist:', error);
+                setlistTable.innerHTML = '<tbody><tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr></tbody>';
+            });
+    });
+
+    function fetchSetlist(selectedConcert) {
+        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+            .then(response => response.json())
+            .then(files => {
+                const setlistPromises = [];
+                files.forEach(file => {
+                    if (file.type === 'file' && file.name.endsWith('.txt')) {
+                        setlistPromises.push(fetch(`setlist/${file.name}`)
+                            .then(response => response.text())
+                            .then(data => {
+                                if (data.includes(selectedConcert)) {
+                                    return parseSetlist(file.name, data);
+                                } else {
+                                    return '';
+                                }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching setlist file:', error);
+                                return '<tr><td colspan="4">Error fetching setlist. Please try again later.</td></tr>';
+                            }));
+                    }
+                });
+                return Promise.all(setlistPromises);
+            });
+    }
+
+    function parseSetlist(fileName, setlistData) {
+        const lines = setlistData.split('\n');
+        let setlistHTML = '';
+
+        const date = lines[0].trim(); // Date line
+        const title = lines[1].trim(); // Title line
+        const venue = lines[2].trim(); // Venue line
+
+        setlistHTML += `<tr><td>${date}</td><td>${title}</td><td>${venue}</td><td>`;
+        for (let i = 3; i < lines.length; i++) {
             const line = lines[i].trim();
             if (line !== '') {
-                const row = document.createElement('tr');
-                const cell = document.createElement('td');
-                cell.textContent = line;
-                row.appendChild(cell);
-                tbody.appendChild(row);
+                setlistHTML += `${line}<br>`;
             }
         }
-    } else {
-        const checkboxesContainer = document.getElementById('checkboxes');
-        const response = await fetch('https://api.github.com/repos/tokiyui/YuiData/contents/setlist');
-        const data = await response.json();
-        data.forEach((file, index) => {
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.id = `setlist${index + 1}`;
-            const label = document.createElement('label');
-            label.htmlFor = `setlist${index + 1}`;
-            label.textContent = `setlist${index + 1}.txt`;
-            checkboxesContainer.appendChild(checkbox);
-            checkboxesContainer.appendChild(label);
-            checkboxesContainer.appendChild(document.createElement('br'));
-        });
+        setlistHTML += `</td></tr>`;
 
-        // チェックボックスの状態を取得
-        const checkboxes = document.querySelectorAll('input[type="checkbox"]');
-        const checkedIndexes = Array.from(checkboxes).map((checkbox, index) => checkbox.checked ? index : null).filter(index => index !== null);
-
-        // setlistの内容を表示
-        const table = document.getElementById('setlist-table');
-        const tbody = table.querySelector('tbody');
-
-        // チェックされたtxtファイルの本文2行目を取得して表示
-        await Promise.all(checkedIndexes.map(async index => {
-            const response = await fetch(`https://raw.githubusercontent.com/tokiyui/YuiData/master/setlist/setlist${index + 1}.txt`);
-            const text = await response.text();
-            const lines = text.split('\n');
-            const secondLine = lines.length > 1 ? lines[1].trim() : ''; // 2行目のみ取得
-            const row = document.createElement('tr');
-            const cell = document.createElement('td');
-            cell.textContent = secondLine;
-            row.appendChild(cell);
-            tbody.appendChild(row);
-        }));
+        return setlistHTML;
     }
 });
 </script>
