@@ -23,8 +23,7 @@ th {
   background-color: #f2f2f2;
 }
 
-/* Pink background color for cells with different content */
-tr.diff-content td {
+.pink-background {
   background-color: pink;
 }
 </style>
@@ -48,40 +47,28 @@ tr.diff-content td {
 <table id="setlistTable">
   <thead>
     <tr>
-      <th>曲目</th>
       <th>日付</th>
       <th>タイトル</th>
       <th>会場</th>
       <th>セットリスト</th>
     </tr>
   </thead>
-  <tbody id="setlistBody"></tbody>
+  <tbody id="setlistBody">
+  </tbody>
 </table>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
-    const setlistTableBody = document.getElementById('setlistBody');
+    const setlistTable = document.getElementById('setlistTable');
 
     concertSelector.addEventListener('change', function() {
         const selectedConcert = this.value;
-        fetchAndDisplaySetlist(selectedConcert);
+        fetchSetlist(selectedConcert);
     });
 
-    function fetchAndDisplaySetlist(selectedConcert) {
-        fetchSetlist(selectedConcert)
-            .then(setlistData => {
-                const formattedSetlist = formatSetlist(setlistData);
-                displaySetlist(formattedSetlist);
-            })
-            .catch(error => {
-                console.error('Error fetching or displaying setlist:', error);
-                setlistTableBody.innerHTML = '<tr><td colspan="5">Error fetching or displaying setlist. Please try again later.</td></tr>';
-            });
-    }
-
     function fetchSetlist(selectedConcert) {
-        return fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
+        fetch(`https://api.github.com/repos/tokiyui/YuiData/contents/setlist`)
             .then(response => response.json())
             .then(files => {
                 const setlistPromises = files.map(file => {
@@ -90,102 +77,98 @@ document.addEventListener('DOMContentLoaded', function() {
                             .then(response => response.text())
                             .then(data => {
                                 if (data.includes(selectedConcert)) {
-                                    return data;
+                                    return parseSetlist(file.name, data);
                                 } else {
                                     return null;
                                 }
+                            })
+                            .catch(error => {
+                                console.error('Error fetching setlist file:', error);
+                                return '<td colspan="4">Error fetching setlist. Please try again later.</td>';
                             });
                     }
                 });
-                return Promise.all(setlistPromises)
-                    .then(setlists => setlists.filter(setlist => setlist !== null));
+                Promise.all(setlistPromises)
+                    .then(setlists => {
+                        const dates = [];
+                        const titles = [];
+                        const venues = [];
+                        const setlistsData = [];
+                        setlists.forEach(setlist => {
+                            if (setlist) {
+                                dates.push(setlist.date);
+                                titles.push(setlist.title);
+                                venues.push(setlist.venue);
+                                setlistsData.push(setlist.setlist);
+                            }
+                        });
+                        displaySetlists(dates, titles, venues, setlistsData);
+                    });
             });
     }
 
-    function formatSetlist(setlistData) {
-        const formattedSetlist = [];
+    function parseSetlist(fileName, setlistData) {
+        const lines = setlistData.split('\n');
+        const date = lines[0].trim(); // Date line
+        const title = lines[1].trim(); // Title line
+        const venue = lines[2].trim(); // Venue line
+        const setlist = [];
         let songCount = 0;
         let medleyCount = 0;
-        let encoreStarted = false;
         let encoreCount = 0;
+        let isMedley = false;
+        let isEncore = false;
 
-        setlistData.forEach(setlist => {
-            const lines = setlist.split('\n');
-            const date = lines[0].trim();
-            const title = lines[1].trim();
-            const venue = lines[2].trim();
-            const songs = lines.slice(3).map(line => line.trim()).filter(line => line !== '');
-
-            songs.forEach((song, index) => {
-                const rowData = {
-                    date: index === 0 ? date : '',
-                    title: index === 0 ? title : '',
-                    venue: index === 0 ? venue : '',
-                    songNumber: index === 0 ? ++songCount : '',
-                    isDifferentContent: index !== 0 && song !== songs[index - 1],
-                    isMedley: song === '<MEDLEY>',
-                    isEncore: song === '<ENCORE>',
-                    isDoubleEncore: song === '<W ENCORE>',
-                    isFanClub: song === '<FAN CLUB>',
-                    songName: song
-                };
-
-                if (rowData.isMedley) {
-                    medleyCount++;
-                    rowData.songNumber = songCount + medleyCount;
-                } else if (rowData.isEncore) {
-                    encoreStarted = true;
-                    encoreCount = 0;
-                } else if (rowData.isDoubleEncore) {
-                    rowData.date = '';
-                    rowData.title = '';
-                    rowData.venue = '';
-                    encoreStarted = false;
-                } else if (rowData.isFanClub) {
-                    encoreStarted = false;
-                } else if (encoreStarted) {
-                    rowData.songNumber = 'EC' + ++encoreCount;
+        for (let i = 4; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (line === '<MEDLEY>') {
+                isMedley = true;
+                medleyCount++; // Increment medley count
+                setlist.push(`<span class="pink-background">${songCount + medleyCount}. 【メドレーコーナー】</span>`);
+            } else if (line === '<MEDLEY END>') {
+                isMedley = false;
+            } else if (line === '<ENCORE>') {
+                isEncore = true;
+                encoreCount = 0; // Reset encore song count when new encore starts
+                setlist.push('<span class="pink-background">【アンコール】</span>');
+            } else if (line === '<W ENCORE>') {
+                setlist.push('<span class="pink-background">【ダブルアンコール】</span>');
+            } else if (line === '<FAN CLUB>') {
+                setlist.push('<span class="pink-background">【ファンクラブ限定】</span>');
+            } else {
+                if (line !== '') { // Check if line is not empty
+                    if (isMedley) {
+                        // Display medley song only if it's not empty
+                        setlist.push(`<span style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></span>`);
+                    } else if (isEncore) {
+                        let prefix = 'EC'
+                        encoreCount++; // Increment encore song count
+                        setlist.push(`${prefix}${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a>`);
+                    } else {
+                        songCount++; // Increment encore song count
+                        setlist.push(`${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a>`);
+                    }
                 }
+            }
+        }
 
-                formattedSetlist.push(rowData);
-            });
-        });
-
-        return formattedSetlist;
+        return { date, title, venue, setlist: setlist.join('<br>') };
     }
 
-    function displaySetlist(setlist) {
-        setlistTableBody.innerHTML = '';
+    function displaySetlists(dates, titles, venues, setlistsData) {
+        const setlistBody = document.getElementById('setlistBody');
+        setlistBody.innerHTML = ''; // Clear previous setlists
 
-        setlist.forEach(rowData => {
-            const row = document.createElement('tr');
+        for (let i = 0; i < dates.length; i++) {
+            const date = dates[i];
+            const title = titles[i];
+            const venue = venues[i];
+            const setlist = setlistsData[i];
 
-            const cellNumber = document.createElement('td');
-            cellNumber.textContent = rowData.songNumber;
-            row.appendChild(cellNumber);
-
-            const cellDate = document.createElement('td');
-            cellDate.textContent = rowData.date;
-            row.appendChild(cellDate);
-
-            const cellTitle = document.createElement('td');
-            cellTitle.textContent = rowData.title;
-            row.appendChild(cellTitle);
-
-            const cellVenue = document.createElement('td');
-            cellVenue.textContent = rowData.venue;
-            row.appendChild(cellVenue);
-
-            const cellSong = document.createElement('td');
-            cellSong.innerHTML = rowData.isMedley ? `【メドレーコーナー】` : `<a href="search.html?name=${encodeURIComponent(rowData.songName)}">${rowData.songName}</a>`;
-            row.appendChild(cellSong);
-
-            if (rowData.isDifferentContent) {
-                row.classList.add('diff-content');
-            }
-
-            setlistTableBody.appendChild(row);
-        });
+            const tr = document.createElement('tr');
+            tr.innerHTML = `<td>${date}</td><td>${title}</td><td>${venue}</td><td>${setlist}</td>`;
+            setlistBody.appendChild(tr);
+        }
     }
 });
 </script>
