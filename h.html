@@ -141,13 +141,45 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (isEncore) {
                         prefix = `EC${++encoreCount}.`;
                     } else {
-                        prefix = `${++songCount}.`;
+                        prefix = `${++songCount++encoreCount}.`;
                     }
                     setlist.push(`${prefix} ${line}`);
                 }
             }
         }
-
+            const line = lines[i].trim();
+            if (line === '<MEDLEY>') {
+                isMedley = true;
+                medleyCount++; // Increment medley count
+                setlistHTML += `<p>${songCount + medleyCount}. 【メドレーコーナー】</p>`;
+            } else if (line === '<MEDLEY END>') {
+               isMedley = false;
+            } else if (line === '<ENCORE>') {
+                isEncore = true;
+                encoreCount = 0; // Reset encore song count when new encore starts
+                setlistHTML += '<p>【アンコール】</p>';
+            } else if (line === '<W ENCORE>') {
+                setlistHTML += '<p>【ダブルアンコール】</p>';
+            } else if (line === '<FAN CLUB>') {
+                setlistHTML += '<p>【ファンクラブ限定】</p>';
+            } else {
+                if (line !== '') { // Check if line is not empty
+                    if (isMedley) {
+                        // Display medley song only if it's not empty
+                        setlistHTML += `<p style="margin-left: 20px;"><a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                    } else if (isEncore) {
+                        let prefix = 'EC'
+                        encoreCount++; // Increment encore song count
+                        setlistHTML += `<p>${prefix}${encoreCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                    } else {
+                        songCount++; // Increment encore song count
+                        setlistHTML += `<p>${songCount + medleyCount}. <a href="search.html?name=${encodeURIComponent(line)}">${line}</a></p>`;
+                    }
+                }
+            }
+        }
+        return setlistHTML;
+    }
         return { date, title, venue, setlist };
     }
 
