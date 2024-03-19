@@ -178,6 +178,23 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     });
 
+    // Add encore row to all setlists if an encore exists
+    const hasEncore = setlists.some(setlist => setlist.includes('【アンコール】'));
+    if (hasEncore) {
+        setlists.forEach(setlist => {
+            const index = setlist.indexOf('【アンコール】');
+            if (index !== -1) {
+                for (let i = 0; i < maxSongs - setlist.length; i++) {
+                    setlist.splice(index, 0, ''); // Add empty cells for encore songs
+                }
+            } else {
+                for (let i = 0; i < maxSongs; i++) {
+                    setlist.push(''); // Add empty cells if no encore in the setlist
+                }
+            }
+        });
+    }
+
     // Initialize array to track whether each column contains different songs
     const isDifferentSongColumn = new Array(maxSongs).fill(false);
 
@@ -205,8 +222,6 @@ function displaySetlists(dates, titles, venues, setlists) {
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
     }
 }
-
-
 
 });
 </script>
