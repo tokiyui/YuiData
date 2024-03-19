@@ -205,7 +205,7 @@ function displaySetlists(dates, titles, venues, setlists) {
                 const className = isDifferentSongColumn[i] ? 'pink-background' : '';
                 return `<td class="${className}">${song}</td>`;
             } else {
-                //return '<td></td>';
+                return '<td></td>';
             }
         });
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
