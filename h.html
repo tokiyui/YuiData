@@ -188,7 +188,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     const isDifferentSongColumn = new Array(maxSongs).fill(false);
 
     // Check for different songs in each column
-    for (let i = 0; i < maxSongs; i++) {
+    for (let i = 0; i < maxSongs - 1; i++) {
         for (let j = 1; j < setlists.length; j++) {
             if (setlists[j][i] !== setlists[0][i]) {
                 isDifferentSongColumn[i] = true;
