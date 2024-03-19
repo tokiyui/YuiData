@@ -188,7 +188,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     const isDifferentSongColumn = new Array(maxSongs).fill(false);
 
     // Check for different songs in each column
-    for (let i = 0; i < maxSongs - 1; i++) {
+    for (let i = 0; i < maxSongs; i++) {
         for (let j = 1; j < setlists.length; j++) {
             if (setlists[j][i] !== setlists[0][i]) {
                 isDifferentSongColumn[i] = true;
@@ -198,14 +198,14 @@ function displaySetlists(dates, titles, venues, setlists) {
     }
 
     // Add songs to the setlist with pink background for columns with different songs
-    for (let i = 0; i < maxSongs - 1; i++) {
+    for (let i = 0; i < maxSongs; i++) {
         const songCells = setlists.map((setlist, index) => {
             let song = setlist[i];
             if (song) {
                 const className = isDifferentSongColumn[i] ? 'pink-background' : '';
                 return `<td class="${className}">${song}</td>`;
             } else {
-                return '<td></td>';
+                //return '<td></td>';
             }
         });
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
