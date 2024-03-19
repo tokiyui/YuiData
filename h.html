@@ -151,39 +151,40 @@ document.addEventListener('DOMContentLoaded', function() {
         return { date, title, venue, setlist };
     }
 
-    function displaySetlists(dates, titles, venues, setlists) {
-        const headerRow = document.getElementById('headerRow');
-        const setlistBody = document.getElementById('setlistBody');
+function displaySetlists(dates, titles, venues, setlists) {
+    const headerRow = document.getElementById('headerRow');
+    const setlistBody = document.getElementById('setlistBody');
 
-        // Clear existing content
-        headerRow.innerHTML = '';
-        setlistBody.innerHTML = '';
+    // Clear existing content
+    headerRow.innerHTML = '';
+    setlistBody.innerHTML = '';
 
-        // Add headers for dates, titles, and venues
-        dates.forEach(date => headerRow.insertAdjacentHTML('beforeend', `<th>${date}</th>`));
-        setlistBody.insertAdjacentHTML('beforeend', `<tr>${titles.map(title => `<td>${title}</td>`).join('')}</tr>`);
-        setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
+    // Add headers for dates, titles, and venues
+    dates.forEach(date => headerRow.insertAdjacentHTML('beforeend', `<th>${date}</th>`));
+    setlistBody.insertAdjacentHTML('beforeend', `<tr>${titles.map(title => `<td>${title}</td>`).join('')}</tr>`);
+    setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
 
-        // Find the maximum number of songs among all concerts
-        const maxSongs = Math.max(...setlists.map(setlist => setlist.length));
+    // Find the maximum number of songs among all concerts
+    const maxSongs = Math.max(...setlists.map(setlist => setlist.length));
 
-        // Add songs to the setlist
-        for (let i = 0; i < maxSongs; i++) {
-            const songCells = setlists.map((setlist, index) => {
-                const song = setlist[i];
-                if (song) {
-                    let className = '';
-                    if (i > 0 && song !== setlists[0][i]) {
-                        className = 'pink-background'; // Add pink background if song is different from the first concert
-                    }
-                    return `<td class="${className}">${song}</td>`;
-                } else {
-                    return '<td></td>';
+    // Add songs to the setlist
+    for (let i = 0; i < maxSongs; i++) {
+        const songCells = setlists.map((setlist, index) => {
+            const song = setlist[i];
+            if (song) {
+                let className = '';
+                if (i > 0 && song !== setlists[0][i]) {
+                    className = 'pink-background'; // Add pink background if song is different from the first concert
                 }
-            });
-            setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
-        }
+                return `<td class="${className}">${song}</td>`;
+            } else {
+                return '<td></td>';
+            }
+        });
+        setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
     }
+}
+
 });
 </script>
 
