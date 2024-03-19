@@ -165,7 +165,10 @@ function displaySetlists(dates, titles, venues, setlists) {
     setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
 
     // Find the maximum number of songs among all concerts
-    const maxSongs = Math.max(...setlists.map(setlist => setlist.length));
+    let maxSongs = 0;
+    setlists.forEach(setlist => {
+        maxSongs = Math.max(maxSongs, setlist.length);
+    });
 
     // Initialize array to track whether each column contains different songs
     const isDifferentSongColumn = new Array(maxSongs).fill(false);
@@ -183,7 +186,11 @@ function displaySetlists(dates, titles, venues, setlists) {
     // Add songs to the setlist with pink background for columns with different songs
     for (let i = 0; i < maxSongs; i++) {
         const songCells = setlists.map((setlist, index) => {
-            const song = setlist[i];
+            let song = setlist[i];
+            // If the song is empty and it's not the last song in the list, fill it with an empty cell
+            if (!song && i < setlist.length - 1) {
+                song = '';
+            }
             if (song) {
                 const className = isDifferentSongColumn[i] ? 'pink-background' : '';
                 return `<td class="${className}">${song}</td>`;
@@ -194,6 +201,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
     }
 }
+
 
 });
 </script>
