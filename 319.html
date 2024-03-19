@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小倉唯楽曲一覧</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    th, td {
+        border: 1px solid #dddddd;
+        text-align: left;
+        padding: 8px;
+    }
+
+    th {
+        background-color: #f2f2f2;
+    }
+</style>
+</head>
+<body>
+
+<table id="songTable">
+  <thead>
+    <tr>
+      <th>楽曲名</th>
+      <th>披露回数</th>
+      <th>最終披露日</th>
+      <th>作詞</th>
+      <th>作曲</th>
+      <th>編曲</th>
+      <th>収録作品名</th>
+      <th>リリース日</th>
+    </tr>
+  </thead>
+  <tbody id="songTableBody">
+  </tbody>
+</table>
+
+<script>
+  function getPerformanceData(songName) {
+    if (!songName) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
+    const setlistDirectory = 'setlist';
+    return fetchSetlistFiles(setlistDirectory)
+      .then(files => {
+        const promises = files.map((file, index) => {
+          const url = `${setlistDirectory}/${file}`;
+          const delay = 40;
+          return new Promise((resolve, reject) => {
+            setTimeout(() => {
+              fetch(url)
+                .then(response => response.text())
+                .then(text => {
+                  const lines = text.split('\n');
+                  const match = lines.find(line => line.trim() === songName);
+                  let performanceCount = match ? 1 : 0;
+                  let lastPerformanceDate = null;
+                  if (match) {
+                    const currentDate = getsongName(file);
+                    if (!lastPerformanceDate || currentDate > lastPerformanceDate) {
+                      lastPerformanceDate = currentDate;
+                    }
+                  }
+                  resolve({ performanceCount, lastPerformanceDate });
+                })
+                .catch(error => reject(error));
+            }, index * delay);
+          });
+        });
+        return Promise.all(promises);
+      })
+      .then(performanceDataArray => {
+        const lastPerformanceDate = performanceDataArray.reduce((latestDate, data) => {
+          if (!latestDate || data.lastPerformanceDate > latestDate) {
+            return data.lastPerformanceDate;
+          }
+          return latestDate;
+        }, null);
+        const performanceCount = performanceDataArray.reduce((total, data) => {
+          return total + data.performanceCount;
+        }, 0);
+        return { performanceCount, lastPerformanceDate };
+      });
+  }
+
+  function fetchSetlistFiles(directory) {
+    const url = `https://api.github.com/repos/tokiyui/YuiData/contents/${directory}`;
+    return fetch(url)
+      .then(response => response.json())
+      .then(data => {
+        const files = data.filter(item => item.type === 'file').map(item => item.name);
+        return files;
+      });
+  }
+
+  function getsongName(songName) {
+    return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
+  }
+
+  function loadTextFile() {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function() {
+      if (xhr.status === 200) {
+        const text = xhr.responseText;
+        const lines = text.trim().split('\n');
+        const songNames = lines.map(line => line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/)[0]);
+        updatePerformanceData(songNames);
+      } else {
+        console.error('Failed to load the file.');
+      }
+    };
+    xhr.open('GET', 'song.txt', true);
+    xhr.send();
+  }
+
+  window.addEventListener('load', loadTextFile);
+
+  function updatePerformanceData(songNames) {
+    songNames.forEach(songName => {
+      const performanceCountCell = document.createElement('td');
+      const lastPerformanceDateCell = document.createElement('td');
+      const row = document.createElement('tr');
+      getPerformanceData(songName).then(data => {
+        performanceCountCell.textContent = data.performanceCount;
+        if (data.lastPerformanceDate) {
+          const year = data.lastPerformanceDate.substring(0, 4);
+          const month = parseInt(data.lastPerformanceDate.substring(4, 6), 10);
+          const day = parseInt(data.lastPerformanceDate.substring(6, 8), 10);
+          const formattedLastDate = `${year}年${month}月${day}日`;
+          lastPerformanceDateCell.textContent = formattedLastDate;
+        } else {
+          lastPerformanceDateCell.textContent = "-";
+        }
+        row.innerHTML = `<td><a href="search.html?name=${songName}">${songName}</a></td>`;
+        row.appendChild(performanceCountCell);
+        row.appendChild(lastPerformanceDateCell);
+        document.getElementById('songTableBody').appendChild(row);
+      });
+    });
+  }
+</script>
+
+</body>
+</html>
