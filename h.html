@@ -181,14 +181,23 @@ function displaySetlists(dates, titles, venues, setlists) {
     // Find the index of the encore row
     const encoreIndex = setlists[0].indexOf('【アンコール】');
 
-    // Add empty rows before the encore row to align with other rows
-    if (encoreIndex !== -1) {
-        // Count the number of rows before the encore
-        const rowsBeforeEncore = setlists[0].slice(0, encoreIndex).filter(row => row !== '').length;
+    // Find the number of rows before the encore
+    let rowsBeforeEncore = encoreIndex === -1 ? maxSongs : 0;
+    for (let i = 0; i < setlists.length; i++) {
+        const setlist = setlists[i];
+        for (let j = 0; j < setlist.length; j++) {
+            if (setlist[j] === '【アンコール】') {
+                rowsBeforeEncore = Math.max(rowsBeforeEncore, j);
+                break;
+            }
+        }
+    }
 
-        // Insert empty rows for each setlist
+    // Insert empty rows before the encore row to align with other rows
+    if (encoreIndex !== -1) {
         setlists.forEach(setlist => {
-            for (let i = 0; i < rowsBeforeEncore; i++) {
+            const diff = maxSongs - setlist.length;
+            for (let i = 0; i < diff; i++) {
                 setlist.splice(encoreIndex, 0, '');
             }
         });
@@ -221,6 +230,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
     }
 }
+
 
 });
 </script>
