@@ -141,7 +141,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     } else if (isEncore) {
                         prefix = `EC${++encoreCount}.`;
                     } else {
-                        prefix = `${++songCount++encoreCount}.`;
+                        prefix = `${++songCount + encoreCount}.`;
                     }
                     setlist.push(`${prefix} ${line}`);
                 }
