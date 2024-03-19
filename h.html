@@ -152,28 +152,28 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
 function displaySetlists(dates, titles, venues, setlists) {
-    const headerRow = document.getElementById('headerRow');
-    const setlistBody = document.getElementById('setlistBody');
+    const headerRow = document.getElementById('headerRow'); // テーブルのヘッダー行の要素を取得
+    const setlistBody = document.getElementById('setlistBody'); // セットリストの本体部分の要素を取得
 
-    // Clear existing content
+    // テーブルのヘッダー行とセットリストの本体部分の内容をクリア
     headerRow.innerHTML = '';
     setlistBody.innerHTML = '';
 
-    // Add headers for dates, titles, and venues
+    // ヘッダーに日付、タイトル、会場の情報を追加
     dates.forEach(date => headerRow.insertAdjacentHTML('beforeend', `<th>${date}</th>`));
     setlistBody.insertAdjacentHTML('beforeend', `<tr>${titles.map(title => `<td>${title}</td>`).join('')}</tr>`);
     setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
 
-    // Find the maximum number of songs among all concerts
+    // すべてのコンサートの中で最大の曲数を見つける
     let maxSongs = 0;
     setlists.forEach(setlist => {
         maxSongs = Math.max(maxSongs, setlist.length);
     });
 
-    // Find the index of the encore row
+    // アンコールの行のインデックスを見つける
     const encoreIndex = setlists[0].indexOf('【アンコール】');
 
-    // Find the number of rows before the encore
+    // アンコールの手前の行数を見つける
     let rowsBeforeEncore = encoreIndex === -1 ? maxSongs : 0;
     for (let i = 0; i < setlists.length; i++) {
         const setlist = setlists[i];
@@ -185,7 +185,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     }
 
-    // Adjust the number of rows before the encore to align with the longest setlist
+    // すべてのセットリストを最長のセットリストに合わせて調整
     setlists.forEach(setlist => {
         const diff = rowsBeforeEncore - setlist.length;
         if (diff > 0) {
@@ -198,13 +198,13 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     });
 
-    // Find the maximum length among all setlists after adjusting
+    // 調整後のすべてのセットリストの中で最大の長さを見つける
     let maxLength = 0;
     setlists.forEach(setlist => {
         maxLength = Math.max(maxLength, setlist.length);
     });
 
-    // Fill shorter setlists with empty strings to align with the longest setlist
+    // 最も短いセットリストを最長のセットリストと同じ長さにするために空の文字列で埋める
     setlists.forEach(setlist => {
         const diff = maxLength - setlist.length;
         for (let i = 0; i < diff; i++) {
@@ -212,10 +212,10 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     });
 
-    // Initialize array to track whether each column contains different songs
+    // 各列に異なる曲が含まれているかどうかを追跡する配列を初期化
     const isDifferentSongColumn = new Array(maxLength).fill(false);
 
-    // Check for different songs in each column
+    // 各列に異なる曲が含まれているかどうかをチェック
     for (let i = 0; i < maxLength; i++) {
         for (let j = 1; j < setlists.length; j++) {
             if (setlists[j][i] !== setlists[0][i]) {
@@ -225,7 +225,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     }
 
-    // Add songs to the setlist with pink background for columns with different songs
+    // 異なる曲が含まれている列にはピンクの背景を設定して曲を追加
     for (let i = 0; i < maxLength; i++) {
         const songCells = setlists.map((setlist, index) => {
             let song = setlist[i];
@@ -233,7 +233,7 @@ function displaySetlists(dates, titles, venues, setlists) {
                 const className = isDifferentSongColumn[i] ? 'pink-background' : '';
                 return `<td class="${className}">${song}</td>`;
             } else {
-                return '<td>&nbsp;</td>'; // Use non-breaking space to maintain cell height
+                return '<td>&nbsp;</td>'; // セルの高さを保つために改行しないスペースを使用
             }
         });
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
