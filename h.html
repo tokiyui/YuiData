@@ -170,15 +170,19 @@ function displaySetlists(dates, titles, venues, setlists) {
         maxSongs = Math.max(maxSongs, setlist.length);
     });
 
-    // Add empty cells for concerts with shorter setlists
-    setlists.forEach(setlist => {
-        const hasEncore = setlist.includes('【アンコール】');
-        const index = hasEncore ? setlist.indexOf('【アンコール】') : setlist.length;
-        const diff = maxSongs - index;
-        for (let i = 0; i < diff; i++) {
-            setlist.splice(index, 0, ''); // Add empty cells before encore
-        }
-    });
+    // Add encore row to all setlists if an encore exists
+    const hasEncore = setlists.some(setlist => setlist.includes('【アンコール】'));
+    if (hasEncore) {
+        setlists.forEach(setlist => {
+            const index = setlist.indexOf('【アンコール】');
+            if (index !== -1) {
+                const encoreLength = maxSongs - setlist.length + 1; // Add 1 row for encore
+                for (let i = 0; i < encoreLength; i++) {
+                    setlist.splice(index, 0, ''); // Add empty cells for encore songs
+                }
+            }
+        });
+    }
 
     // Initialize array to track whether each column contains different songs
     const isDifferentSongColumn = new Array(maxSongs).fill(false);
@@ -194,7 +198,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     }
 
     // Add songs to the setlist with pink background for columns with different songs
-    for (let i = 0; i < maxSongs; i++) {
+    for (let i = 0; i < maxSongs - 1; i++) {
         const songCells = setlists.map((setlist, index) => {
             let song = setlist[i];
             if (song) {
@@ -207,7 +211,6 @@ function displaySetlists(dates, titles, venues, setlists) {
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
     }
 }
-
 
 });
 </script>
