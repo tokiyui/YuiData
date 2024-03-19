@@ -198,12 +198,40 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     });
 
+    // Find the maximum length among all setlists after adjusting
+    let maxLength = 0;
+    setlists.forEach(setlist => {
+        maxLength = Math.max(maxLength, setlist.length);
+    });
+
+    // Fill shorter setlists with empty strings to align with the longest setlist
+    setlists.forEach(setlist => {
+        const diff = maxLength - setlist.length;
+        for (let i = 0; i < diff; i++) {
+            setlist.push('');
+        }
+    });
+
+    // Initialize array to track whether each column contains different songs
+    const isDifferentSongColumn = new Array(maxSongs).fill(false);
+
+    // Check for different songs in each column
+    for (let i = 0; i < maxSongs; i++) {
+        for (let j = 1; j < setlists.length; j++) {
+            if (setlists[j][i] !== setlists[0][i]) {
+                isDifferentSongColumn[i] = true;
+                break;
+            }
+        }
+    }
+
     // Add songs to the setlist with pink background for columns with different songs
     for (let i = 0; i < maxSongs; i++) {
         const songCells = setlists.map((setlist, index) => {
             let song = setlist[i];
             if (song) {
-                return `<td>${song}</td>`;
+                const className = isDifferentSongColumn[i] ? 'pink-background' : '';
+                return `<td class="${className}">${song}</td>`;
             } else {
                 return '<td>&nbsp;</td>'; // Use non-breaking space to maintain cell height
             }
