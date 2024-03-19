@@ -178,17 +178,14 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     });
 
+    // Find the index of "【アンコール】" in the setlist
+    const encoreIndex = setlists[0].indexOf('【アンコール】');
+    
     // Add encore row to all setlists if an encore exists
-    const hasEncore = setlists.some(setlist => setlist.includes('【アンコール】'));
-    if (hasEncore) {
+    if (encoreIndex !== -1) {
         const encoreRow = new Array(maxSongs).fill('');
         setlists.forEach(setlist => {
-            const index = setlist.indexOf('【アンコール】');
-            if (index !== -1) {
-                setlist.splice(index, 0, ...encoreRow);
-            } else {
-                setlist.push(...encoreRow);
-            }
+            setlist.splice(encoreIndex, 0, ...encoreRow);
         });
     }
 
@@ -219,6 +216,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         setlistBody.insertAdjacentHTML('beforeend', `<tr>${songCells.join('')}</tr>`);
     }
 }
+
 
 });
 </script>
