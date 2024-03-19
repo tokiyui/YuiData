@@ -167,15 +167,25 @@ function displaySetlists(dates, titles, venues, setlists) {
     // Find the maximum number of songs among all concerts
     const maxSongs = Math.max(...setlists.map(setlist => setlist.length));
 
-    // Add songs to the setlist
+    // Initialize array to track whether each column contains different songs
+    const isDifferentSongColumn = new Array(maxSongs).fill(false);
+
+    // Check for different songs in each column
+    for (let i = 0; i < maxSongs; i++) {
+        for (let j = 1; j < setlists.length; j++) {
+            if (setlists[j][i] !== setlists[0][i]) {
+                isDifferentSongColumn[i] = true;
+                break;
+            }
+        }
+    }
+
+    // Add songs to the setlist with pink background for columns with different songs
     for (let i = 0; i < maxSongs; i++) {
         const songCells = setlists.map((setlist, index) => {
             const song = setlist[i];
             if (song) {
-                let className = '';
-                if (i > 0 && song !== setlists[0][i]) {
-                    className = 'pink-background'; // Add pink background if song is different from the first concert
-                }
+                const className = isDifferentSongColumn[i] ? 'pink-background' : '';
                 return `<td class="${className}">${song}</td>`;
             } else {
                 return '<td></td>';
