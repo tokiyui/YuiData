@@ -184,7 +184,8 @@ function displaySetlists(dates, titles, venues, setlists) {
         setlists.forEach(setlist => {
             const index = setlist.indexOf('【アンコール】');
             if (index !== -1) {
-                for (let i = 0; i < maxSongs - setlist.length; i++) {
+                const encoreLength = maxSongs - setlist.length;
+                for (let i = 0; i < encoreLength; i++) {
                     setlist.splice(index, 0, ''); // Add empty cells for encore songs
                 }
             } else {
