@@ -187,7 +187,7 @@ function displaySetlists(dates, titles, venues, setlists) {
   
     // すべてのセットリストを最長のセットリストに合わせて調整
     setlists.forEach(setlist => {
-        const diff = rowsBeforeEncore - setlist.length +1;
+        const diff = rowsBeforeEncore - setlist.length - 1;
         if (diff > 0) {
             const index = setlist.indexOf('【アンコール】');
             if (index !== -1) {
