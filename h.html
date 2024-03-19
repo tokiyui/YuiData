@@ -178,22 +178,25 @@ function displaySetlists(dates, titles, venues, setlists) {
         }
     });
 
+    // Find the index of "【アンコール】" in the setlist
+    const encoreIndex = setlists[0].indexOf('【アンコール】');
+    
     // Add encore row to all setlists if an encore exists
-    const hasEncore = setlists.some(setlist => setlist.includes('【アンコール】'));
-    if (hasEncore) {
+    if (encoreIndex !== -1) {
+        const encoreRow = new Array(maxSongs).fill('');
         setlists.forEach(setlist => {
-            const index = setlist.indexOf('【アンコール】');
-            if (index !== -1) {
-                const encoreLength = maxSongs - setlist.length;
-                for (let i = 0; i < encoreLength; i++) {
-                    setlist.splice(index, 0, ''); // Add empty cells for encore songs
-                }
-            } else {
-                for (let i = 0; i < maxSongs; i++) {
-                    setlist.push(''); // Add empty cells if no encore in the setlist
-                }
-            }
+            setlist.splice(encoreIndex, 0, ...encoreRow);
         });
+    }
+
+    // Add extra row if last setlist is longer
+    const lastSetlistLength = setlists[setlists.length - 1].length;
+    if (lastSetlistLength > maxSongs) {
+        const extraRow = new Array(lastSetlistLength - maxSongs).fill('');
+        setlists.forEach(setlist => {
+            setlist.push(...extraRow);
+        });
+        maxSongs = lastSetlistLength;
     }
 
     // Initialize array to track whether each column contains different songs
