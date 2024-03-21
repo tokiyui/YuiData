@@ -137,10 +137,10 @@
     let fileToLoad = '';
     if (mode === 'k') {
       fileToLoad = 'song_f.txt';
-    } else if (mode === 'y') {
-      fileToLoad = 'song_y.txt';
+    } else if (mode === 'f') {
+      fileToLoad = 'song_f.txt';
     } else {
-      fileToLoad = 'song.txt';
+      fileToLoad = 'song_y.txt';
     }
     xhr.open('GET', fileToLoad, true);
     xhr.send();
