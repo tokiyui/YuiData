@@ -43,7 +43,7 @@
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode');
-
+  console.log(mode);
   function getPerformanceData(songName) {
     if (!songName) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
     const setlistDirectory = 'setlist';
@@ -139,7 +139,7 @@
     };
     let fileToLoad = '';
     if (mode === 'k') {
-      fileToLoad = 'song_f.txt';
+      fileToLoad = 'song_k.txt';
     } else if (mode === 'f') {
       fileToLoad = 'song_f.txt';
     } else {
