@@ -41,6 +41,9 @@
 </table>
 
 <script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const mode = urlParams.get('mode');
+
   function getPerformanceData(songName) {
     if (!songName) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
     const setlistDirectory = 'setlist';
