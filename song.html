@@ -43,7 +43,6 @@
 <script>
   const urlParams = new URLSearchParams(window.location.search);
   const mode = urlParams.get('mode');
-  console.log(mode);
   function getPerformanceData(songName) {
     if (!songName) return Promise.resolve({ performanceCount: 0, lastPerformanceDate: null });
     const setlistDirectory = 'setlist';
@@ -149,7 +148,7 @@
     xhr.send();
   }
 
-  window.addEventListener('load', () => loadTextFile(''));
+  window.addEventListener('load', () => loadTextFile(mode));
 
   function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
     console.log('Searching for:', songName);
