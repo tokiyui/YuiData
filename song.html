@@ -100,7 +100,7 @@
     return songName.replace(/[^a-zA-Z0-9]/g, '').substring(0, 8);
   }
 
-  function loadTextFile() {
+  function loadTextFile(mode) {
     const xhr = new XMLHttpRequest();
     xhr.onload = function() {
       if (xhr.status === 200) {
@@ -134,11 +134,19 @@
         console.error('Failed to load the file.');
       }
     };
-    xhr.open('GET', 'song.txt', true);
+    let fileToLoad = '';
+    if (mode === 'k') {
+      fileToLoad = 'song_f.txt';
+    } else if (mode === 'y') {
+      fileToLoad = 'song_y.txt';
+    } else {
+      fileToLoad = 'song.txt';
+    }
+    xhr.open('GET', fileToLoad, true);
     xhr.send();
   }
 
-  window.addEventListener('load', loadTextFile);
+  window.addEventListener('load', () => loadTextFile(''));
 
   function updatePerformanceData(songName, performanceCountCell, lastPerformanceDateCell) {
     console.log('Searching for:', songName);
