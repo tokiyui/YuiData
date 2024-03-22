@@ -36,7 +36,7 @@ Remember Heart"," Remember Love,結城アイラ,藤井健太郎(HANO),藤井健�
 Abracada-Boo,藤林聖子,滝澤俊輔(TRYTONELABO),滝澤俊輔(TRYTONELABO),Abracada-Boo,2022年8月3日
 曖昧蜃気楼,RIRIKO,RIRIKO,RIRIKO,Abracada-Boo,2022年8月3日
 Paraglider,渡辺翔,渡辺翔,HAMA-kgn,Paraglider\Calm Scene,2023年8月2日
-To My Dear,叶人,フワリ(Dream Monster),フワリ(Dream Monster),Paraglider,2023年8月2日
+To My Dear,叶人,フワリ(Dream Monster),フワリ(Dream Monster),Paraglider\Calm Scene,2023年8月2日
 Gift,柳舘周平\稲葉エミ,柳舘周平,奈良悠樹,Gift\Calm Scene,2024年1月9日
 プルケリマを朝に,クボナオキ,クボナオキ,サトウコウスケ,Calm Scene,2024年4月24日
 Harmonia,中村彼方,俊龍,俊龍,Calm Scene,2024年4月24日
@@ -46,4 +46,3 @@ ILLUSION,柿沼雅美,YHEL,YHEL,Calm Scene,2024年4月24日
 恋の匂い,多田慎也,多田慎也,渡辺拓也,Calm Scene,2024年4月24日
 Sugar Planets,春野,春野,春野,Calm Scene,2024年4月24日
 Twinkle Ticking,フワリ（Dream Monster）,フワリ（Dream Monster）,フワリ（Dream Monster）,Calm Scene,2024年4月24日
-To My Dear,叶人,フワリ（Dream Monster）,フワリ（Dream Monster）,Calm Scene,2024年4月24日
