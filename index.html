@@ -131,7 +131,7 @@ function searchEvents() {
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
     const filter = document.querySelector('input[name="filter"]:checked').value;
 
-    fetch('data2.txt')
+    fetch('data.txt')
         .then(response => response.text())
         .then(data => {
             const events = data.trim().split('\n').map(line => line.split(','));
