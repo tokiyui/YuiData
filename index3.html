@@ -192,9 +192,9 @@ function displayEvents(events) {
                 link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(value);
                 link.textContent = 'セットリスト'; // セットリストのテキストを設定
                 cell.appendChild(link);
-            } 
-            cell.textContent = value;
-
+            } else if (index !== 0) { // 識別子以外のデータのみ表示
+                cell.textContent = value;
+            }
             row.appendChild(cell);
         });
         tableBody.appendChild(row);
