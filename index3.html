@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>小倉唯データベース</title>
+<style>
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+    th, td {
+        border: 1px solid black;
+        padding: 8px;
+        text-align: left;
+    }
+    .checkbox-group label {
+        display: inline-block;
+        margin-right: 10px;
+    }
+    body {
+        background-color: pink;
+    }
+</style>
+</head>
+<body>
+<h2>&#9825;小倉唯データベース&#9825; <a href="song.html">楽曲一覧はこちら</a></h2>
+<div id="checkboxes">
+</div>
+
+<div id="radioButtons">
+    <input type="radio" id="solo" name="filter" value="solo" checked>
+    <label for="solo">ソロのみ</label>
+    <input type="radio" id="yui_and_frag" name="filter" value="yui_and_frag">
+    <label for="yui_and_frag">ゆいかおりを含める</label>
+    <input type="radio" id="yui_and_frag_and_kari" name="filter" value="yui_and_frag_and_kari">
+    <label for="yui_and_frag_and_kari">キャリさんを含める</label>
+    <input type="radio" id="yui_and_frag_and_syuri" name="filter" value="yui_and_frag_and_syuri">
+    <label for="yui_and_frag_and_syuri">ユニットを含める</label>
+    <input type="radio" id="all" name="filter" value="all">
+    <label for="all">全部</label>
+</div>
+
+<button onclick="searchEvents()">Search</button>
+
+<table id="eventsTable">
+    <thead>
+        <tr>
+            <th style="display:none;">識別子</th> <!-- 識別子を非表示 -->
+            <th>年</th>
+            <th>月</th>
+            <th>日</th>
+            <th>曜日</th>
+            <th>時刻</th>
+            <th>大分類</th>
+            <th>中分類</th>
+            <th>小分類</th>
+            <th>タイトル</th>
+            <th>詳細タイトル</th>
+            <th>都道府県</th>
+            <th>会場</th>
+            <th>with</th>
+            <th>備考</th>
+            <th>セットリスト</th>
+        </tr>
+    </thead>
+    <tbody id="eventsTableBody">
+    </tbody>
+</table>
+
+<script>
+function generateCheckboxes(id, label, options) {
+    const container = document.getElementById('checkboxes');
+    
+    // タイトルの追加
+    const title = document.createElement('span'); 
+    title.textContent = label + '：';
+    title.style.fontWeight = 'bold';
+    container.appendChild(title);
+
+    options.forEach(option => {
+        const label = document.createElement('label');
+        label.setAttribute('for', id + '-' + option);
+        label.textContent = option;
+        const checkbox = document.createElement('input');
+        checkbox.setAttribute('type', 'checkbox');
+        checkbox.setAttribute('name', id); 
+        checkbox.setAttribute('value', option);
+        container.appendChild(checkbox);
+        container.appendChild(label);        
+    });
+    container.appendChild(document.createElement('br'));
+}
+
+generateCheckboxes('years', '年', ['2012', '2013', '2014', '2015', '2016', '2017', '2018', '2019', '2020', '2021', '2022', '2023', '2024']);
+generateCheckboxes('months', '月', ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']);
+generateCheckboxes('daysOfWeek', '曜日', ['日', '月', '火', '水', '木', '金', '土']);
+generateCheckboxes('type1', '大分類', ['ライブ', 'リリース', 'イベント', '特典会', 'アニメイベント', '配信', '歩み']);
+generateCheckboxes('type2', '中分類', ['ワンマン', 'フェス', '社員総会', '公開録音', '学園祭', '有料配信', 'CD', 'DVD', '書籍', 'アーティスト活動', '出身地', 'FC', '事務所移籍', 'その他']);
+generateCheckboxes('type3', '小分類', ['ツアー', 'キンスパ', 'アニサマ', 'シングル', 'アルバム', '写真集', 'フォトブック', '配信']);
+generateCheckboxes('eventtitle', '詳細タイトル', ['昼公演', '夜公演', '1部', '2部', '3部']);
+generateCheckboxes('prefecture', '都道府県', ['東京', '神奈川', '千葉', '愛知', '大阪', '群馬', 'オンライン', '北海道', '青森', '岩手', '宮城', '秋田', '山形', '福島', '茨城', '栃木', '群馬', '埼玉', 
+                                          '新潟', '富山', '石川', '福井', '山梨', '長野', '岐阜', '静岡', '三重', '滋賀', '京都', '兵庫', '奈良', '和歌山', '鳥取', '島根', '岡山', '広島', '山口',
+                                          '徳島', '香川', '愛媛', '高知', '福岡', '佐賀', '長崎', '熊本', '大分', '宮崎', '鹿児島', '沖縄', '台湾', '上海']);
+generateCheckboxes('title', '作品名', ['Raise', 'Baby Sweet Berry Love', 'Charming Do!', 'Tinkling Smile', 'Strawberry JAM', 'Honey♥Come!!', 'ハイタッチ☆メモリー', 'Future Strike', 'Cherry Passport',
+                                          '白く咲く花', '永遠少年', 'ホップ・ステップ・アップル', 'Destiny', 'I・LOVE・YOU!!', 'ハピネス*センセーション', 'Clear Morning', 'Fightin★Pose', 'Tarte',
+                                          'Love∞Vision', '秘密♡Melody', 'Empty//Princess.', '君色のキセキ', 'yui memory', 'ゆいはたち', 'ユイペース', 'yui-itsu', 'Yui-can!', 'Yui colore...', 'ゆいたいむ~has♡come!!~', 'ゆいたび']);
+generateCheckboxes('title', 'イベント名', ['小倉唯BIRTHDAY SPECIALミニライブ～SEVENTEEN!', 'HAPPY JAM', 'High-Touch☆Summer', '2ndアルバム発売記念＆バースデーイベント', 'Smiley Cherry', 'Platinum Airline☆', '唯涼祭',
+                                          'Xmasイブ×3♪', 'Step Apple', '「小倉唯のyui*room」公開録音', '「Step Apple」Blu-ray＆DVD発売記念イベント', 'New Year Party♪2020', '#LOVEcall', '#Re♥LOVEcall', 'Twinkle Holy Day♪',
+                                          'Birthday Party♡2022', 'ゆいらんらん', '10th Anniversary Assemble!!', 'To the 11\'Eleven', '#ゆいしょ!公開録音', 'ゆいちゃん・ハローキティ〜きらきらリボン♡大作戦〜', '"唯涼祭"~Cute or Cool？~']);
+    
+function searchEvents() {
+    const years = Array.from(document.querySelectorAll('input[name="years"]:checked')).map(input => input.value);
+    const months = Array.from(document.querySelectorAll('input[name="months"]:checked')).map(input => input.value);
+    const daysOfWeek = Array.from(document.querySelectorAll('input[name="daysOfWeek"]:checked')).map(input => input.value);
+    const type1Values = Array.from(document.querySelectorAll('input[name="type1"]:checked')).map(input => input.value);
+    const type2Values = Array.from(document.querySelectorAll('input[name="type2"]:checked')).map(input => input.value);
+    const type3Values = Array.from(document.querySelectorAll('input[name="type3"]:checked')).map(input => input.value);
+    const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
+    const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
+    const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
+    const filter = document.querySelector('input[name="filter"]:checked').value;
+
+    fetch('data2.txt')
+        .then(response => response.text())
+        .then(data => {
+            const events = data.trim().split('\n').map(line => line.split(','));
+            const filteredEvents = events.filter(event => {
+                const identifier = event.pop(); // 識別子を配列から取り出す
+                const year = event[0];
+                const month = event[1];
+                const dayOfWeek = event[3];
+                const type1 = event[5];
+                const type2 = event[6];
+                const type3 = event[7];
+                const title = event[8];
+                const eventTitle = event[9];
+                const prefecture = event[10];
+
+                // フィルタリング条件の追加
+                if (filter === 'solo') {
+                    return identifier === 'y';
+                } else if (filter === 'yui_and_frag') {
+                    return identifier === 'y' || identifier === 'f';
+                } else if (filter === 'yui_and_frag_and_kari') {
+                    return identifier === 'y' || identifier === 'f' || identifier === 'k';
+                } else if (filter === 'yui_and_frag_and_syuri') {
+                    return identifier === 'y' || identifier === 'f' || identifier === 's';
+                } else if (filter === 'all') {
+                    return true;
+                }
+            });
+
+            const finalFilteredEvents = filteredEvents.filter(event => {
+                const year = event[0];
+                const month = event[1];
+                const dayOfWeek = event[3];
+                const type1 = event[5];
+                const type2 = event[6];
+                const type3 = event[7];
+                const title = event[8];
+                const eventTitle = event[9];
+                const prefecture = event[10];
+                return (
+                    (years.length === 0 || years.includes(year)) &&
+                    (months.length === 0 || months.includes(month)) &&
+                    (daysOfWeek.length === 0 || daysOfWeek.includes(dayOfWeek)) &&
+                    (type1Values.length === 0 || type1Values.includes(type1)) &&
+                    (type2Values.length === 0 || type2Values.includes(type2)) &&
+                    (type3Values.length === 0 || type3Values.includes(type3)) &&
+                    (titleValues.length === 0 || titleValues.includes(title)) &&
+                    (eventTitleValues.length === 0 || eventTitleValues.includes(eventTitle)) &&
+                    (prefectureValues.length === 0 || prefectureValues.includes(prefecture))
+                );
+            });
+
+            displayEvents(finalFilteredEvents);
+        })
+        .catch(error => console.error('Error fetching data:', error));
+}
+
+function displayEvents(events) {
+    const tableBody = document.getElementById('eventsTableBody');
+    tableBody.innerHTML = '';
+    
+    events.forEach(event => {
+        const row = document.createElement('tr');
+        event.forEach((value, index) => {
+            const cell = document.createElement('td');
+            if (index === 14 && value.trim() !== '') { // 15番目の要素が空でない場合のみリンクを生成
+                const link = document.createElement('a');
+                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(value);
+                link.textContent = 'セットリスト'; // セットリストのテキストを設定
+                cell.appendChild(link);
+            } else if (index !== 0) { // 識別子以外のデータのみ表示
+                cell.textContent = value;
+            }
+            row.appendChild(cell);
+        });
+        tableBody.appendChild(row);
+    });
+}
+
+</script>
+</body>
+</html>
