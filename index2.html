@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -26,6 +26,19 @@
 <body>
 <h2>&#9825;小倉唯データベース&#9825; <a href="song.html">楽曲一覧はこちら</a></h2>
 <div id="checkboxes">
+</div>
+
+<div id="radioButtons">
+    <input type="radio" id="solo" name="filter" value="solo" checked>
+    <label for="solo">ソロのみ</label>
+    <input type="radio" id="yui_and_frag" name="filter" value="yui_and_frag">
+    <label for="yui_and_frag">ゆいかおりを含める</label>
+    <input type="radio" id="yui_and_frag_and_kari" name="filter" value="yui_and_frag_and_kari">
+    <label for="yui_and_frag_and_kari">キャリさんを含める</label>
+    <input type="radio" id="yui_and_frag_and_syuri" name="filter" value="yui_and_frag_and_syuri">
+    <label for="yui_and_frag_and_syuri">ユニットを含める</label>
+    <input type="radio" id="all" name="filter" value="all">
+    <label for="all">全部</label>
 </div>
 
 <button onclick="searchEvents()">Search</button>
@@ -105,12 +118,39 @@ function searchEvents() {
     const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
     const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
+    const filter = document.querySelector('input[name="filter"]:checked').value;
 
     fetch('data2.txt')
         .then(response => response.text())
         .then(data => {
             const events = data.trim().split('\n').map(line => line.split(','));
             const filteredEvents = events.filter(event => {
+                const year = event[0];
+                const month = event[1];
+                const dayOfWeek = event[3];
+                const type1 = event[5];
+                const type2 = event[6];
+                const type3 = event[7];
+                const title = event[8];
+                const eventTitle = event[9];
+                const prefecture = event[10];
+                const identifier = event[15]; // 識別子
+
+                // フィルタリング条件の追加
+                if (filter === 'solo') {
+                    return identifier === 'y';
+                } else if (filter === 'yui_and_frag') {
+                    return identifier === 'y' || identifier === 'f';
+                } else if (filter === 'yui_and_frag_and_kari') {
+                    return identifier === 'y' || identifier === 'f' || identifier === 'k';
+                } else if (filter === 'yui_and_frag_and_syuri') {
+                    return identifier === 'y' || identifier === 'f' || identifier === 's';
+                } else if (filter === 'all') {
+                    return true;
+                }
+            });
+
+            const finalFilteredEvents = filteredEvents.filter(event => {
                 const year = event[0];
                 const month = event[1];
                 const dayOfWeek = event[3];
@@ -133,7 +173,7 @@ function searchEvents() {
                 );
             });
 
-            displayEvents(filteredEvents);
+            displayEvents(finalFilteredEvents);
         })
         .catch(error => console.error('Error fetching data:', error));
 }
