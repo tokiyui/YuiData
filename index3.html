@@ -178,28 +178,30 @@ function searchEvents() {
         })
         .catch(error => console.error('Error fetching data:', error));
 }
-
+    
 function displayEvents(events) {
     const tableBody = document.getElementById('eventsTableBody');
     tableBody.innerHTML = '';
     
     events.forEach(event => {
         const row = document.createElement('tr');
-        event.forEach((value, index) => {
+        // 識別子(event[0])を無視して、データの表示をevent[1]から始める
+        for (let i = 1; i < event.length; i++) {
             const cell = document.createElement('td');
-            if (index === 14 && value.trim() !== '') { // 15番目の要素が空でない場合のみリンクを生成
+            if (i === 14 && event[i].trim() !== '') { // 15番目の要素が空でない場合のみリンクを生成
                 const link = document.createElement('a');
-                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(value);
+                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(event[i]);
                 link.textContent = 'セットリスト'; // セットリストのテキストを設定
                 cell.appendChild(link);
-            } else if (index !== 0) { // 識別子以外のデータのみ表示
-                cell.textContent = value;
+            } else {
+                cell.textContent = event[i];
             }
             row.appendChild(cell);
-        });
+        }
         tableBody.appendChild(row);
     });
 }
+
 
 </script>
 </body>
