@@ -46,7 +46,7 @@
 <table id="eventsTable">
     <thead>
         <tr>
-            <th style="display:none;">識別子</th> <!-- 識別子を非表示 -->
+            <th style="display: none;"></th> <!-- 識別子の列を非表示 -->
             <th>年</th>
             <th>月</th>
             <th>日</th>
@@ -126,16 +126,16 @@ function searchEvents() {
         .then(data => {
             const events = data.trim().split('\n').map(line => line.split(','));
             const filteredEvents = events.filter(event => {
-                const identifier = event[0]; // 識別子を配列から取り出す
-                const year = event[1];
-                const month = event[2];
-                const dayOfWeek = event[4];
-                const type1 = event[6];
-                const type2 = event[7];
-                const type3 = event[8];
-                const title = event[9];
-                const eventTitle = event[10];
-                const prefecture = event[11];
+                const identifier = event.shift(); // 識別子を配列から取り出す
+                const year = event[0];
+                const month = event[1];
+                const dayOfWeek = event[3];
+                const type1 = event[5];
+                const type2 = event[6];
+                const type3 = event[7];
+                const title = event[8];
+                const eventTitle = event[9];
+                const prefecture = event[10];
 
                 // フィルタリング条件の追加
                 if (filter === 'solo') {
@@ -152,15 +152,15 @@ function searchEvents() {
             });
 
             const finalFilteredEvents = filteredEvents.filter(event => {
-                const year = event[1];
-                const month = event[2];
-                const dayOfWeek = event[4];
-                const type1 = event[6];
-                const type2 = event[7];
-                const type3 = event[8];
-                const title = event[9];
-                const eventTitle = event[10];
-                const prefecture = event[11];
+                const year = event[0];
+                const month = event[1];
+                const dayOfWeek = event[3];
+                const type1 = event[5];
+                const type2 = event[6];
+                const type3 = event[7];
+                const title = event[8];
+                const eventTitle = event[9];
+                const prefecture = event[10];
                 return (
                     (years.length === 0 || years.includes(year)) &&
                     (months.length === 0 || months.includes(month)) &&
