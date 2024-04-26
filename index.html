@@ -21,11 +21,35 @@
     body {
         background-color: pink;
     }
+    /* 背景色のスタイル */
+    .orange-bg {
+        background-color: orange;
+    }
+    .cyan-bg {
+        background-color: cyan;
+    }
+    .white-bg {
+        background-color: white;
+    }
 </style>
 </head>
 <body>
 <h2>&#9825;小倉唯データベース&#9825; <a href="song.html">楽曲一覧はこちら</a></h2>
 <div id="checkboxes">
+</div>
+
+<br>
+<div id="radioButtons">
+    <input type="radio" id="solo" name="filter" value="solo" checked>
+    <label for="solo">ソロのみ</label>
+    <input type="radio" id="yui_and_frag" name="filter" value="yui_and_frag">
+    <label for="yui_and_frag">ゆいかおりを含める</label>
+    <input type="radio" id="yui_and_frag_and_kari" name="filter" value="yui_and_frag_and_kari">
+    <label for="yui_and_frag_and_kari">キャリさんを含める</label>
+    <input type="radio" id="yui_and_frag_and_syuri" name="filter" value="yui_and_frag_and_syuri">
+    <label for="yui_and_frag_and_syuri">ユニットを含める</label>
+    <input type="radio" id="all" name="filter" value="all">
+    <label for="all">全部</label>
 </div>
 
 <button onclick="searchEvents()">Search</button>
@@ -93,7 +117,7 @@ generateCheckboxes('title', '作品名', ['Raise', 'Baby Sweet Berry Love', 'Cha
                                           'Love∞Vision', '秘密♡Melody', 'Empty//Princess.', '君色のキセキ', 'yui memory', 'ゆいはたち', 'ユイペース', 'yui-itsu', 'Yui-can!', 'Yui colore...', 'ゆいたいむ~has♡come!!~', 'ゆいたび']);
 generateCheckboxes('title', 'イベント名', ['小倉唯BIRTHDAY SPECIALミニライブ～SEVENTEEN!', 'HAPPY JAM', 'High-Touch☆Summer', '2ndアルバム発売記念＆バースデーイベント', 'Smiley Cherry', 'Platinum Airline☆', '唯涼祭',
                                           'Xmasイブ×3♪', 'Step Apple', '「小倉唯のyui*room」公開録音', '「Step Apple」Blu-ray＆DVD発売記念イベント', 'New Year Party♪2020', '#LOVEcall', '#Re♥LOVEcall', 'Twinkle Holy Day♪',
-                                          'Birthday Party♡2022', 'ゆいらんらん', '10th Anniversary Assemble!!', 'To the 11\'Eleven', '#ゆいしょ!公開録音', 'ゆいちゃん・ハローキティ〜きらきらリボン♡大作戦〜', '"唯涼祭"~Cute or Cool？~']);
+                                          'Birthday Party♡2022', 'ゆいらんらん', '10th Anniversary Assemble!!', 'To the 11\'Eleven', '#ゆいしょ!公開録音', 'ゆいちゃん・ハローキティ〜きらきらリボン♡大作戦〜']);
     
 function searchEvents() {
     const years = Array.from(document.querySelectorAll('input[name="years"]:checked')).map(input => input.value);
@@ -105,21 +129,48 @@ function searchEvents() {
     const titleValues = Array.from(document.querySelectorAll('input[name="title"]:checked')).map(input => input.value);
     const eventTitleValues = Array.from(document.querySelectorAll('input[name="eventtitle"]:checked')).map(input => input.value);
     const prefectureValues = Array.from(document.querySelectorAll('input[name="prefecture"]:checked')).map(input => input.value);
+    const filter = document.querySelector('input[name="filter"]:checked').value;
 
-    fetch('data.txt')
+    fetch('data2.txt')
         .then(response => response.text())
         .then(data => {
             const events = data.trim().split('\n').map(line => line.split(','));
             const filteredEvents = events.filter(event => {
-                const year = event[0];
-                const month = event[1];
-                const dayOfWeek = event[3];
-                const type1 = event[5];
-                const type2 = event[6];
-                const type3 = event[7];
-                const title = event[8];
-                const eventTitle = event[9];
-                const prefecture = event[10];
+                const identifier = event[0]; // 識別子を配列から取り出す
+                const year = event[1];
+                const month = event[2];
+                const dayOfWeek = event[4];
+                const type1 = event[6];
+                const type2 = event[7];
+                const type3 = event[8];
+                const title = event[9];
+                const eventTitle = event[10];
+                const prefecture = event[11];
+
+                // フィルタリング条件の追加
+                if (filter === 'solo') {
+                    return identifier === 'y';
+                } else if (filter === 'yui_and_frag') {
+                    return identifier === 'y' || identifier === 'f';
+                } else if (filter === 'yui_and_frag_and_kari') {
+                    return identifier === 'y' || identifier === 'f' || identifier === 'k';
+                } else if (filter === 'yui_and_frag_and_syuri') {
+                    return identifier === 'y' || identifier === 'f' || identifier === 's';
+                } else if (filter === 'all') {
+                    return true;
+                }
+            });
+
+            const finalFilteredEvents = filteredEvents.filter(event => {
+                const year = event[1];
+                const month = event[2];
+                const dayOfWeek = event[4];
+                const type1 = event[6];
+                const type2 = event[7];
+                const type3 = event[8];
+                const title = event[9];
+                const eventTitle = event[10];
+                const prefecture = event[11];
                 return (
                     (years.length === 0 || years.includes(year)) &&
                     (months.length === 0 || months.includes(month)) &&
@@ -133,32 +184,51 @@ function searchEvents() {
                 );
             });
 
-            displayEvents(filteredEvents);
+            displayEvents(finalFilteredEvents);
         })
         .catch(error => console.error('Error fetching data:', error));
 }
-
+    
 function displayEvents(events) {
     const tableBody = document.getElementById('eventsTableBody');
     tableBody.innerHTML = '';
     
     events.forEach(event => {
         const row = document.createElement('tr');
-        event.forEach((value, index) => {
+        // 識別子(event[0])を無視して、データの表示をevent[1]から始める
+        for (let i = 1; i < event.length; i++) {
             const cell = document.createElement('td');
-            if (index === 14 && value.trim() !== '') { // 15番目の要素が空でない場合のみリンクを生成
+            if (i === 15 && event[i].trim() !== '') { // 16番目の要素が空でない場合のみリンクを生成
                 const link = document.createElement('a');
-                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(value);
+                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(event[i]);
                 link.textContent = 'セットリスト'; // セットリストのテキストを設定
                 cell.appendChild(link);
             } else {
-                cell.textContent = value;
+                cell.textContent = event[i];
             }
             row.appendChild(cell);
-        });
+        }
+        // 背景色を設定
+        switch (event[0]) {
+            case 'y':
+                row.className = 'orange-bg';
+                break;
+            case 'f':
+                row.className = 'cyan-bg';
+                break;
+            case 'k':
+                row.className = 'cyan-bg';
+                break;
+            case 's':
+                row.className = 'cyan-bg';
+                break;
+            default:
+                row.className = 'white-bg';
+        }
         tableBody.appendChild(row);
     });
 }
+
 
 </script>
 </body>
