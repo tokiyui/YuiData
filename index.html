@@ -18,10 +18,10 @@
         display: inline-block;
         margin-right: 10px;
     }
-    body {
+    /* 背景色のスタイル */
+    .pink-bg {
         background-color: pink;
     }
-    /* 背景色のスタイル */
     .orange-bg {
         background-color: orange;
     }
@@ -211,16 +211,16 @@ function displayEvents(events) {
         // 背景色を設定
         switch (event[0]) {
             case 'y':
-                row.className = 'orange-bg';
+                row.className = 'pink-bg';
                 break;
             case 'f':
-                row.className = 'cyan-bg';
+                row.className = 'orange-bg';
                 break;
             case 'k':
                 row.className = 'cyan-bg';
                 break;
             case 's':
-                row.className = 'cyan-bg';
+                row.className = 'white-bg';
                 break;
             default:
                 row.className = 'white-bg';
