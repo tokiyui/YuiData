@@ -213,7 +213,8 @@ function displaySetlists(dates, titles, venues, setlists) {
     });
   
     // 調整後のすべてのセットリストの中で最大の長さを見つける
-    let maxLength = 0;
+    //let maxLength = 0;
+    maxLength = 0;
     setlists.forEach(setlist => {
         maxLength = Math.max(maxLength, setlists.length);
     });
