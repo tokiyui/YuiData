@@ -197,23 +197,9 @@ function displaySetlists(dates, titles, venues, setlists) {
             }
         }
     });
-
-    // 調整後のすべてのセットリストの中で最大の長さを見つける
-    let maxLength = 0;
-    setlists.forEach(setlist => {
-        maxLength = Math.max(maxLength, rowsBeforeEncore);
-    });
-
-    // 最も短いセットリストを最長のセットリストと同じ長さにするために空の文字列で埋める
-    setlists.forEach(setlist => {
-        const diff = maxLength - rowsBeforeEncore;
-        for (let i = 0; i < diff; i++) {
-            setlist.push('あ');
-        }
-    });
   
     // 調整後のすべてのセットリストの中で最大の長さを見つける
-    //let maxLength = 0;
+    let maxLength = 0;
     maxLength = 0;
     setlists.forEach(setlist => {
         maxLength = Math.max(maxLength, setlists.length);
@@ -223,7 +209,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     setlists.forEach(setlist => {
         const diff = maxLength - setlists.length;
         for (let i = 0; i < diff; i++) {
-            setlist.push('あ');
+            setlist.push('');
         }
     });
 
