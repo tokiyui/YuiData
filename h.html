@@ -211,6 +211,20 @@ function displaySetlists(dates, titles, venues, setlists) {
             setlist.push('あ');
         }
     });
+  
+    // 調整後のすべてのセットリストの中で最大の長さを見つける
+    let maxLength = 0;
+    setlists.forEach(setlist => {
+        maxLength = Math.max(maxLength, setlists.length);
+    });
+
+    // 最も短いセットリストを最長のセットリストと同じ長さにするために空の文字列で埋める
+    setlists.forEach(setlist => {
+        const diff = maxLength - setlists.length;
+        for (let i = 0; i < diff; i++) {
+            setlist.push('あ');
+        }
+    });
 
     // 各列に異なる曲が含まれているかどうかを追跡する配列を初期化
     const isDifferentSongColumn = new Array(maxLength).fill(false);
