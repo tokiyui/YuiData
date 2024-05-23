@@ -197,7 +197,8 @@ function displaySetlists(dates, titles, venues, setlists) {
         if (diff > 0) {
             const index = setlist.indexOf('【アンコール】');
             if (index !== -1) {
-                const emptySpaces = ''.repeat(diff); // diffの数だけ空白文字列を生成
+                const emptySpaces = 'a'.repeat(diff); // diffの数だけ空白文字列を生成
+                console.log(diff,emptySpaces);
                 setlist.splice(index, 0, emptySpaces + '【アンコール】'); // 空白文字列と【アンコール】を組み合わせて挿入
                 //for (let i = 0; i < diff; i++) {
                     //setlist.splice(index, 0, '');
@@ -214,7 +215,6 @@ function displaySetlists(dates, titles, venues, setlists) {
 
     // 最も短いセットリストを最長のセットリストと同じ長さにするために空の文字列で埋める
     setlists.forEach(setlist => {
-        console.log(setlist);
         const diff = maxLength - setlist.length;
         console.log(diff);
         for (let i = 0; i < diff; i++) {
