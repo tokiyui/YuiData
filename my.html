@@ -52,7 +52,7 @@
             }
 
             // 「なし」と判定された曲数を表示
-            var countResult = "<strong>未回収楽曲数: " + count + "</strong>";
+            var countResult = "<br><strong>未回収楽曲数: " + count + "</strong>";
             resultDiv.innerHTML = countResult + "<br><br>";
 
             // 検索結果を表示
@@ -160,7 +160,7 @@
     <input type="checkbox" id="2018081501" class="setlist-checkbox">唯涼祭
     <br><input type="checkbox" id="2019081501" class="setlist-checkbox">「Step Apple」Blu-ray＆DVD発売記念イベント 昼公演
     <input type="checkbox" id="2019081502" class="setlist-checkbox">「Step Apple」Blu-ray＆DVD発売記念イベント 夜公演
-    <br><br><button onclick="searchSetlist()">検索</button><br>
+    <br><button onclick="searchSetlist()">検索</button><br>
     <div id="result"></div>
 </body>
 </html>
