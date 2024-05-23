@@ -193,12 +193,14 @@ function displaySetlists(dates, titles, venues, setlists) {
   
     // すべてのセットリストを最長のセットリストに合わせて調整
     setlists.forEach(setlist => {
-        const diff = rowsBeforeEncore - setlist.length;
+        const diff = rowsBeforeEncore - Math.max(rowsBeforeEncore); //setlist.length;
         if (diff > 0) {
             const index = setlist.indexOf('【アンコール】');
             if (index !== -1) {
-                for (let i = 0; i < diff; i++) {
-                    setlist.splice(index, 0, '');
+                const emptySpaces = ''.repeat(diff); // diffの数だけ空白文字列を生成
+                setlist.splice(index, 0, emptySpaces + '【アンコール】'); // 空白文字列と【アンコール】を組み合わせて挿入
+                //for (let i = 0; i < diff; i++) {
+                    //setlist.splice(index, 0, '');
                 }
             }
         }
