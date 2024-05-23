@@ -177,7 +177,8 @@ function displaySetlists(dates, titles, venues, setlists) {
     });
 
     // アンコールの行のインデックスを見つける
-    const encoreIndex = setlists[0].indexOf('【アンコール】');
+    //const encoreIndex = setlists[0].indexOf('【アンコール】');
+    const encoreIndex = setlists.indexOf('【アンコール】');
 
     // アンコールの手前の行数を見つける
     let rowsBeforeEncore = encoreIndex === -1 ? maxSongs : 0;
