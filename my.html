@@ -31,8 +31,8 @@
                     var setlistContent = getFileContent(filePath);
 
                     songLines.forEach(function(line) {
-                        var songData = line.split("\",\"");
-                        var songName = songData[0].replace("\"", "").trim();
+                        var songData = line.split(",");
+                        var songName = songData[0].replace(/^\"|\"$/g, "").trim();
 
                         if (setlistContent.includes(songName)) {
                             searchResult[songName] = "あり";
