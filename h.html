@@ -168,7 +168,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     // ヘッダーに日付、タイトル、会場の情報を追加
     dates.forEach(date => headerRow.insertAdjacentHTML('beforeend', `<th>${date}</th>`));
     setlistBody.insertAdjacentHTML('beforeend', `<tr>${titles.map(title => `<td>${title}</td>`).join('')}</tr>`);
-    setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
+    setlistBody.insertAdjacentHTML('beforeend', `<tr>@${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
 
     // すべてのコンサートの中で最大の曲数を見つける
     let maxSongs = 0;
@@ -186,6 +186,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         for (let j = 0; j < setlist.length; j++) {
             if (setlist[j] === '【アンコール】') {
                 rowsBeforeEncore = Math.max(rowsBeforeEncore, j);
+                console.log(rowsBeforeEncore);
                 break;
             }
         }
