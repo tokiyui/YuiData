@@ -214,6 +214,7 @@ function displaySetlists(dates, titles, venues, setlists) {
 
     // 最も短いセットリストを最長のセットリストと同じ長さにするために空の文字列で埋める
     setlists.forEach(setlist => {
+        consloe.log(setlist);
         const diff = maxLength - setlist.length;
         console.log(diff);
         for (let i = 0; i < diff; i++) {
