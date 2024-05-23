@@ -21,7 +21,7 @@
 
             checkboxes.forEach(function(checkbox) {
                 if (checkbox.checked) {
-                    var filePath = checkbox.id + ".txt";
+                    var filePath = "setlist/" + checkbox.id + ".txt";
                     var setlistContent = getFileContent(filePath);
 
                     songLines.forEach(function(line) {
