@@ -136,13 +136,13 @@
         console.error('Failed to load the file.');
       }
     };
-    let fileToLoad = '';
+    let fileToLoad = 'songs/';   
     if (mode === 'k') {
-      fileToLoad = 'song_k.txt';
+      fileToLoad += 'song_k.txt';
     } else if (mode === 'f') {
-      fileToLoad = 'song_f.txt';
+      fileToLoad += 'song_f.txt';
     } else {
-      fileToLoad = 'song_y.txt';
+      fileToLoad += 'song_y.txt';
     }
     xhr.open('GET', fileToLoad, true);
     xhr.send();
