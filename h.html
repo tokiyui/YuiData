@@ -186,6 +186,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         for (let j = 0; j < setlist.length; j++) {
             if (setlist[j] === '【アンコール】') {
                 rowsBeforeEncore = Math.max(rowsBeforeEncore, j);
+                console.log(rowsBeforeEncore);
                 break;
             }
         }
@@ -216,7 +217,6 @@ function displaySetlists(dates, titles, venues, setlists) {
     // 最も短いセットリストを最長のセットリストと同じ長さにするために空の文字列で埋める
     setlists.forEach(setlist => {
         const diff = maxLength - setlist.length;
-        console.log(rowsBeforeEncore,maxLength,setlist.length);
         for (let i = 0; i < diff; i++) {
             setlist.push('');
         }
