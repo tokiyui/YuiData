@@ -8,7 +8,7 @@
             var resultDiv = document.getElementById("result");
 
             // song_f.txtの内容を取得
-            var songFileContent = getFileContent("song_f.txt");
+            var songFileContent = getFileContent("song_y.txt");
 
             // song_f.txtの内容を行ごとに分割して配列に格納
             var songLines = songFileContent.split("\n");
@@ -60,6 +60,9 @@
     <h1>Setlist Search</h1>
     <input type="checkbox" id="checkbox1" class="setlist-checkbox" checked>唯涼祭<br>
     <input type="checkbox" id="checkbox2" class="setlist-checkbox" checked>小倉唯 ONLINE クリスマス ライブ 2020 ~Winter Twinkle Magic~<br>
+    <h1><strong>10th Anniversary Assemble!!</strong></h1>
+    <input type="checkbox" id="checkbox1" class="setlist-checkbox" checked>昼公演<br>
+    <input type="checkbox" id="checkbox2" class="setlist-checkbox" checked>夜公演<br>
     <button onclick="searchSetlist()">検索</button>
     <div id="result"></div>
 </body>
