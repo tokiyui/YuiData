@@ -174,7 +174,6 @@ function displaySetlists(dates, titles, venues, setlists) {
     let maxSongs = 0;
     setlists.forEach(setlist => {
         maxSongs = Math.max(maxSongs, setlist.length);
-        console.log(maxSongs);
     });
 
     // アンコールの行のインデックスを見つける
@@ -195,6 +194,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     // すべてのセットリストを最長のセットリストに合わせて調整
     setlists.forEach(setlist => {
         const diff = rowsBeforeEncore - setlist.length;
+        console.log(diff);
         if (diff > 0) {
             const index = setlist.indexOf('【アンコール】');
             if (index !== -1) {
