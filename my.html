@@ -4,59 +4,48 @@
     <meta charset="UTF-8">
     <title>Setlist Search</title>
     <script>
-function searchSetlist() {
-    // チェックボックスの値を取得
-    var checkBox1 = document.getElementById("checkbox1");
-    var checkBox2 = document.getElementById("checkbox2");
-    var resultDiv = document.getElementById("result");
+        function searchSetlist() {
+            var resultDiv = document.getElementById("result");
 
-    // 検索対象のファイルパスを設定
-    var filePath1 = "setlist/2018081501.txt";
-    var filePath2 = "setlist/2020122401.txt";
+            // song_f.txtの内容を取得
+            var songFileContent = getFileContent("song_f.txt");
 
-    // song_f.txtの内容を取得
-    var songFileContent = getFileContent("song_y.txt");
+            // song_f.txtの内容を行ごとに分割して配列に格納
+            var songLines = songFileContent.split("\n");
 
-    // song_f.txtの内容を行ごとに分割して配列に格納
-    var songLines = songFileContent.split("\n");
+            // 検索対象ファイルのチェックボックスを取得
+            var checkboxes = document.querySelectorAll("input[type='checkbox'][class='setlist-checkbox']");
 
-    // 検索結果を格納するオブジェクトを作成
-    var searchResult = {};
+            // 検索結果を格納するオブジェクトを作成
+            var searchResult = {};
 
-    // song_f.txtの各行を処理
-    songLines.forEach(function(line) {
-        var songData = line.split(",");
-        var songName = songData[0].trim();
+            checkboxes.forEach(function(checkbox) {
+                if (checkbox.checked) {
+                    var filePath = checkbox.id + ".txt";
+                    var setlistContent = getFileContent(filePath);
 
-        // チェックボックスに応じて対応するセットリストを検索
-        if (checkBox1.checked) {
-            var setlistContent1 = getFileContent(filePath1);
-            if (setlistContent1.includes(songName)) {
-                searchResult[songName] = "あり";
-            } else if (!searchResult[songName]) {
-                searchResult[songName] = "なし";
+                    songLines.forEach(function(line) {
+                        var songData = line.split(",");
+                        var songName = songData[0].trim();
+
+                        if (setlistContent.includes(songName)) {
+                            searchResult[songName] = "あり";
+                        } else if (!searchResult[songName]) {
+                            searchResult[songName] = "なし";
+                        }
+                    });
+                }
+            });
+
+            // 検索結果を表示
+            resultDiv.innerHTML = "";
+            for (var song in searchResult) {
+                if (searchResult[song] === "なし") {
+                    var result = song + "<br>";
+                    resultDiv.innerHTML += result;
+                }
             }
         }
-
-        if (checkBox2.checked) {
-            var setlistContent2 = getFileContent(filePath2);
-            if (setlistContent2.includes(songName)) {
-                searchResult[songName] = "あり";
-            } else if (!searchResult[songName]) {
-                searchResult[songName] = "なし";
-            }
-        }
-    });
-
-    // 検索結果を表示
-    resultDiv.innerHTML = "";
-    for (var song in searchResult) {
-        if (searchResult[song] === "なし") {
-            var result = song +"<br>";
-            resultDiv.innerHTML += result;
-        }
-    }
-}
 
         function getFileContent(filePath) {
             // XMLHttpRequestを使用してファイルの内容を非同期で取得する
@@ -69,8 +58,8 @@ function searchSetlist() {
 </head>
 <body>
     <h1>Setlist Search</h1>
-    <input type="checkbox" id="checkbox1" checked>唯涼祭<br>
-    <input type="checkbox" id="checkbox2" checked>小倉唯 ONLINE クリスマス ライブ 2020 ~Winter Twinkle Magic~<br>
+    <input type="checkbox" id="checkbox1" class="setlist-checkbox" checked>唯涼祭<br>
+    <input type="checkbox" id="checkbox2" class="setlist-checkbox" checked>小倉唯 ONLINE クリスマス ライブ 2020 ~Winter Twinkle Magic~<br>
     <button onclick="searchSetlist()">検索</button>
     <div id="result"></div>
 </body>
