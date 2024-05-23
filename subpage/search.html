@@ -50,7 +50,7 @@
     // ファイル内を検索する関数
     function searchFiles(files, query) {
         const promises = files.map(file => {
-            const url = `setlist/${file}`;
+            const url = `../setlist/${file}`;
             return fetch(url)
                 .then(response => response.text())
                 .then(text => {
