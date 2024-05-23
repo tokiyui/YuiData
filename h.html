@@ -58,6 +58,7 @@ th {
   </tbody>
 </table>
 
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const concertSelector = document.getElementById('concertSelector');
@@ -168,7 +169,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     // ヘッダーに日付、タイトル、会場の情報を追加
     dates.forEach(date => headerRow.insertAdjacentHTML('beforeend', `<th>${date}</th>`));
     setlistBody.insertAdjacentHTML('beforeend', `<tr>${titles.map(title => `<td>${title}</td>`).join('')}</tr>`);
-    setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>@${venue}</td>`).join('')}</tr>`);
+    setlistBody.insertAdjacentHTML('beforeend', `<tr>${venues.map(venue => `<td>${venue}</td>`).join('')}</tr>`);
 
     // すべてのコンサートの中で最大の曲数を見つける
     let maxSongs = 0;
@@ -177,8 +178,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     });
 
     // アンコールの行のインデックスを見つける
-    //const encoreIndex = setlists[0].indexOf('【アンコール】');
-    const encoreIndex = setlists.indexOf('【アンコール】');
+    const encoreIndex = setlists[0].indexOf('【アンコール】');
 
     // アンコールの手前の行数を見つける
     let rowsBeforeEncore = encoreIndex === -1 ? maxSongs : 0;
@@ -187,7 +187,6 @@ function displaySetlists(dates, titles, venues, setlists) {
         for (let j = 0; j < setlist.length; j++) {
             if (setlist[j] === '【アンコール】') {
                 rowsBeforeEncore = Math.max(rowsBeforeEncore, j);
-                console.log(encoreIndex,rowsBeforeEncore);
                 break;
             }
         }
@@ -195,17 +194,13 @@ function displaySetlists(dates, titles, venues, setlists) {
   
     // すべてのセットリストを最長のセットリストに合わせて調整
     setlists.forEach(setlist => {
-        const diff = rowsBeforeEncore - encoreIndex; //setlist.length;
+        const diff = rowsBeforeEncore - setlist.length;
         if (diff > 0) {
             const index = setlist.indexOf('【アンコール】');
             if (index !== -1) {
-                const emptySpaces = 'a'.repeat(diff); // diffの数だけ空白文字列を生成
-                console.log(diff,emptySpaces);
-                setlist.splice(index, 0, emptySpaces);
-                //setlist.splice(index, 0, emptySpaces + '【アンコール】'); // 空白文字列と【アンコール】を組み合わせて挿入
-                //for (let i = 0; i < diff; i++) {
-                    //setlist.splice(index, 0, '');
-                //}
+                for (let i = 0; i < diff; i++) {
+                    setlist.splice(index, 0, '');
+                }
             }
         }
     });
@@ -220,7 +215,7 @@ function displaySetlists(dates, titles, venues, setlists) {
     setlists.forEach(setlist => {
         const diff = maxLength - setlist.length;
         for (let i = 0; i < diff; i++) {
-            setlist.push('');
+            setlist.push('あ');
         }
     });
 
