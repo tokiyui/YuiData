@@ -34,7 +34,7 @@
 </style>
 </head>
 <body>
-<h2>&#9825;小倉唯データベース&#9825; <a href="song.html">楽曲一覧はこちら</a></h2>
+<h2>&#9825;小倉唯データベース&#9825; <a href="subpage/song.html">楽曲一覧はこちら</a></h2>
 <div id="checkboxes">
 </div>
 
@@ -200,7 +200,7 @@ function displayEvents(events) {
             const cell = document.createElement('td');
             if (i === 15 && event[i].trim() !== '') { // 16番目の要素が空でない場合のみリンクを生成
                 const link = document.createElement('a');
-                link.href = 'https://tokiyui.github.io/YuiData/setlist.html?id=' + encodeURIComponent(event[i]);
+                link.href = 'https://tokiyui.github.io/YuiData/subpage/setlist.html?id=' + encodeURIComponent(event[i]);
                 link.textContent = 'セットリスト'; // セットリストのテキストを設定
                 cell.appendChild(link);
             } else {
