@@ -186,7 +186,7 @@ function displaySetlists(dates, titles, venues, setlists) {
         for (let j = 0; j < setlist.length; j++) {
             if (setlist[j] === '【アンコール】') {
                 rowsBeforeEncore = Math.max(rowsBeforeEncore, j);
-                console.log(rowsBeforeEncore);
+                console.log(encoreIndex,rowsBeforeEncore);
                 break;
             }
         }
