@@ -67,7 +67,7 @@
         function getFileContent(filePath) {
             // XMLHttpRequestを使用してファイルの内容を非同期で取得する
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", filePath, false);
+            xhr.open("GET", filePath, true);
             xhr.send();
             return xhr.responseText;
         }
