@@ -89,7 +89,7 @@
   }
 
   function fetchSetlistFiles(directory) {
-    const url = `https://tokiyui.github.io/YuiData/setlist/${directory}`;
+    const url = `https://tokiyui.github.io/YuiData/${directory}`;
     return fetch(url)
       .then(response => response.json())
       .then(data => {
