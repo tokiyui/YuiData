@@ -50,7 +50,7 @@
       .then(files => {
         const promises = files.map((file, index) => {
           const url = `${setlistDirectory}/${file}`;
-          const delay = 40;
+          const delay = 400;
           return new Promise((resolve, reject) => {
             setTimeout(() => {
               fetch(url)
